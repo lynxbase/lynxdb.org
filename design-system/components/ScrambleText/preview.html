@@ -1,0 +1,37 @@
+<!-- @dsCard group="Motion" height=184 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>ScrambleText — LynxDB</title>
+<style>
+  .sc a.lx-label { text-decoration: none; padding: var(--space-2) 0; }
+  .sc a.lx-label:hover { color: var(--fg-default); }
+  .sc-num { display: flex; gap: var(--space-8); align-items: baseline; }
+  .sc-num b { font-family: var(--font-mono); font-size: 28px; line-height: 32px; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; cursor: default; }
+  .sc-num small { margin-left: var(--space-1); font-family: var(--font-mono); font-size: 13px; color: var(--fg-muted); }
+</style>
+</head>
+<body>
+<div class="sc">
+  <div class="lx-row" style="gap:var(--space-8)">
+    <a class="lx-label" href="#"><span data-scramble>Docs</span></a>
+    <a class="lx-label" href="#"><span data-scramble>GitHub</span></a>
+    <a class="lx-label" href="#"><span data-scramble>Discord</span></a>
+    <a class="lx-label" href="#"><span data-scramble>Releases</span></a>
+    <a class="lx-label" href="#"><span data-scramble>Benchmarks</span></a>
+  </div>
+  <div class="lx-row sc-num" style="padding-top:0">
+    <span data-scramble-host><b data-scramble>0.127</b><small>s</small></span>
+    <span data-scramble-host><b data-scramble>86.36</b><small>GiB</small></span>
+    <span data-scramble-host><b data-scramble>×19.03</b></span>
+    <button class="lx-btn" type="button" id="sc-replay">Replay all</button>
+  </div>
+  <div class="lx-row lx-muted" style="padding-top:0;font-size:13px">Hover or focus a mono label or figure. Letters and digits are searched and resolve left to right in at most 360 ms; punctuation and neighbours never move.</div>
+</div>
+<script>
+  document.getElementById('sc-replay').addEventListener('click', function () {
+    if (!window.LynxDS) return;
+    document.querySelectorAll('[data-scramble]').forEach(function (el) { window.LynxDS.scramble(el); });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+{
+  "manifestVersion": 3,
+  "name": "LynxDB",
+  "namespace": "LynxDS",
+  "files": [
+    "assets/Logos/README.md",
+    "cli.md",
+    "components/Badge/README.md",
+    "components/Button/README.md",
+    "components/Callout/README.md",
+    "components/CliOutput/README.md",
+    "components/CodeBlock/README.md",
+    "components/Console/README.md",
+    "components/DataTable/README.md",
+    "components/DocsPage/README.md",
+    "components/Histogram/README.md",
+    "components/Homepage/README.md",
+    "components/HomepageB/README.md",
+    "components/HomepageBDark/README.md",
+    "components/Input/README.md",
+    "components/LogLevel/README.md",
+    "components/LogTable/README.md",
+    "components/Logo/README.md",
+    "components/ScrambleText/README.md",
+    "components/Tabs/README.md",
+    "components/Terminal/README.md",
+    "components/bundle.css",
+    "components/bundle.js",
+    "components/index.d.ts",
+    "fonts/geist-cyrillic-wght-normal.woff2",
+    "fonts/geist-latin-ext-wght-normal.woff2",
+    "fonts/geist-latin-wght-normal.woff2",
+    "fonts/jetbrains-mono-cyrillic-wght-normal.woff2",
+    "fonts/jetbrains-mono-latin-ext-wght-normal.woff2",
+    "fonts/jetbrains-mono-latin-wght-normal.woff2",
+    "motion.md",
+    "tokens.css"
+  ],
+  "libraries": [],
+  "components": [
+    {
+      "name": "Badge",
+      "group": "Status",
+      "summary": "One or two words of state or metadata in the label style."
+    },
+    {
+      "name": "Button",
+      "group": "Actions",
+      "summary": "A sans, sentence-case action on a 6px radius."
+    },
+    {
+      "name": "Callout",
+      "group": "Content",
+      "summary": "A short aside in running docs text."
+    },
+    {
+      "name": "CliOutput",
+      "group": "Examples",
+      "summary": "What lynxdb prints: a result table, a query error with a hint, a status view, the same view without colour, and help.",
+      "page": true
+    },
+    {
+      "name": "CodeBlock",
+      "group": "Content",
+      "summary": "LynxFlow and shell text on bg-sunken, in the code style."
+    },
+    {
+      "name": "Console",
+      "group": "Examples",
+      "summary": "The Web UI query console in the dark theme: field list, LynxFlow editor, event histogram and log rows.",
+      "page": true
+    },
+    {
+      "name": "DataTable",
+      "group": "Data",
+      "summary": "Aggregated results: one row per group, columns typed."
+    },
+    {
+      "name": "DocsPage",
+      "group": "Examples",
+      "summary": "A documentation page in the light theme: section nav, a prose column capped at measure, a migration table, a code block and an on-page index.",
+      "page": true
+    },
+    {
+      "name": "Histogram",
+      "group": "Data",
+      "summary": "Event volume over time as plain bars."
+    },
+    {
+      "name": "Homepage",
+      "group": "Examples",
+      "summary": "Homepage variant A, always dark: a two-line statement about log search, the JSONBench comparison as proof, a tabbed search-to-analytics demo, how block skippin…",
+      "page": true
+    },
+    {
+      "name": "HomepageB",
+      "group": "Examples",
+      "summary": "Homepage variant B, light: the hero is a product window that answers PPL queries over 240 sample events in the browser, and the page can be driven from the key…",
+      "page": true
+    },
+    {
+      "name": "HomepageBDark",
+      "group": "Examples",
+      "summary": "Homepage variant B on a dark ground.",
+      "page": true
+    },
+    {
+      "name": "Input",
+      "group": "Forms",
+      "summary": "A bordered field on bg-surface with a border-control edge that holds 3:1 in both themes."
+    },
+    {
+      "name": "LogLevel",
+      "group": "Status",
+      "summary": "The level word of a log event, coloured by its level-* token."
+    },
+    {
+      "name": "LogTable",
+      "group": "Data",
+      "summary": "Raw events, one per 22px row: time, level, source, message."
+    },
+    {
+      "name": "Logo",
+      "group": "Brand",
+      "summary": "The mark, the wordmark and their lockups on light, dark and moss grounds, with size guidance and app icons.",
+      "page": true
+    },
+    {
+      "name": "ScrambleText",
+      "group": "Motion",
+      "summary": "A hover and focus effect for short mono labels and figures on the site: letters and digits are searched glyph by glyph and resolve left to right."
+    },
+    {
+      "name": "Tabs",
+      "group": "Navigation",
+      "summary": "Views of the same data, labelled in the label style with a 2px accent underline on the selected tab."
+    },
+    {
+      "name": "Terminal",
+      "group": "Content",
+      "summary": "A shell session, always dark."
+    }
+  ],
+  "assetGroups": [
+    {
+      "name": "Logos",
+      "tile": "l",
+      "order": [
+        "lynxdb-mark-faceted-on-light.svg",
+        "lynxdb-mark-faceted-on-dark.svg",
+        "lynxdb-mark-ink-moss.svg",
+        "lynxdb-mark-ink-lime.svg",
+        "lynxdb-mark-ink-black.svg",
+        "lynxdb-mark-ink-white.svg",
+        "lynxdb-appicon-dark.svg",
+        "lynxdb-appicon-moss.svg",
+        "lynxdb-original-mark.png",
+        "lynxdb-original-logo.png"
+      ],
+      "files": [
+        {
+          "path": "assets/Logos/lynxdb-mark-faceted-on-light.svg",
+          "id": "89d0b5f6360a8ae9a79cdefb275ba267"
+        },
+        {
+          "path": "assets/Logos/lynxdb-mark-faceted-on-dark.svg",
+          "id": "709af57038ce173959afb43fcaff4f49"
+        },
+        {
+          "path": "assets/Logos/lynxdb-mark-ink-moss.svg",
+          "id": "7eb09b82db104dda6ed7945076776df7"
+        },
+        {
+          "path": "assets/Logos/lynxdb-mark-ink-lime.svg",
+          "id": "7b337b4e4fde7b21966e0d4932a86aa9"
+        },
+        {
+          "path": "assets/Logos/lynxdb-mark-ink-black.svg",
+          "id": "35de6cfc50c8372528d402beb6c057fb"
+        },
+        {
+          "path": "assets/Logos/lynxdb-mark-ink-white.svg",
+          "id": "66c74bb61e115821d886d3f9db561b3f"
+        },
+        {
+          "path": "assets/Logos/lynxdb-appicon-dark.svg",
+          "id": "fac9e08e2f338e835ac57123da83c1ec"
+        },
+        {
+          "path": "assets/Logos/lynxdb-appicon-moss.svg",
+          "id": "c7e22737a2639c1a3be8088119e0d6bd"
+        },
+        {
+          "path": "assets/Logos/lynxdb-original-mark.png",
+          "id": "ef6c4a9cb613f16c8db4e6855ae44cff"
+        },
+        {
+          "path": "assets/Logos/lynxdb-original-logo.png",
+          "id": "fb86049b0eeee9c1467fe0a795b07c76"
+        }
+      ]
+    }
+  ],
+  "storage": {
+    "files": {
+      "assets/Logos/lynxdb-appicon-dark.svg": {
+        "store": "blob",
+        "id": "fac9e08e2f338e835ac57123da83c1ec",
+        "bytes": 2990,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/lynxdb-appicon-moss.svg": {
+        "store": "blob",
+        "id": "c7e22737a2639c1a3be8088119e0d6bd",
+        "bytes": 2990,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/lynxdb-mark-faceted-on-dark.svg": {
+        "store": "blob",
+        "id": "709af57038ce173959afb43fcaff4f49",
+        "bytes": 3506,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/lynxdb-mark-faceted-on-light.svg": {
+        "store": "blob",
+        "id": "89d0b5f6360a8ae9a79cdefb275ba267",
+        "bytes": 3506,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/lynxdb-mark-ink-black.svg": {
+        "store": "blob",
+        "id": "35de6cfc50c8372528d402beb6c057fb",
+        "bytes": 2872,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/lynxdb-mark-ink-lime.svg": {
+        "store": "blob",
+        "id": "7b337b4e4fde7b21966e0d4932a86aa9",
+        "bytes": 2872,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/lynxdb-mark-ink-moss.svg": {
+        "store": "blob",
+        "id": "7eb09b82db104dda6ed7945076776df7",
+        "bytes": 2872,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/lynxdb-mark-ink-white.svg": {
+        "store": "blob",
+        "id": "66c74bb61e115821d886d3f9db561b3f",
+        "bytes": 2872,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/lynxdb-original-logo.png": {
+        "store": "blob",
+        "id": "fb86049b0eeee9c1467fe0a795b07c76",
+        "bytes": 4424331,
+        "type": "image/png"
+      },
+      "assets/Logos/lynxdb-original-mark.png": {
+        "store": "blob",
+        "id": "ef6c4a9cb613f16c8db4e6855ae44cff",
+        "bytes": 258275,
+        "type": "image/png"
+      }
+    },
+    "blobBytesUsed": 4707086
+  }
+}

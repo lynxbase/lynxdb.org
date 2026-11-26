@@ -1,0 +1,18 @@
+<!-- @dsCard group="Content" height=226 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Terminal — LynxDB</title></head>
+<body>
+<div class="lx-stack">
+  <div class="lx-term" data-theme="dark">
+    <div class="lx-term__bar"><span class="lx-term__lights"><i></i><i></i><i></i></span><span class="lx-label">zsh</span></div>
+<pre class="lx-term__body"><span class="pr">$</span> lynxdb query --file app.ndjson '<span class="a-green">sample</span> <span class="a-magenta">1%</span> seed=<span class="a-magenta">42</span> <span class="a-green b">|</span> <span class="a-green">describe</span>'
+<span class="dim">FIELD          TYPE      NON-NULL</span>
+_time          time          100%
+level          string        100%
+duration_ms    number         35%
+<span class="pr">$</span> <span class="cur"></span></pre>
+  </div>
+</div>
+</body>
+</html>

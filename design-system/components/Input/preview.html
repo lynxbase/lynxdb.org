@@ -1,0 +1,19 @@
+<!-- @dsCard group="Forms" height=180 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Input — LynxDB</title></head>
+<body>
+<div class="lx-stack" style="grid-template-columns:repeat(3, minmax(0, 1fr));align-items:start">
+  <label class="lx-field"><span class="lx-label">Data directory</span>
+    <span class="lx-input lx-input--mono"><input value="/var/lib/lynxdb" aria-label="Data directory"></span>
+    <span class="lx-help">Where segments are stored.</span></label>
+  <label class="lx-field"><span class="lx-label">Search</span>
+    <span class="lx-input"><input placeholder="Search the docs" aria-label="Search"><span class="lx-kbd">/</span></span></label>
+  <label class="lx-field"><span class="lx-label">Listen address</span>
+    <span class="lx-input lx-input--mono lx-input--invalid"><input value="0.0.0.0:31oo" aria-label="Listen address" aria-invalid="true"></span>
+    <span class="lx-help" style="color:var(--danger)">Error: port must be a number.</span></label>
+  <label class="lx-field" style="grid-column:1 / -1"><span class="lx-label">Query</span>
+    <span class="lx-input lx-input--mono lx-input--lg"><span class="lx-affix">from</span><input value="main[-1h] status>=500 | stats count() by service" aria-label="Query"><button class="lx-btn lx-btn--primary lx-btn--sm" type="button">Run</button></span></label>
+</div>
+</body>
+</html>

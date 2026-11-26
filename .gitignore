@@ -1,36 +1,22 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# The design tools' notes, reports, caches and browser profiles stay on the machine
+.taste-skill/
+.impeccable/
+PRODUCT.md
+DESIGN.md
+.agents/
+.claude/
+skills-lock.json
+.playwright-mcp/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# The blog's build tools
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+.bundle/
+vendor/
+node_modules/
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
+# The system
 .DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files
-.env*.local
-.env
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+*.log

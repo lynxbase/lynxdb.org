@@ -1,0 +1,1172 @@
+<!-- @dsCard group="Examples" page="true" width=1280 height=3968 subtitle="Variant B: playable console, dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Homepage B dark — LynxDB</title>
+<style>
+  body { background: var(--stone-1000); }
+  .hb { position: relative; width: 1280px; margin: 0 auto; background: var(--hb-ground); color: var(--hb-ink); font-size: 15px; line-height: 24px; overflow: hidden; }
+  .hb { --hb-ground: var(--stone-50); --hb-surface: var(--stone-0); --hb-chrome: var(--stone-50); --hb-well: var(--stone-100); --hb-box: var(--stone-0); --hb-chip: var(--stone-100);
+    --hb-ink: var(--stone-950); --hb-ink-2: var(--stone-800); --hb-dim: var(--stone-500); --hb-track: var(--stone-200); --hb-thumb: var(--stone-0); --hb-thumb-ring: rgba(31, 35, 31, 0.08);
+    --hb-bar: var(--stone-300); --hb-bar-2: var(--stone-400); --hb-hot: var(--moss-600); --hb-mark: var(--lime-300); --hb-on-mark: var(--stone-950); --hb-prompt: var(--accent-fg);
+    --hb-press: var(--stone-950); --hb-on-press: var(--stone-50); --hb-press-rule: var(--stone-600); --hb-core: var(--stone-950); --hb-on-core: var(--stone-50); --hb-core-mark: var(--lime-400);
+    --hb-shadow: 0 0 0 1px rgba(31, 35, 31, 0.03), 0 24px 60px -24px rgba(31, 35, 31, 0.28); --hb-veil: rgba(23, 27, 23, 0.28); --hb-pal: var(--stone-0); --hb-pal-foot: var(--stone-50); --hb-out: 0.55; }
+  .hb[data-theme="dark"] { --hb-ground: var(--stone-1000); --hb-surface: var(--stone-950); --hb-chrome: var(--stone-1000); --hb-well: var(--stone-950); --hb-box: var(--stone-1000); --hb-chip: var(--stone-850);
+    --hb-ink: var(--stone-50); --hb-ink-2: var(--stone-300); --hb-dim: var(--stone-500); --hb-track: var(--stone-850); --hb-thumb: var(--stone-700); --hb-thumb-ring: rgba(241, 243, 239, 0.06);
+    --hb-bar: var(--stone-700); --hb-bar-2: var(--stone-600); --hb-hot: var(--lime-400); --hb-mark: rgba(183, 246, 82, 0.2); --hb-on-mark: var(--lime-300); --hb-prompt: var(--lime-400);
+    --hb-press: var(--stone-50); --hb-on-press: var(--stone-950); --hb-press-rule: var(--stone-400); --hb-core: var(--stone-100); --hb-on-core: var(--stone-950); --hb-core-mark: var(--moss-700);
+    --hb-shadow: 0 0 0 1px rgba(241, 243, 239, 0.03), 0 40px 90px -30px rgba(0, 0, 0, 0.9); --hb-veil: rgba(0, 0, 0, 0.55); --hb-pal: var(--stone-900); --hb-pal-foot: var(--stone-950); --hb-out: 0.9; }
+  .hb h1, .hb h2, .hb h3, .hb p { margin: 0; }
+  .hb h1, .hb h2 { font-weight: 500; }
+  .hb a:not(.lx-btn) { color: inherit; text-decoration: none; }
+  .hb-in { padding-left: var(--space-12); padding-right: var(--space-12); }
+  .hb-mono { font-family: var(--font-mono); font-variant-ligatures: none; }
+  .hb .dim { color: var(--fg-muted); }
+  .hb .lx-btn { border-radius: var(--radius-full); }
+  .hb .lx-btn--lg { height: 44px; padding: 0 22px; }
+  .hb .lx-kbd { transition: transform var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out); }
+  .hb .lx-kbd.is-down { transform: translateY(1px); background: var(--lime-300); border-color: var(--moss-600); color: var(--stone-950); }
+  .hb-pill { display: inline-flex; align-items: center; gap: var(--space-3); height: 44px; padding: 0 6px 0 18px; border: 1px solid var(--border-default); border-radius: var(--radius-full); background: var(--hb-surface); color: var(--hb-ink); font-family: var(--font-mono); font-size: 12.5px; font-variant-ligatures: none; white-space: nowrap; cursor: pointer; }
+  .hb-pill:hover { border-color: var(--border-control); }
+  .hb-pill span { height: 32px; padding: 0 12px; border-radius: var(--radius-full); background: var(--hb-chip); color: var(--fg-muted); font-family: var(--font-sans); font-size: 12px; font-weight: 500; line-height: 32px; }
+
+  /* nav */
+  .hb-nav { display: flex; align-items: center; gap: var(--space-8); height: 64px; }
+  .hb-nav nav { display: flex; gap: var(--space-6); }
+  .hb-nav nav a { font-size: 14px; color: var(--fg-muted); }
+  .hb-nav nav a:hover { color: var(--hb-ink); }
+  .hb-nav .end { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
+  .hb-jump { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 216px; height: var(--control-md); padding: 0 6px 0 14px; border: 1px solid var(--border-default); border-radius: var(--radius-full); background: var(--hb-surface); color: var(--fg-muted); font: inherit; font-size: 13px; cursor: pointer; }
+  .hb-jump:hover { border-color: var(--border-control); }
+  .hb-jump span:last-child { display: flex; gap: 3px; }
+
+  /* hero */
+  .hb-hero { padding-top: 56px; }
+  .hb-new { display: inline-flex; align-items: center; gap: var(--space-2); height: 28px; padding: 0 12px 0 4px; border-radius: var(--radius-full); background: var(--hb-chip); font-size: 13px; color: var(--fg-muted); }
+  .hb-new b { height: 20px; padding: 0 8px; border-radius: var(--radius-full); background: var(--lime-300); color: var(--stone-950); font-size: 11px; font-weight: 600; line-height: 20px; }
+  .hb-new:hover { color: var(--hb-ink); }
+  .hb-hero__row { display: grid; grid-template-columns: minmax(0, 1fr) 572px; gap: var(--space-8); align-items: end; margin-top: var(--space-6); }
+  .hb-hero h1 { font-size: 68px; line-height: 68px; letter-spacing: -0.05em; }
+  .hb-hero .lead { font-size: 17px; line-height: 26px; color: var(--fg-muted); }
+  .hb-cta { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-4); }
+
+  /* the window */
+  .hb-win { margin-top: var(--space-12); border: 1px solid var(--border-default); border-radius: 14px; background: var(--hb-surface); box-shadow: var(--hb-shadow); overflow: hidden; }
+  .hb-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 44px; padding: 0 var(--space-4); border-bottom: 1px solid var(--border-subtle); background: var(--hb-chrome); }
+  .hb-bar .dots { display: flex; gap: 7px; }
+  .hb-bar .dots i { width: 11px; height: 11px; border-radius: var(--radius-full); background: var(--hb-bar); }
+  .hb-bar .name { font-size: 12px; color: var(--fg-muted); }
+  .hb-bar .lx-seg { justify-self: end; padding: 2px; border-radius: var(--radius-full); background: var(--hb-track); }
+  .hb-bar .lx-seg__item { height: 24px; padding: 0 12px; font-size: 12px; }
+  .hb-bar .lx-seg__item[aria-selected="true"] { background: var(--hb-thumb); color: var(--hb-ink); box-shadow: 0 0 0 1px var(--hb-thumb-ring); }
+  .hb-q { display: flex; align-items: center; gap: var(--space-3); height: 56px; padding: 0 var(--space-4) 0 20px; }
+  .hb-q .lx-mark { height: 22px; color: var(--hb-prompt); }
+  .hb-q input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; color: var(--hb-ink); font-family: var(--font-mono); font-size: 15px; font-variant-ligatures: none; }
+  .hb-q .caret-tip { color: var(--fg-muted); font-size: 12px; white-space: nowrap; }
+  .hb-sug { display: flex; align-items: center; gap: var(--space-2); height: 32px; padding: 0 20px; border-top: 1px solid var(--border-subtle); background: var(--hb-chrome); color: var(--fg-muted); font-size: 13px; cursor: pointer; }
+  .hb-sug[hidden] { display: flex; visibility: hidden; }
+  .hb-sug b { font-weight: 500; color: var(--hb-ink); }
+  .hb-sug code { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 620px; font-variant-ligatures: none; }
+  .hb-body { display: grid; grid-template-columns: minmax(0, 1fr) 348px; height: 372px; border-top: 1px solid var(--border-subtle); }
+  .hb-res { padding: var(--space-4) 20px 0; overflow: hidden; min-width: 0; }
+  .hb-res.is-stale { opacity: 0.45; }
+  .hb-side { padding: var(--space-4) var(--space-4) 0; border-left: 1px solid var(--border-subtle); background: var(--hb-chrome); overflow: hidden; }
+  .hb-st { display: flex; justify-content: space-between; gap: var(--space-4); height: 36px; align-items: center; padding: 0 20px; border-top: 1px solid var(--border-subtle); background: var(--hb-chrome); color: var(--fg-muted); font-family: var(--font-mono); font-size: 12px; white-space: nowrap; }
+  .hb-st b { color: var(--hb-ink); font-weight: 500; }
+  .hb-st .keys { display: flex; gap: var(--space-4); font-family: var(--font-sans); }
+  .hb-st .keys span { display: inline-flex; align-items: center; gap: 5px; }
+  .hb-dock { display: flex; justify-content: center; gap: var(--space-2); margin-top: var(--space-4); }
+  .hb-dock button { display: inline-flex; align-items: center; gap: var(--space-2); height: 34px; padding: 0 14px 0 6px; border: 1px solid var(--border-default); border-radius: var(--radius-full); background: var(--hb-surface); color: var(--fg-muted); font: inherit; font-size: 13px; cursor: pointer; }
+  .hb-dock button .lx-kbd { border-radius: var(--radius-full); min-width: 22px; height: 22px; line-height: 20px; border-bottom-width: 1px; }
+  .hb-dock button:hover { color: var(--hb-ink); border-color: var(--border-control); }
+  .hb-dock button[aria-pressed="true"] { background: var(--hb-press); border-color: var(--hb-press); color: var(--hb-on-press); }
+  .hb-dock button[aria-pressed="true"] .lx-kbd { background: transparent; border-color: var(--hb-press-rule); color: var(--hb-on-press); }
+
+  /* results */
+  .hb-cap { margin-bottom: var(--space-2); }
+  .hb-t { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 13px; line-height: 20px; font-variant-ligatures: none; }
+  .hb-t th { padding: 0 var(--space-3) 6px; border-bottom: 1px solid var(--border-default); color: var(--fg-muted); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; white-space: nowrap; }
+  .hb-t td { padding: 7px var(--space-3); border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+  .hb-t .num { width: 80px; text-align: right; font-variant-numeric: tabular-nums; }
+  .hb-t.wide .num { width: auto; }
+  .hb-t th:not(.num):not(.bar), .hb-t td:not(.num):not(.bar) { padding-left: var(--space-4); }
+  .hb-t .bar { width: 42%; }
+  .hb-t .bar i { display: block; height: 8px; border-radius: var(--radius-xs); background: var(--hb-bar); }
+  .hb-t tr[aria-selected="true"] td { background: var(--bg-selected); }
+  .hb-t tr[aria-selected="true"] td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+  .hb-t tr[aria-selected="true"] .bar i { background: var(--hb-hot); }
+  .hb-t tbody tr.can { cursor: pointer; }
+  .hb-ev { font-family: var(--font-mono); font-size: 12.5px; line-height: 26px; font-variant-ligatures: none; }
+  .hb-ev > div { display: grid; grid-template-columns: 12ch 7ch 5ch 4ch minmax(0, 1fr); column-gap: var(--space-3); border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+  .hb-ev .t, .hb-ev .h, .hb-ev .kv { color: var(--fg-muted); }
+  .hb-ev .m { overflow: hidden; text-overflow: ellipsis; }
+  .hb-ev .lx-level { line-height: inherit; font-size: inherit; }
+  .hb-raw { font-family: var(--font-mono); font-size: 12px; line-height: 20px; color: var(--hb-ink-2); font-variant-ligatures: none; }
+  .hb-raw div { padding: 4px 0; border-bottom: 1px solid var(--border-subtle); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .hb mark { padding: 1px 1px; border-radius: var(--radius-xs); background: var(--hb-mark); color: var(--hb-on-mark); }
+  .hb-more { padding-top: 6px; color: var(--fg-muted); font-family: var(--font-mono); font-size: 12px; }
+  .hb-ch { display: flex; align-items: flex-end; gap: 6px; height: 250px; border-bottom: 1px solid var(--border-default); }
+  .hb-ch > div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; color: var(--fg-muted); font-family: var(--font-mono); font-size: 11px; }
+  .hb-ch i { display: block; width: 100%; border-radius: var(--radius-xs) var(--radius-xs) 0 0; background: var(--hb-bar-2); }
+  .hb-chx { display: flex; gap: 6px; padding-top: 6px; color: var(--fg-muted); font-family: var(--font-mono); font-size: 11px; }
+  .hb-chx span { flex: 1; text-align: center; }
+  .hb-err { padding-top: var(--space-2); font-family: var(--font-mono); font-size: 13px; line-height: 22px; white-space: pre-wrap; font-variant-ligatures: none; }
+  .hb-err b { color: var(--danger); }
+  .hb-err u { text-decoration: none; color: var(--info); font-weight: 600; }
+  /* side pane */
+  .hb-src { display: grid; gap: var(--space-2); }
+  .hb-src > div { padding: var(--space-2) var(--space-3); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--hb-surface); font-family: var(--font-mono); font-size: 11.5px; line-height: 18px; font-variant-ligatures: none; }
+  .hb-src .top { display: flex; gap: var(--space-2); color: var(--fg-muted); }
+  .hb-src .top .n { color: var(--hb-ink); font-weight: 600; }
+  .hb-src .top .lx-level { width: auto; font-size: inherit; line-height: inherit; }
+  .hb-src .msg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hb-fac { display: grid; gap: var(--space-4); }
+  .hb-fac h3 { margin-bottom: 4px; font-family: var(--font-mono); font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted); }
+  .hb-fac button { display: grid; grid-template-columns: 116px minmax(0, 1fr) 28px; align-items: center; gap: var(--space-2); width: 100%; height: 24px; padding: 0 var(--space-1); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--hb-ink); font-family: var(--font-mono); font-size: 12px; text-align: left; cursor: pointer; }
+  .hb-fac button:hover { background: var(--bg-hover); }
+  .hb-fac button i { display: block; height: 6px; border-radius: var(--radius-xs); background: var(--hb-bar); }
+  .hb-fac button span:last-child { text-align: right; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+
+  /* sections */
+  .hb-sec { padding-top: 128px; }
+  .hb-say { max-width: 1130px; text-wrap: balance; font-size: 36px; line-height: 43px; font-weight: 500; letter-spacing: -0.035em; color: var(--fg-muted); }
+  .hb-say b { font-weight: 500; color: var(--hb-ink); }
+  .hb-fig { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: var(--space-16); }
+  .hb-fig > div { padding: 0 var(--space-8); border-left: 1px solid var(--border-default); }
+  .hb-fig > div:first-child { padding-left: 0; border-left: 0; }
+  .hb-fig .no { font-family: var(--font-mono); font-size: 11px; line-height: 16px; letter-spacing: 0.08em; color: var(--fg-muted); }
+  .hb-fig .art { display: grid; place-items: center; height: 200px; }
+  .hb-fig h3 { font-size: 15px; line-height: 24px; font-weight: 500; }
+  .hb-fig p { margin-top: 2px; max-width: 320px; font-size: 15px; line-height: 24px; color: var(--fg-muted); }
+  .f-grid { display: grid; grid-template-columns: repeat(14, 14px); gap: 4px; }
+  .f-grid i { width: 14px; height: 14px; border: 1px solid var(--hb-bar); border-radius: var(--radius-xs); }
+  .f-grid i.on { background: var(--hb-hot); border-color: var(--hb-hot); }
+  .f-grid i.out { border-style: dashed; opacity: var(--hb-out); }
+  .f-cols { display: flex; gap: 10px; }
+  .f-cols div { display: grid; gap: 4px; }
+  .f-cols i { width: 30px; height: 14px; border: 1px solid var(--hb-bar); border-radius: var(--radius-xs); }
+  .f-cols .on i { background: var(--hb-hot); border-color: var(--hb-hot); }
+  .f-cols span { font-family: var(--font-mono); font-size: 10px; line-height: 14px; color: var(--fg-muted); text-align: center; }
+  .f-lines { display: grid; gap: 9px; width: 250px; }
+  .f-lines div { display: flex; align-items: center; gap: 6px; }
+  .f-lines i { height: 8px; border-radius: var(--radius-xs); background: var(--hb-bar); }
+  .f-lines i.hit { background: var(--lime-400); outline: 1px solid var(--moss-500); }
+  .f-lines span { width: 22px; font-family: var(--font-mono); font-size: 10px; color: var(--fg-muted); }
+  .f-lines .sum { margin-bottom: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--hb-bar); font-family: var(--font-mono); font-size: 12px; color: var(--hb-ink); }
+
+  .hb-h2 { font-size: 44px; line-height: 48px; letter-spacing: -0.04em; }
+  .hb-num { text-align: center; }
+  .hb-band { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: var(--space-12); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-default); text-align: center; }
+  .hb-band > div { padding: var(--space-8) var(--space-4); border-left: 1px solid var(--border-subtle); }
+  .hb-band > div:first-child { border-left: 0; box-shadow: inset 0 2px 0 var(--hb-ink); }
+  .hb-band b { display: block; font-size: 40px; line-height: 44px; font-weight: 500; letter-spacing: -0.04em; color: var(--hb-dim); font-variant-numeric: tabular-nums; }
+  .hb-band > div:first-child b { color: var(--hb-ink); }
+  .hb-band span { display: block; max-width: 210px; margin: var(--space-2) auto 0; font-size: 13px; line-height: 20px; color: var(--fg-muted); }
+  .hb .hb-fine { margin-top: var(--space-4); font-size: 12px; line-height: 18px; color: var(--fg-muted); }
+  .hb-fine a { color: var(--accent-fg) !important; }
+
+  .hb-row { display: grid; grid-template-columns: 300px minmax(0, 1fr) 252px; gap: var(--space-8); align-items: start; }
+  .hb-row h2 { font-size: 40px; line-height: 44px; letter-spacing: -0.04em; }
+  .hb-row .proof { font-size: 17px; line-height: 26px; font-weight: 500; color: var(--fg-muted); }
+  .hb-row .proof b { font-weight: 500; color: var(--hb-ink); }
+  .hb-row .list { margin: var(--space-6) 0 0; padding: 0; list-style: none; font-size: 14px; line-height: 28px; }
+  .hb-row .list li:first-child { font-size: 12px; color: var(--fg-muted); }
+  .hb-well { padding: var(--space-4); border-radius: 14px; background: var(--hb-well); }
+  .hb-well .lx-seg { padding: 2px; border-radius: var(--radius-full); background: var(--hb-track); }
+  .hb-well .lx-seg__item { height: 26px; padding: 0 12px; font-size: 12px; }
+  .hb-well .lx-seg__item[aria-selected="true"] { background: var(--hb-thumb); color: var(--hb-ink); }
+  .hb-io { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+  .hb-io[hidden] { display: none; }
+  .hb-io .lx-code { border-color: var(--border-subtle); background: var(--hb-box); font-size: 12.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .hb-io .lx-code + .lx-code { color: var(--hb-ink-2); }
+  .hb-send { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--space-8); align-items: end; margin-bottom: var(--space-8); }
+  .hb-send h2 { font-size: 40px; line-height: 44px; letter-spacing: -0.04em; }
+  .hb-send .proof { font-size: 17px; line-height: 26px; font-weight: 500; color: var(--fg-muted); }
+  .hb-send .proof b { font-weight: 500; color: var(--hb-ink); }
+  .hb-well--fig { padding: var(--space-6); }
+  .hb-pipe { position: relative; height: 268px; font-family: var(--font-mono); font-size: 12px; font-variant-ligatures: none; }
+  .hb-pipe > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .hb-pipe .w { fill: none; stroke: var(--hb-bar); stroke-width: 1; }
+  .hb-pipe .f { fill: none; stroke: var(--hb-hot); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 5 35; animation: hb-flow 1s linear infinite; animation-delay: var(--d, 0s); animation-play-state: paused; }
+  .hb-pipe.is-live .f { animation-play-state: running; }
+  .hb-pipe .f.out { opacity: 0; transition: opacity var(--duration-base) var(--ease-out); }
+  .hb-pipe[data-phase="answer"] .f.out { opacity: 1; }
+  @keyframes hb-flow { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
+  .hb-pipe .src { position: absolute; left: 0; width: 176px; height: 32px; padding: 0 var(--space-3); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--hb-box); line-height: 30px; white-space: nowrap; }
+  .hb-pipe .core { position: absolute; left: 292px; top: 76px; width: 116px; height: 116px; display: grid; place-content: center; justify-items: center; gap: var(--space-2); border-radius: var(--radius-lg); background: var(--hb-core); color: var(--hb-on-core); font-family: var(--font-sans); font-size: 14px; font-weight: 500; }
+  .hb-pipe .core .lx-mark { height: 40px; color: var(--hb-core-mark); }
+  .hb-pipe .core::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; border: 1px solid var(--hb-hot); opacity: 0; }
+  .hb-pipe.is-live .core::after { animation: hb-ring 1.7s var(--ease-out) infinite; }
+  @keyframes hb-ring { 0% { opacity: 0.7; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.12); } }
+  .hb-pipe .store { position: absolute; left: 452px; top: 20px; width: 396px; }
+  .hb-pipe .ask { display: flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 var(--space-2) 0 var(--space-3); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--hb-box); color: var(--hb-ink); white-space: nowrap; }
+  .hb-pipe .ask .lx-mark { height: 16px; color: var(--hb-prompt); flex: none; }
+  .hb-pipe .ask .q { flex: 1; min-width: 0; overflow: hidden; }
+  .hb-pipe .ask .q::after { content: ""; display: inline-block; width: 7px; height: 14px; margin-left: 1px; vertical-align: -2px; background: var(--hb-hot); opacity: 0; }
+  .hb-pipe[data-phase="ask"] .ask .q::after { opacity: 1; }
+  .hb-pipe .grid { position: relative; display: grid; grid-template-columns: repeat(20, 16px); gap: 4px; margin-top: 20px; }
+  .hb-pipe .grid i { width: 16px; height: 16px; border: 1px solid var(--hb-bar); border-radius: var(--radius-xs); transition: opacity var(--duration-slow) var(--ease-out), background-color var(--duration-slow) var(--ease-out), border-color var(--duration-slow) var(--ease-out); }
+  .hb-pipe[data-phase="ingest"] .grid i.new { animation: hb-land 0.6s var(--ease-out) both; animation-delay: calc(var(--n) * 70ms + 300ms); }
+  @keyframes hb-land { 0% { opacity: 0; transform: translateX(-10px); background-color: var(--hb-hot); border-color: var(--hb-hot); } 60% { opacity: 1; transform: none; background-color: var(--hb-hot); border-color: var(--hb-hot); } 100% { opacity: 1; background-color: transparent; border-color: var(--hb-bar); } }
+  .hb-pipe[data-phase="scan"] .grid i, .hb-pipe[data-phase="answer"] .grid i { opacity: var(--hb-out); border-style: dashed; }
+  .hb-pipe[data-phase="scan"] .grid i.hit, .hb-pipe[data-phase="answer"] .grid i.hit { opacity: 1; border-style: solid; background-color: var(--hb-hot); border-color: var(--hb-hot); }
+  .hb-pipe[data-phase="scan"] .grid i { transition-delay: calc(var(--c) * 70ms); }
+  .hb-pipe[data-phase="scan"] .grid i.hit { animation: hb-hit 0.45s var(--ease-out) both; animation-delay: calc(var(--c) * 70ms); }
+  @keyframes hb-hit { 0% { transform: scale(1); } 40% { transform: scale(1.5); } 100% { transform: scale(1); } }
+  .hb-pipe .sweep { position: absolute; top: -6px; bottom: -6px; left: 0; width: 2px; border-radius: 1px; background: var(--hb-hot); opacity: 0; }
+  .hb-pipe[data-phase="scan"] .sweep { animation: hb-sweep 1.4s linear both; }
+  @keyframes hb-sweep { 0% { opacity: 1; transform: translateX(0); } 95% { opacity: 1; } 100% { opacity: 0; transform: translateX(396px); } }
+  .hb-pipe .days { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: var(--space-2); color: var(--fg-muted); font-size: 11px; line-height: 16px; }
+  .hb-pipe .days span { padding-left: 1px; border-left: 1px solid var(--hb-bar); text-indent: 5px; }
+  .hb-pipe .tally { margin-top: var(--space-3); color: var(--fg-muted); line-height: 18px; }
+  .hb-pipe .tally b { color: var(--hb-ink); font-weight: 500; }
+  .hb-pipe .ans { position: absolute; left: 900px; top: 30px; width: 236px; height: 208px; padding: var(--space-3) var(--space-4); border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--hb-box); }
+  .hb-pipe .ans .lx-label { display: block; margin-bottom: var(--space-2); }
+  .hb-pipe .ans .r { display: grid; grid-template-columns: 52px minmax(0, 1fr) 16px; align-items: center; gap: var(--space-2); height: 26px; color: var(--hb-ink); opacity: 0; transition: opacity var(--duration-slow) var(--ease-out); }
+  .hb-pipe .ans .r span:last-child { text-align: right; }
+  .hb-pipe .ans .r i { display: block; height: 6px; border-radius: var(--radius-xs); background: var(--hb-bar); transform: scaleX(0); transform-origin: left; transition: transform 0.5s var(--ease-out); }
+  .hb-pipe .ans .r:first-of-type i { background: var(--hb-hot); }
+  .hb-pipe .ans .via { position: absolute; left: var(--space-4); right: var(--space-4); bottom: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--border-subtle); color: var(--fg-muted); font-size: 11px; line-height: 16px; white-space: nowrap; }
+  .hb-pipe[data-phase="answer"] .ans .r { opacity: 1; transition-delay: calc(var(--r) * 90ms); }
+  .hb-pipe[data-phase="answer"] .ans .r i { transform: scaleX(var(--w)); transition-delay: calc(var(--r) * 90ms); }
+  .hb-pipe[data-phase="ingest"] ~ .hb-rawline b { animation: hb-key 0.7s var(--ease-out) both; animation-delay: calc(var(--k) * 180ms + 300ms); }
+  @keyframes hb-key { 0%, 100% { background-color: transparent; } 30% { background-color: var(--hb-mark); } }
+  .hb-notes { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-8); margin-top: var(--space-4); font-size: 14px; line-height: 22px; color: var(--fg-muted); }
+  .hb-notes span { padding-top: var(--space-3); border-top: 1px solid var(--border-default); }
+  @media (prefers-reduced-motion: reduce) { .hb-pipe *, .hb-pipe *::after, .hb-rawline b { animation: none !important; transition: none !important; } }
+  .hb-rawline { margin: var(--space-6) 0 0; padding: var(--space-3); border-radius: var(--radius-md); background: var(--hb-box); font-family: var(--font-mono); font-size: 11.5px; line-height: 20px; color: var(--fg-muted); white-space: pre-wrap; overflow-wrap: break-word; font-variant-ligatures: none; }
+  .hb-rawline b { color: var(--accent-fg); font-weight: 600; border-radius: var(--radius-xs); }
+  .hb-rawline em { font-style: normal; color: var(--hb-ink); }
+
+  .hb-start { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: var(--space-8); align-items: start; }
+  .hb-no { margin: var(--space-6) 0 0; padding: 0; list-style: none; }
+  .hb-no li { padding: var(--space-3) 0; border-top: 1px solid var(--border-default); font-size: 15px; line-height: 22px; color: var(--fg-muted); }
+  .hb-no li:last-child { border-bottom: 1px solid var(--border-default); }
+  .hb-no b { font-weight: 500; color: var(--hb-ink); }
+  .hb-steps { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  .hb-steps li { display: grid; grid-template-columns: 20px 150px minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); border-radius: 14px; background: var(--hb-well); counter-increment: s; }
+  .hb-steps li::before { content: counter(s); font-family: var(--font-mono); font-size: 13px; color: var(--fg-muted); }
+  .hb-steps b { font-size: 14px; font-weight: 500; }
+  .hb-steps b span { display: block; font-size: 12px; line-height: 18px; font-weight: 400; color: var(--fg-muted); }
+  .hb-steps pre { margin: 0; padding: 0 var(--space-3); height: 40px; border-radius: var(--radius-md); background: var(--hb-box); font-family: var(--font-mono); font-size: 12px; line-height: 40px; white-space: pre; overflow: hidden; font-variant-ligatures: none; }
+  .hb-steps pre i { font-style: normal; color: var(--accent-fg); font-weight: 600; }
+
+  .hb-end { padding: 120px 0 104px; text-align: center; }
+  .hb-end h2 { font-size: 76px; line-height: 76px; letter-spacing: -0.055em; }
+  .hb-end .hb-cta { justify-content: center; margin-top: var(--space-8); }
+  .hb-foot { display: flex; align-items: center; gap: var(--space-6); padding-top: var(--space-6); padding-bottom: var(--space-8); border-top: 1px solid var(--border-default); }
+  .hb-foot .end { margin-left: auto; display: flex; gap: var(--space-6); }
+  .hb-foot a.lx-label:hover { color: var(--hb-ink); }
+
+  /* command palette */
+  .hb-veil { position: absolute; inset: 0; z-index: 10; background: var(--hb-veil); }
+  .hb-veil[hidden] { display: none; }
+  .hb-pal { position: absolute; left: 50%; width: 560px; margin-left: -280px; border: 1px solid var(--border-default); border-radius: 14px; background: var(--hb-pal); box-shadow: var(--shadow-popover); overflow: hidden; animation: hb-in var(--duration-base) var(--ease-out); }
+  @keyframes hb-in { from { opacity: 0; transform: scale(0.98); } }
+  .hb-pal input { width: 100%; height: 52px; padding: 0 var(--space-4); border: 0; border-bottom: 1px solid var(--border-subtle); outline: 0; background: transparent; color: var(--hb-ink); font: inherit; font-size: 15px; }
+  .hb-pal ul { margin: 0; padding: 6px; list-style: none; max-height: 408px; overflow: hidden; }
+  .hb-pal li { display: flex; justify-content: space-between; gap: var(--space-4); height: 36px; align-items: center; padding: 0 var(--space-3); border-radius: var(--radius-md); font-size: 14px; cursor: pointer; }
+  .hb-pal li small { color: var(--fg-muted); font-size: 12px; }
+  .hb-pal li[aria-selected="true"] { background: var(--hb-chip); }
+  .hb-pal .none { padding: var(--space-4); color: var(--fg-muted); font-size: 14px; }
+  .hb-pal footer { display: flex; gap: var(--space-4); padding: var(--space-2) var(--space-4); border-top: 1px solid var(--border-subtle); background: var(--hb-pal-foot); color: var(--fg-muted); font-size: 12px; }
+  .hb-pal footer span { display: inline-flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="lx-mono" viewBox="0 0 378.4 512"><path fill-rule="evenodd" d="M49.1,13.3 49.6,17.0 51.0,20.2 54.6,25.7 61.1,33.8 66.4,38.3 71.6,43.9 75.1,46.6 83.1,51.7 85.0,53.5 85.0,63.8 85.4,64.5 85.9,78.1 87.7,83.3 88.6,89.1 90.5,94.4 90.9,97.3 91.8,99.0 94.1,106.5 101.0,120.3 108.4,131.3 113.0,137.1 119.8,144.4 119.8,146.3 118.0,147.4 115.5,147.9 113.0,149.2 110.9,149.7 106.5,152.5 87.5,162.1 63.8,180.0 50.1,193.8 39.5,206.2 33.5,214.2 21.1,234.9 12.9,252.8 12.9,253.9 9.2,263.3 9.2,265.0 8.3,266.6 7.8,269.5 6.4,273.0 6.0,276.4 5.1,278.5 4.6,282.4 3.7,284.9 3.2,290.2 1.8,295.9 1.4,303.1 0.9,303.8 0.9,309.0 0.0,309.3 0.0,336.6 0.9,336.8 1.4,344.9 1.8,345.5 1.8,348.5 3.2,354.7 3.2,357.3 6.9,373.3 12.4,389.9 18.4,403.6 27.1,420.2 40.9,439.4 50.1,450.5 63.4,463.6 76.9,474.6 94.4,486.1 108.1,493.4 122.4,499.4 134.3,503.5 143.7,505.8 145.8,506.7 161.9,509.9 174.5,510.9 174.7,511.8 204.3,511.8 204.6,510.9 208.9,510.9 209.6,510.4 216.3,509.9 238.3,505.3 243.1,503.5 250.7,501.7 266.3,495.2 281.0,487.9 295.7,478.7 303.3,473.2 318.5,460.3 326.7,452.1 337.7,439.2 344.2,430.7 352.9,417.9 367.1,388.0 372.2,371.0 372.2,369.4 373.6,365.1 374.5,358.9 375.8,354.0 375.8,351.1 376.8,348.1 377.2,341.4 378.1,341.2 378.1,311.6 376.5,311.6 375.6,317.8 373.8,322.6 372.4,328.3 371.0,330.8 371.0,332.0 365.5,343.0 359.1,352.0 350.6,360.9 341.2,368.7 330.6,376.1 312.3,385.3 298.5,390.3 280.1,394.9 275.7,394.9 274.1,395.8 269.3,395.8 267.7,396.7 261.5,396.7 260.8,397.2 239.0,397.2 238.3,396.7 234.4,396.7 215.6,393.1 205.7,388.9 203.2,388.5 195.4,384.8 190.8,382.0 181.8,375.6 171.5,364.8 165.5,356.3 159.6,343.0 157.3,333.8 157.3,330.4 158.7,326.3 161.9,318.9 165.5,312.5 171.5,304.4 180.0,296.4 188.0,291.4 194.9,288.1 200.0,286.8 209.9,285.8 210.5,285.4 218.1,285.4 218.8,285.8 224.1,286.3 227.3,287.2 235.6,290.9 242.7,295.5 245.7,299.2 247.5,302.8 248.9,308.3 248.9,314.5 248.4,316.8 244.7,326.3 244.7,327.6 246.6,327.6 253.0,324.4 261.5,318.5 267.7,314.8 278.3,305.1 283.6,301.0 300.5,283.6 301.9,281.3 310.2,271.4 315.0,264.5 315.0,263.1 314.3,262.2 312.0,254.2 310.6,251.2 309.3,245.4 305.1,236.0 305.1,234.6 304.2,233.5 304.2,232.1 301.5,225.0 301.5,223.4 300.5,221.8 300.5,220.6 299.6,219.0 297.8,212.4 296.9,210.8 296.9,209.6 295.0,205.7 294.1,201.4 292.3,197.5 290.4,191.9 290.4,190.3 287.7,183.7 285.4,175.6 281.3,165.3 279.0,157.3 277.6,155.2 275.5,153.4 262.4,145.6 250.7,137.3 233.0,127.2 229.4,123.8 189.9,72.8 173.3,52.3 164.2,39.7 155.4,29.4 149.0,20.0 143.0,13.5 136.2,3.9 133.2,0.9 131.8,0.9 131.8,5.5 133.6,13.3 139.1,26.6 146.5,36.5 146.5,39.0 144.2,45.2 140.5,59.9 140.1,65.7 139.1,66.6 137.1,66.6 132.2,63.4 124.7,59.7 116.9,54.6 114.3,52.3 97.6,42.7 85.0,34.0 71.9,26.6 56.0,16.1 51.0,13.3ZM219.7,173.7 268.9,184.8 296.4,210.5 239.0,198.5Z"/></symbol><clipPath id="lx-clip"><path fill-rule="evenodd" clip-rule="evenodd" d="M49.1,13.3 49.6,17.0 51.0,20.2 54.6,25.7 61.1,33.8 66.4,38.3 71.6,43.9 75.1,46.6 83.1,51.7 85.0,53.5 85.0,63.8 85.4,64.5 85.9,78.1 87.7,83.3 88.6,89.1 90.5,94.4 90.9,97.3 91.8,99.0 94.1,106.5 101.0,120.3 108.4,131.3 113.0,137.1 119.8,144.4 119.8,146.3 118.0,147.4 115.5,147.9 113.0,149.2 110.9,149.7 106.5,152.5 87.5,162.1 63.8,180.0 50.1,193.8 39.5,206.2 33.5,214.2 21.1,234.9 12.9,252.8 12.9,253.9 9.2,263.3 9.2,265.0 8.3,266.6 7.8,269.5 6.4,273.0 6.0,276.4 5.1,278.5 4.6,282.4 3.7,284.9 3.2,290.2 1.8,295.9 1.4,303.1 0.9,303.8 0.9,309.0 0.0,309.3 0.0,336.6 0.9,336.8 1.4,344.9 1.8,345.5 1.8,348.5 3.2,354.7 3.2,357.3 6.9,373.3 12.4,389.9 18.4,403.6 27.1,420.2 40.9,439.4 50.1,450.5 63.4,463.6 76.9,474.6 94.4,486.1 108.1,493.4 122.4,499.4 134.3,503.5 143.7,505.8 145.8,506.7 161.9,509.9 174.5,510.9 174.7,511.8 204.3,511.8 204.6,510.9 208.9,510.9 209.6,510.4 216.3,509.9 238.3,505.3 243.1,503.5 250.7,501.7 266.3,495.2 281.0,487.9 295.7,478.7 303.3,473.2 318.5,460.3 326.7,452.1 337.7,439.2 344.2,430.7 352.9,417.9 367.1,388.0 372.2,371.0 372.2,369.4 373.6,365.1 374.5,358.9 375.8,354.0 375.8,351.1 376.8,348.1 377.2,341.4 378.1,341.2 378.1,311.6 376.5,311.6 375.6,317.8 373.8,322.6 372.4,328.3 371.0,330.8 371.0,332.0 365.5,343.0 359.1,352.0 350.6,360.9 341.2,368.7 330.6,376.1 312.3,385.3 298.5,390.3 280.1,394.9 275.7,394.9 274.1,395.8 269.3,395.8 267.7,396.7 261.5,396.7 260.8,397.2 239.0,397.2 238.3,396.7 234.4,396.7 215.6,393.1 205.7,388.9 203.2,388.5 195.4,384.8 190.8,382.0 181.8,375.6 171.5,364.8 165.5,356.3 159.6,343.0 157.3,333.8 157.3,330.4 158.7,326.3 161.9,318.9 165.5,312.5 171.5,304.4 180.0,296.4 188.0,291.4 194.9,288.1 200.0,286.8 209.9,285.8 210.5,285.4 218.1,285.4 218.8,285.8 224.1,286.3 227.3,287.2 235.6,290.9 242.7,295.5 245.7,299.2 247.5,302.8 248.9,308.3 248.9,314.5 248.4,316.8 244.7,326.3 244.7,327.6 246.6,327.6 253.0,324.4 261.5,318.5 267.7,314.8 278.3,305.1 283.6,301.0 300.5,283.6 301.9,281.3 310.2,271.4 315.0,264.5 315.0,263.1 314.3,262.2 312.0,254.2 310.6,251.2 309.3,245.4 305.1,236.0 305.1,234.6 304.2,233.5 304.2,232.1 301.5,225.0 301.5,223.4 300.5,221.8 300.5,220.6 299.6,219.0 297.8,212.4 296.9,210.8 296.9,209.6 295.0,205.7 294.1,201.4 292.3,197.5 290.4,191.9 290.4,190.3 287.7,183.7 285.4,175.6 281.3,165.3 279.0,157.3 277.6,155.2 275.5,153.4 262.4,145.6 250.7,137.3 233.0,127.2 229.4,123.8 189.9,72.8 173.3,52.3 164.2,39.7 155.4,29.4 149.0,20.0 143.0,13.5 136.2,3.9 133.2,0.9 131.8,0.9 131.8,5.5 133.6,13.3 139.1,26.6 146.5,36.5 146.5,39.0 144.2,45.2 140.5,59.9 140.1,65.7 139.1,66.6 137.1,66.6 132.2,63.4 124.7,59.7 116.9,54.6 114.3,52.3 97.6,42.7 85.0,34.0 71.9,26.6 56.0,16.1 51.0,13.3Z"/></clipPath><symbol id="lx-fac" viewBox="0 0 378.4 512"><g clip-path="url(#lx-clip)"><rect class="m-body" width="378.4" height="512"/><polygon class="m-deep" points="117.2,146.2 80.4,294.1 48.3,441.2 0.0,441.2 0.0,146.2"/><polygon class="m-deep" points="155.3,339.2 257.4,512.0 378.3,512.0 378.3,294.1 335.5,294.1 335.5,339.2"/><polygon class="m-head" points="0.0,0.0 378.3,0.0 378.3,294.1 330.9,294.1 330.9,333.2 229.8,333.2 197.6,257.4 80.4,294.1 117.2,146.2 0.0,146.2"/><polygon class="m-ear" points="128.7,0.0 137.9,68.9 280.4,156.3 248.2,128.7 142.5,9.2"/><polygon class="m-eye" points="219.7,173.7 268.9,184.8 296.4,210.5 239.0,198.5"/></g></symbol></defs></svg>
+<div class="hb" data-theme="dark">
+
+<header class="hb-nav hb-in">
+  <a class="lx-lockup" href="#" aria-label="LynxDB home"><svg class="lx-mark lx-mark--faceted lx-mark--on-dark" viewBox="0 0 378.4 512" aria-hidden="true"><use href="#lx-fac"/></svg><span class="lx-wordmark">LynxDB</span></a>
+  <nav aria-label="Primary">
+    <a href="#">Docs</a>
+    <a href="#">PPL guide</a>
+    <a href="#proof">Benchmarks</a>
+    <a href="#">Changelog</a>
+    <a href="https://github.com/lynxbase/lynxdb">GitHub</a>
+  </nav>
+  <div class="end">
+    <button class="hb-jump" type="button" id="hb-open" aria-haspopup="dialog"><span>Search or jump to…</span><span><span class="lx-kbd" data-key="k">⌘</span><span class="lx-kbd" data-key="k">K</span></span></button>
+    <a class="lx-btn lx-btn--ink" href="#start">Get started</a>
+  </div>
+</header>
+
+<section class="hb-hero hb-in">
+  <a class="hb-new" href="#proof"><b>New</b>JSONBench at 1 billion events <span class="hb-mono">-&gt;</span></a>
+  <div class="hb-hero__row">
+    <h1>Fast answers<br>from your logs.</h1>
+    <div>
+      <p class="lead">LynxDB is an open-source database for log search and analytics. Try it before you read on: the window below answers PPL queries over 240 sample events, in your browser.</p>
+      <div class="hb-cta">
+        <a class="lx-btn lx-btn--lg lx-btn--ink" href="#start">Get started</a>
+        <button class="hb-pill" type="button" data-copy-text="curl -fsSL https://lynxdb.org/install.sh | sh">curl -fsSL https://lynxdb.org/install.sh | sh<span>Copy</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hb-win" id="hb-con">
+    <div class="hb-bar">
+      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="name hb-mono">lynxdb · source=main · 240 events</span>
+      <div class="lx-seg" role="tablist" aria-label="View" id="hb-view">
+        <button class="lx-seg__item" role="tab" aria-selected="false" data-view="raw">Raw</button>
+        <button class="lx-seg__item" role="tab" aria-selected="false" data-view="parsed">Parsed</button>
+        <button class="lx-seg__item" role="tab" aria-selected="true" data-view="answer">Answer</button>
+      </div>
+    </div>
+    <label class="hb-q">
+      <svg class="lx-mark" viewBox="0 0 378.4 512" aria-hidden="true"><use href="#lx-mono"/></svg>
+      <input id="hb-q" class="hb-mono" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="PPL query" value="">
+      <span class="caret-tip">answers as you type</span>
+    </label>
+    <div class="hb-sug" id="hb-sug" hidden><span class="lx-kbd" data-key="tab">tab</span><span>Next: <b id="hb-sug-l"></b></span><code id="hb-sug-q"></code></div>
+    <div class="hb-body">
+      <div class="hb-res" id="hb-res" aria-live="polite"></div>
+      <aside class="hb-side" id="hb-side" aria-label="Evidence"></aside>
+    </div>
+    <div class="hb-st">
+      <span id="hb-st"></span>
+      <span class="keys" aria-hidden="true">
+        <span><span class="lx-kbd" data-key="slash">/</span>query</span>
+        <span><span class="lx-kbd" data-key="up">↑</span><span class="lx-kbd" data-key="down">↓</span><span class="lx-kbd" data-key="enter">↵</span>open a row</span>
+        <span><span class="lx-kbd" data-key="esc">esc</span>back</span>
+      </span>
+    </div>
+  </div>
+  <div class="hb-dock" role="group" aria-label="Examples">
+    <button type="button" data-ex="0" aria-pressed="false"><span class="lx-kbd" data-key="1">1</span>Find a phrase</button>
+    <button type="button" data-ex="1" aria-pressed="false"><span class="lx-kbd" data-key="2">2</span>Errors by host</button>
+    <button type="button" data-ex="2" aria-pressed="false"><span class="lx-kbd" data-key="3">3</span>Slowest paths</button>
+    <button type="button" data-ex="3" aria-pressed="false"><span class="lx-kbd" data-key="4">4</span>Errors over time</button>
+  </div>
+</section>
+
+<section class="hb-sec hb-in">
+  <p class="hb-say"><b>Built for the moment something breaks.</b> Type what you remember, a word, an ID or a status, and the answer is back before you finish typing, with the events behind it one keystroke away.</p>
+  <div class="hb-fig">
+    <div>
+      <span class="no">FIG 0.1</span>
+      <div class="art"><div class="f-grid" aria-hidden="true"><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i></i><i></i><i></i><i></i><i></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="on"></i><i></i><i></i><i></i><i></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i></i><i></i><i></i><i class="on"></i><i></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i></i><i></i><i></i><i></i><i></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i></i><i></i><i class="on"></i><i></i><i></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i></i><i></i><i></i><i></i><i class="on"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i class="out"></i><i></i><i></i><i></i><i class="on"></i><i></i></div></div>
+      <h3>Reads only what can match</h3>
+      <p>Time partitions and per-block token filters rule most of the data out before it is opened.</p>
+    </div>
+    <div>
+      <span class="no">FIG 0.2</span>
+      <div class="art"><div class="f-cols" aria-hidden="true">
+        <div><i></i><i></i><i></i><i></i><i></i><i></i><span>_time</span></div>
+        <div><i></i><i></i><i></i><i></i><i></i><i></i><span>host</span></div>
+        <div class="on"><i></i><i></i><i></i><i></i><i></i><i></i><span>status</span></div>
+        <div><i></i><i></i><i></i><i></i><i></i><i></i><span>path</span></div>
+        <div><i></i><i></i><i></i><i></i><i></i><i></i><span>user</span></div>
+        <div><i></i><i></i><i></i><i></i><i></i><i></i><span>msg</span></div>
+      </div></div>
+      <h3>Counts in columns</h3>
+      <p>Counts, percentiles and group-bys decode the columns a query names, not whole events.</p>
+    </div>
+    <div>
+      <span class="no">FIG 0.3</span>
+      <div class="art"><div class="f-lines" aria-hidden="true">
+        <div class="sum">errors 18 · host api-02</div>
+        <div><span>[1]</span><i style="width:70px"></i><i class="hit" style="width:86px"></i><i style="width:40px"></i></div>
+        <div><span>[2]</span><i style="width:104px"></i><i class="hit" style="width:58px"></i></div>
+        <div><span>[3]</span><i style="width:48px"></i><i class="hit" style="width:86px"></i><i style="width:64px"></i></div>
+      </div></div>
+      <h3>Shows its work</h3>
+      <p>Drop the last stage of the pipe and you are looking at the events behind the number.</p>
+    </div>
+  </div>
+</section>
+
+<section class="hb-sec hb-in hb-num" id="proof">
+  <h2 class="hb-h2">Fast on a billion events,<br><span class="dim">not only on 240.</span></h2>
+  <div class="hb-band">
+    <div><b>0.127 s</b><span>The slowest of five queries over 1 billion events</span></div>
+    <div><b>86 GiB</b><span>On disk for the billion. ClickHouse 182, Elasticsearch 358</span></div>
+    <div><b>1.2M/s</b><span>Events ingested per second while loading it</span></div>
+    <div><b>19×</b><span>Ahead of ClickHouse on the combined score, 65× ahead of Elasticsearch</span></div>
+  </div>
+  <p class="hb-fine">JSONBench, 1 billion Bluesky events, AWS m6i.8xlarge. LynxDB measured 2026-11-20 at commit ad9d7e3b; other systems as published in ClickBench. <a href="https://github.com/lynxbase/ClickBench/tree/main/json/lynxdb">Entry and raw results</a></p>
+</section>
+
+<section class="hb-sec hb-in" id="api">
+  <div class="hb-row">
+    <h2>Ask from anywhere</h2>
+    <div class="hb-well">
+      <div class="lx-seg" role="tablist" aria-label="Interface" data-tabs="io">
+        <button class="lx-seg__item" role="tab" aria-selected="true" data-tab="cli">Terminal</button>
+        <button class="lx-seg__item" role="tab" aria-selected="false" data-tab="http">HTTP</button>
+        <button class="lx-seg__item" role="tab" aria-selected="false" data-tab="stream">Stream</button>
+      </div>
+      <div class="hb-io" data-pane="io:cli">
+<pre class="lx-code">lynxdb query --file access.log '
+  <span class="k">source</span>=main status&gt;=<span class="n">500</span>
+  <span class="p">|</span> <span class="k">stats</span> <span class="f">count</span>() <span class="k">as</span> errors <span class="k">by</span> host
+  <span class="p">|</span> <span class="k">sort</span> - errors' --format csv --no-stats</pre>
+<pre class="lx-code">errors,host
+48,api-02
+43,web-02
+41,web-03</pre>
+      </div>
+      <div class="hb-io" data-pane="io:http" hidden>
+<pre class="lx-code">curl -s localhost:3100/api/v1/query \
+  -H 'Content-Type: application/json' \
+  -d '{"q": "<span class="k">source</span>=main status&gt;=<span class="n">500</span> <span class="p">|</span> <span class="k">stats</span> <span class="f">count</span>() <span class="k">as</span> errors <span class="k">by</span> host <span class="p">|</span> <span class="k">sort</span> - errors <span class="p">|</span> <span class="k">head</span> <span class="n">3</span>"}'</pre>
+<pre class="lx-code">{ "data": { "type": "aggregate", "columns": ["errors", "host"],
+    "rows": [[<span class="n">48</span>, <span class="s">"api-02"</span>], [<span class="n">43</span>, <span class="s">"web-02"</span>], [<span class="n">41</span>, <span class="s">"web-03"</span>]],
+    "total_rows": <span class="n">3</span>, "has_more": false },
+  "meta": { "took_ms": <span class="n">0.218</span>, "rows": <span class="n">3</span> } }</pre>
+      </div>
+      <div class="hb-io" data-pane="io:stream" hidden>
+<pre class="lx-code">curl -s localhost:3100/api/v1/query/stream \
+  -H 'Content-Type: application/json' \
+  -d '{"q": "<span class="k">source</span>=main <span class="p">|</span> <span class="k">stats</span> <span class="f">count</span>() <span class="k">as</span> n <span class="k">by</span> level"}'</pre>
+<pre class="lx-code">{"n":<span class="n">294</span>,"level":<span class="s">"ERROR"</span>}
+{"n":<span class="n">359</span>,"level":<span class="s">"INFO"</span>}
+{"n":<span class="n">347</span>,"level":<span class="s">"WARN"</span>}
+{"__meta":{"total":<span class="n">3</span>,"took_ms":<span class="n">0</span>}}</pre>
+      </div>
+    </div>
+    <div>
+      <p class="proof"><b>One pipe language</b> in the terminal, over HTTP, or as a stream that scripts and agents read line by line.</p>
+      <ul class="list"><li>Interfaces</li><li>CLI on files and pipes</li><li>REST API</li><li>NDJSON streaming</li><li>OpenSearch PPL</li></ul>
+    </div>
+  </div>
+</section>
+
+<section class="hb-sec hb-in" style="padding-top:96px">
+  <div class="hb-send">
+    <h2>Send it what you have</h2>
+    <p class="proof"><b>Keep your collector.</b> Point the agent you already run at a new address, and ask while the logs are still arriving.</p>
+  </div>
+  <div class="hb-well hb-well--fig">
+    <div class="hb-pipe" id="hb-pipe" data-phase="answer" role="img" aria-label="Log lines arrive over five protocols, are stored as blocks grouped by day, and a query reads only the blocks that can contain its term before returning counts by host">
+      <svg viewBox="0 0 1136 268" aria-hidden="true"><path class="w" d="M176 46 C 236 46, 232 134, 292 134"/><path class="w" d="M176 90 C 236 90, 232 134, 292 134"/><path class="w" d="M176 134 C 236 134, 232 134, 292 134"/><path class="w" d="M176 178 C 236 178, 232 134, 292 134"/><path class="w" d="M176 222 C 236 222, 232 134, 292 134"/><path class="w" d="M408 134 H452"/><path class="w" d="M848 134 H900"/><path class="f" pathLength="120" style="--d:0s" d="M176 46 C 236 46, 232 134, 292 134"/><path class="f" pathLength="120" style="--d:-0.7s" d="M176 90 C 236 90, 232 134, 292 134"/><path class="f" pathLength="120" style="--d:-1.2s" d="M176 134 C 236 134, 232 134, 292 134"/><path class="f" pathLength="120" style="--d:-0.35s" d="M176 178 C 236 178, 232 134, 292 134"/><path class="f" pathLength="120" style="--d:-1.0s" d="M176 222 C 236 222, 232 134, 292 134"/><path class="f" pathLength="120" style="--d:-0.5s" d="M408 134 H452"/><path class="f out" pathLength="120" style="--d:-0.2s" d="M848 134 H900"/></svg>
+      <div class="src" style="top:30px">NDJSON</div><div class="src" style="top:74px">Elasticsearch _bulk</div><div class="src" style="top:118px">OpenTelemetry logs</div><div class="src" style="top:162px">Splunk HEC</div><div class="src" style="top:206px">syslog</div>
+      <div class="core"><svg class="lx-mark" viewBox="0 0 378.4 512" aria-hidden="true"><use href="#lx-mono"/></svg><span>LynxDB</span></div>
+      <div class="store">
+        <div class="ask"><svg class="lx-mark" viewBox="0 0 378.4 512" aria-hidden="true"><use href="#lx-mono"/></svg><span class="q" id="hb-pipe-q">source=main timeout | stats count() by host</span></div>
+        <div class="grid"><i style="--c:0"></i><i style="--c:1"></i><i style="--c:2"></i><i style="--c:3"></i><i style="--c:4"></i><i style="--c:5"></i><i style="--c:6"></i><i style="--c:7"></i><i style="--c:8"></i><i class="hit" style="--c:9"></i><i style="--c:10"></i><i style="--c:11"></i><i style="--c:12"></i><i style="--c:13"></i><i style="--c:14"></i><i style="--c:15"></i><i class="new" style="--c:16;--n:0"></i><i class="new" style="--c:17;--n:6"></i><i class="new" style="--c:18;--n:12"></i><i class="new" style="--c:19;--n:18"></i><i style="--c:0"></i><i style="--c:1"></i><i style="--c:2"></i><i style="--c:3"></i><i class="hit" style="--c:4"></i><i style="--c:5"></i><i style="--c:6"></i><i style="--c:7"></i><i style="--c:8"></i><i style="--c:9"></i><i style="--c:10"></i><i style="--c:11"></i><i style="--c:12"></i><i style="--c:13"></i><i style="--c:14"></i><i style="--c:15"></i><i class="new" style="--c:16;--n:1"></i><i class="hit new" style="--c:17;--n:7"></i><i class="new" style="--c:18;--n:13"></i><i class="new" style="--c:19;--n:19"></i><i style="--c:0"></i><i style="--c:1"></i><i style="--c:2"></i><i style="--c:3"></i><i style="--c:4"></i><i style="--c:5"></i><i style="--c:6"></i><i style="--c:7"></i><i style="--c:8"></i><i style="--c:9"></i><i style="--c:10"></i><i style="--c:11"></i><i style="--c:12"></i><i style="--c:13"></i><i class="hit" style="--c:14"></i><i style="--c:15"></i><i class="new" style="--c:16;--n:2"></i><i class="new" style="--c:17;--n:8"></i><i class="new" style="--c:18;--n:14"></i><i class="new" style="--c:19;--n:20"></i><i style="--c:0"></i><i style="--c:1"></i><i style="--c:2"></i><i style="--c:3"></i><i style="--c:4"></i><i style="--c:5"></i><i style="--c:6"></i><i class="hit" style="--c:7"></i><i style="--c:8"></i><i style="--c:9"></i><i style="--c:10"></i><i style="--c:11"></i><i style="--c:12"></i><i style="--c:13"></i><i style="--c:14"></i><i style="--c:15"></i><i class="new" style="--c:16;--n:3"></i><i class="new" style="--c:17;--n:9"></i><i class="new" style="--c:18;--n:15"></i><i class="new" style="--c:19;--n:21"></i><i style="--c:0"></i><i class="hit" style="--c:1"></i><i style="--c:2"></i><i style="--c:3"></i><i style="--c:4"></i><i style="--c:5"></i><i style="--c:6"></i><i style="--c:7"></i><i style="--c:8"></i><i style="--c:9"></i><i style="--c:10"></i><i style="--c:11"></i><i style="--c:12"></i><i style="--c:13"></i><i style="--c:14"></i><i style="--c:15"></i><i class="new" style="--c:16;--n:4"></i><i class="new" style="--c:17;--n:10"></i><i class="hit new" style="--c:18;--n:16"></i><i class="new" style="--c:19;--n:22"></i><i style="--c:0"></i><i style="--c:1"></i><i style="--c:2"></i><i style="--c:3"></i><i style="--c:4"></i><i style="--c:5"></i><i style="--c:6"></i><i style="--c:7"></i><i style="--c:8"></i><i style="--c:9"></i><i style="--c:10"></i><i style="--c:11"></i><i class="hit" style="--c:12"></i><i style="--c:13"></i><i style="--c:14"></i><i style="--c:15"></i><i class="new" style="--c:16;--n:5"></i><i class="new" style="--c:17;--n:11"></i><i class="new" style="--c:18;--n:17"></i><i class="new" style="--c:19;--n:23"></i><span class="sweep"></span></div>
+        <div class="days"><span>3 days ago</span><span>2 days ago</span><span>yesterday</span><span>today</span></div>
+        <div class="tally" id="hb-pipe-n"><b>8 of 120</b> blocks read · 112 skipped</div>
+      </div>
+      <div class="ans"><span class="lx-label">Answer</span><div class="r" style="--r:0;--w:1.000"><span>api-01</span><i></i><span>7</span></div><div class="r" style="--r:1;--w:0.714"><span>web-02</span><i></i><span>5</span></div><div class="r" style="--r:2;--w:0.571"><span>web-01</span><i></i><span>4</span></div><div class="r" style="--r:3;--w:0.571"><span>web-03</span><i></i><span>4</span></div><div class="r" style="--r:4;--w:0.429"><span>api-02</span><i></i><span>3</span></div><div class="via">via <span id="hb-pipe-via">lynxdb query</span></div></div>
+    </div>
+<pre class="hb-rawline"><em>2025-01-15T08:00:00.105Z</em> <b style="--k:0">host</b>=web-03 <b style="--k:1">level</b>=ERROR <b style="--k:2">method</b>=GET <b style="--k:3">path</b>=/api/v1/users <b style="--k:4">status</b>=502 <b style="--k:5">user</b>=grace <b style="--k:6">response_time</b>=786</pre>
+  </div>
+  <div class="hb-notes"><span>JSON keeps its fields</span><span>Timestamps are found</span><span>key=value pairs become fields</span><span>Access logs and syslog are parsed</span></div>
+</section>
+
+<section class="hb-sec hb-in" id="start">
+  <div class="hb-start">
+    <div>
+      <h2 class="hb-h2" style="font-size:40px;line-height:44px">Running in a minute</h2>
+      <ul class="hb-no">
+        <li><b>No schema</b> to declare first.</li>
+        <li><b>No index</b> to design or rebuild.</li>
+        <li><b>No cluster</b> to start: a file is enough.</li>
+      </ul>
+    </div>
+    <ol class="hb-steps">
+      <li><b>Install<span>Release binary, checksum verified, to /usr/local/bin</span></b><pre><i>$</i> curl -fsSL https://lynxdb.org/install.sh | sh</pre><button class="lx-btn lx-btn--sm" type="button" data-copy>Copy</button></li>
+      <li><b>Ask a file<span>Nothing to start, nothing to configure</span></b><pre><i>$</i> lynxdb query --file access.log 'source=main status&gt;=500 | top 10 uri'</pre><button class="lx-btn lx-btn--sm" type="button" data-copy>Copy</button></li>
+      <li><b>Keep the logs<span>A server that stores them on disk</span></b><pre><i>$</i> lynxdb server</pre><button class="lx-btn lx-btn--sm" type="button" data-copy>Copy</button></li>
+    </ol>
+  </div>
+</section>
+
+<section class="hb-end hb-in">
+  <h2>Try it on your own logs.</h2>
+  <div class="hb-cta">
+    <a class="lx-btn lx-btn--lg lx-btn--ink" href="#">Read the quick start</a>
+    <button class="hb-pill" type="button" data-copy-text="curl -fsSL https://lynxdb.org/install.sh | sh">curl -fsSL https://lynxdb.org/install.sh | sh<span>Copy</span></button>
+  </div>
+</section>
+
+<footer class="hb-foot hb-in">
+  <a class="lx-lockup" href="#" style="font-size:15px" aria-label="LynxDB"><svg class="lx-mark" viewBox="0 0 378.4 512" aria-hidden="true"><use href="#lx-mono"/></svg><span class="lx-wordmark">LynxDB</span></a>
+  <span class="lx-label">Apache 2.0</span>
+  <div class="end">
+    <a class="lx-label" href="#"><span data-scramble>Docs</span></a>
+    <a class="lx-label" href="#"><span data-scramble>GitHub</span></a>
+    <a class="lx-label" href="#"><span data-scramble>Discord</span></a>
+    <a class="lx-label" href="#"><span data-scramble>Releases</span></a>
+  </div>
+</footer>
+
+<div class="hb-veil" id="hb-veil" hidden>
+  <div class="hb-pal" role="dialog" aria-modal="true" aria-label="Command menu" id="hb-pal">
+    <input id="hb-pq" type="text" placeholder="Type a command…" spellcheck="false" autocomplete="off" aria-label="Command">
+    <ul id="hb-pl" role="listbox"></ul>
+    <footer><span><span class="lx-kbd">↑</span><span class="lx-kbd">↓</span>move</span><span><span class="lx-kbd">↵</span>run</span><span><span class="lx-kbd">esc</span>close</span></footer>
+  </div>
+</div>
+
+</div>
+<script>
+(function () {
+  'use strict';
+
+  // ------------------------------------------------------------------ sample data
+  var BASE = Date.UTC(2026, 10, 25, 9, 0, 0);
+  var seed = 7;
+  function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+  function pick(list) { return list[Math.floor(rnd() * list.length)]; }
+  var HOSTS = ['web-01', 'web-02', 'web-03', 'api-01', 'api-02'];
+  var PATHS = ['/api/v1/users', '/api/v1/orders', '/api/v1/search', '/api/v1/health', '/checkout', '/cart'];
+  var USERS = ['grace', 'linus', 'ada', 'ken', 'margaret', 'dennis', 'barbara'];
+  var METHODS = ['GET', 'GET', 'GET', 'POST', 'PUT'];
+  var FAIL = ['dial tcp 10.0.4.17:5432: connection refused', 'upstream timeout after 1500ms', 'pool exhausted: 32 of 32 connections in use'];
+  var DENY = { 404: 'route not found', 401: 'invalid token', 429: 'rate limit exceeded' };
+  var EVENTS = [];
+  for (var n = 0; n < 240; n++) {
+    var host = pick(HOSTS), path = pick(PATHS), method = pick(METHODS), user = pick(USERS);
+    var time = BASE - Math.floor(rnd() * 3600000);
+    var age = (BASE - time) / 60000;
+    var bad = (host === 'api-02' ? 0.3 : 0.08) + (age > 20 && age < 35 ? 0.3 : 0);
+    var roll = rnd(), status, msg, rt = Math.round(20 + Math.pow(rnd(), 3) * 900);
+    if (roll < bad) {
+      status = pick([500, 502, 502, 503]);
+      msg = FAIL[host === 'api-02' ? pick([0, 0, 1, 2]) : pick([1, 1, 2])];
+      rt = Math.round(600 + rnd() * 1200);
+    } else if (roll < bad + 0.1) {
+      status = pick([404, 404, 401, 429]);
+      msg = DENY[status];
+    } else {
+      status = pick([200, 200, 200, 200, 201, 304]);
+      msg = method + ' ' + path + ' completed';
+    }
+    EVENTS.push({ _time: time, host: host, level: status >= 500 ? 'ERROR' : (status >= 400 || rt > 700 ? 'WARN' : 'INFO'), method: method, path: path, status: status, user: user, response_time: rt, msg: msg });
+  }
+  EVENTS.sort(function (a, b) { return b._time - a._time; });
+  var FIELDS = ['_time', 'host', 'level', 'method', 'path', 'status', 'user', 'response_time', 'msg'];
+  function tokens(text) { return String(text).toLowerCase().split(/[^a-z0-9]+/).filter(Boolean); }
+  EVENTS.forEach(function (event) {
+    event._tok = FIELDS.slice(1).map(function (f) { return ' ' + tokens(event[f]).join(' ') + ' '; });
+  });
+
+  // ------------------------------------------------------------------ a small subset of PPL
+  var COMMANDS = 'where, stats, sort, head, fields, top, timechart';
+  function fail(message, hint) { var e = new Error(message); e.hint = hint; return e; }
+  function splitTop(text, sep) {
+    var out = [], cur = '', quote = null, depth = 0;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text.charAt(i);
+      if (quote) { cur += ch; if (ch === quote) quote = null; continue; }
+      if (ch === '"' || ch === "'") { quote = ch; cur += ch; continue; }
+      if (ch === '(') depth++;
+      if (ch === ')') depth--;
+      if (ch === sep && depth === 0) { out.push(cur); cur = ''; continue; }
+      cur += ch;
+    }
+    if (quote) throw fail('unterminated quote', 'close the ' + quote + ' you opened');
+    out.push(cur);
+    return out;
+  }
+  function unquote(v) { return /^(".*"|'.*')$/.test(v) ? v.slice(1, -1) : v; }
+  function literal(v) { var u = unquote(v.trim()); return (u === v.trim() && /^-?\d+(\.\d+)?$/.test(u)) ? Number(u) : u; }
+  function known(field) {
+    if (FIELDS.indexOf(field) < 0) throw fail('no event holds the field `' + field + '`', 'fields here: ' + FIELDS.join(', '));
+    return field;
+  }
+  function compare(left, op, right) {
+    if (typeof right === 'number' || typeof left === 'number') {
+      var a = Number(left), b = Number(right);
+      if (isNaN(a) || isNaN(b)) return op === '!=';
+      return op === '=' || op === '==' ? a === b : op === '!=' ? a !== b : op === '>' ? a > b : op === '>=' ? a >= b : op === '<' ? a < b : a <= b;
+    }
+    return op === '=' || op === '==' ? left === right : op === '!=' ? left !== right : op === '>' ? left > right : op === '>=' ? left >= right : op === '<' ? left < right : left <= right;
+  }
+  function parseCond(text, loose) {
+    var m = /^\s*([A-Za-z_][\w.]*)\s*(>=|<=|!=|==|=|>|<)\s*(.+?)\s*$/.exec(text);
+    if (!m) throw fail('cannot read the condition `' + text.trim() + '`', 'write it as field >= 500 or field = "text"');
+    return { field: loose ? m[1] : known(m[1]), op: m[2], value: literal(m[3]) };
+  }
+  function relTime(v) {
+    if (v === 'now') return BASE;
+    var m = /^-(\d+)([smhd])$/.exec(v);
+    if (!m) throw fail('cannot read the time `' + v + '`', 'this demo takes now, -15m, -1h');
+    return BASE - Number(m[1]) * { s: 1000, m: 60000, h: 3600000, d: 86400000 }[m[2]];
+  }
+
+  function parseSearch(text) {
+    var tests = [], needles = [], kept = [];
+    (text.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || []).forEach(function (term) {
+      var m;
+      if ((m = /^(source|index)=(.+)$/i.exec(term))) {
+        if (unquote(m[2]) !== 'main') throw fail('index `' + unquote(m[2]) + '` not found', 'this demo has one index: source=main');
+        return;
+      }
+      if (/^(search)$/i.test(term)) return;
+      if (/^(or|not|and)$/i.test(term)) throw fail('`' + term + '` is not in this demo', 'terms are joined with AND here; the real engine has OR, NOT and parentheses');
+      kept.push(term);
+      if ((m = /^(earliest|latest)=(.+)$/i.exec(term))) {
+        var bound = relTime(unquote(m[2])), early = m[1].toLowerCase() === 'earliest';
+        tests.push(function (e) { return early ? e._time >= bound : e._time <= bound; });
+        return;
+      }
+      if ((m = /^([A-Za-z_][\w.]*)(>=|<=|!=|=|>|<)(.+)$/.exec(term))) {
+        var cond = { field: known(m[1]), op: m[2], value: literal(m[3]) };
+        tests.push(function (e) { return compare(e[cond.field], cond.op, cond.value); });
+        if (cond.op === '=' && typeof cond.value === 'string') needles.push(cond.value);
+        return;
+      }
+      var raw = unquote(term), toks = tokens(raw);
+      if (!toks.length) return;
+      if (/\*$/.test(raw) && toks.length === 1) {
+        tests.push(function (e) { return e._tok.some(function (f) { return f.indexOf(' ' + toks[0]) >= 0; }); });
+      } else {
+        var phrase = ' ' + toks.join(' ') + ' ';
+        tests.push(function (e) { return e._tok.some(function (f) { return f.indexOf(phrase) >= 0; }); });
+      }
+      needles.push(raw.replace(/\*$/, ''));
+    });
+    return { tests: tests, needles: needles, kept: kept.join(' ') };
+  }
+
+  var AGGS = { count: 1, sum: 1, avg: 1, min: 1, max: 1, p50: 1, p90: 1, p95: 1, p99: 1, dc: 1, distinct_count: 1 };
+  function parseAgg(text) {
+    var t = text.trim(), m;
+    if ((m = /^count\(\s*eval\((.+)\)\s*\)(?:\s+as\s+(\w+))?$/i.exec(t))) {
+      var cond = parseCond(m[1]);
+      return { name: m[2] || 'count', run: function (rows) { return rows.filter(function (r) { return compare(r[cond.field], cond.op, cond.value); }).length; } };
+    }
+    m = /^(\w+)\(\s*([\w.]*)\s*\)(?:\s+as\s+(\w+))?$/.exec(t);
+    if (!m || !AGGS[m[1].toLowerCase()]) throw fail('cannot read the aggregate `' + t + '`', 'try count(), avg(f), p95(f), min(f), max(f), sum(f), dc(f)');
+    var fn = m[1].toLowerCase(), field = m[2];
+    if (fn !== 'count') known(field);
+    return {
+      name: m[3] || (fn + '(' + field + ')'),
+      run: function (rows) {
+        if (fn === 'count') return field ? rows.filter(function (r) { return r[field] != null; }).length : rows.length;
+        var values = rows.map(function (r) { return r[field]; }).filter(function (v) { return v != null; });
+        if (fn === 'dc' || fn === 'distinct_count') return values.filter(function (v, i) { return values.indexOf(v) === i; }).length;
+        var nums = values.map(Number).sort(function (a, b) { return a - b; });
+        if (!nums.length) return null;
+        if (fn === 'sum') return nums.reduce(function (a, b) { return a + b; }, 0);
+        if (fn === 'avg') return Math.round(nums.reduce(function (a, b) { return a + b; }, 0) / nums.length * 10) / 10;
+        if (fn === 'min') return nums[0];
+        if (fn === 'max') return nums[nums.length - 1];
+        return nums[Math.min(nums.length - 1, Math.ceil(Number(fn.slice(1)) / 100 * nums.length) - 1)];
+      }
+    };
+  }
+  function groupBy(rows, by) {
+    var order = [], map = {};
+    rows.forEach(function (r) {
+      var key = by.map(function (f) { return r[f]; }).join('\u0001');
+      if (!map[key]) { map[key] = []; order.push(key); }
+      map[key].push(r);
+    });
+    return order.map(function (key) { return map[key]; });
+  }
+
+  function run(query) {
+    var stages = splitTop(query, '|').map(function (s) { return s.trim(); });
+    var first = stages[0], rest = stages.slice(1);
+    if (/^(where|stats|sort|head|fields|top|timechart)\b/i.test(first)) { rest = stages; first = ''; }
+    var search = parseSearch(first);
+    var rows = EVENTS.filter(function (e) { return search.tests.every(function (t) { return t(e); }); });
+    var result = { type: 'events', rows: rows, matched: rows.length, needles: search.needles, kept: search.kept, columns: null, by: [], evidence: rows, before: [] };
+
+    rest.forEach(function (stage) {
+      if (!stage) throw fail('empty stage after `|`', 'known commands: ' + COMMANDS);
+      var m = /^(\w+)\s*([\s\S]*)$/.exec(stage), name = m[1].toLowerCase(), arg = m[2].trim();
+      if (result.type === 'events' && name !== 'stats' && name !== 'top' && name !== 'timechart') result.before.push(stage);
+      if (name === 'where') {
+        var conds = arg.split(/\s+and\s+/i).map(function (c) { return parseCond(c, result.type !== 'events'); });
+        result.rows = result.rows.filter(function (r) { return conds.every(function (c) { return compare(r[c.field], c.op, c.value); }); });
+        if (result.type === 'events') { result.matched = result.rows.length; result.evidence = result.rows; }
+      } else if (name === 'stats') {
+        if (result.type !== 'events') throw fail('a second `stats` is not in this demo', 'the real engine runs it on its row operators');
+        var cut = -1, depth = 0;
+        for (var i = 0; i < arg.length; i++) {
+          var ch = arg.charAt(i);
+          if (ch === '(') depth++; else if (ch === ')') depth--;
+          else if (depth === 0 && /^\sby\s/i.test(arg.substr(i, 4))) cut = i;
+        }
+        var by = cut < 0 ? [] : arg.slice(cut + 4).split(',').map(function (f) { return known(f.trim()); });
+        var aggs = splitTop(cut < 0 ? arg : arg.slice(0, cut), ',').map(parseAgg);
+        result.rows = groupBy(result.rows, by).map(function (group) {
+          var row = {};
+          aggs.forEach(function (a) { row[a.name] = a.run(group); });
+          by.forEach(function (f) { row[f] = group[0][f]; });
+          return row;
+        });
+        result.type = 'table'; result.by = by;
+        result.columns = aggs.map(function (a) { return a.name; }).concat(by);
+      } else if (name === 'top') {
+        m = /^(?:(\d+)\s+)?([\w.]+)$/.exec(arg);
+        if (!m || result.type !== 'events') throw fail('cannot read `top ' + arg + '`', 'write it as top 5 path');
+        var field = known(m[2]);
+        result.rows = groupBy(result.rows, [field]).map(function (g) { var row = { count: g.length }; row[field] = g[0][field]; return row; })
+          .sort(function (a, b) { return b.count - a.count; }).slice(0, Number(m[1] || 10));
+        result.type = 'table'; result.by = [field]; result.columns = ['count', field];
+      } else if (name === 'timechart') {
+        m = /^span=(\d+)m\s+count\(\)$/i.exec(arg);
+        if (!m || result.type !== 'events') throw fail('cannot read `timechart ' + arg + '`', 'this demo draws timechart span=5m count()');
+        var width = Number(m[1]) * 60000, buckets = [];
+        for (var t = BASE - 3600000; t < BASE; t += width) buckets.push({ t: t, n: 0 });
+        result.rows.forEach(function (e) { var b = buckets[Math.floor((e._time - (BASE - 3600000)) / width)]; if (b) b.n++; });
+        result.type = 'chart'; result.rows = buckets;
+      } else if (name === 'sort') {
+        var keys = arg.split(',').map(function (k) { var x = /^([+-])?\s*([\w.()]+)$/.exec(k.trim()); if (!x) throw fail('cannot read `sort ' + arg + '`', 'write it as sort - errors'); return { desc: x[1] === '-', field: x[2] }; });
+        if (result.type === 'chart') throw fail('`sort` after timechart is not in this demo');
+        keys.forEach(function (k) { if (result.type === 'table' ? result.columns.indexOf(k.field) < 0 : FIELDS.indexOf(k.field) < 0) throw fail('cannot sort by `' + k.field + '`', 'columns here: ' + (result.type === 'table' ? result.columns : FIELDS).join(', ')); });
+        result.rows = result.rows.slice().sort(function (a, b) {
+          for (var k = 0; k < keys.length; k++) {
+            var x = a[keys[k].field], y = b[keys[k].field];
+            if (x === y) continue;
+            return (x > y ? 1 : -1) * (keys[k].desc ? -1 : 1);
+          }
+          return 0;
+        });
+      } else if (name === 'head') {
+        if (arg && !/^\d+$/.test(arg)) throw fail('cannot read `head ' + arg + '`', 'write it as head 5');
+        result.rows = result.rows.slice(0, Number(arg || 10));
+      } else if (name === 'fields') {
+        var cols = arg.split(',').map(function (f) { return f.trim(); }).filter(Boolean);
+        if (result.type === 'events') cols.forEach(known);
+        result.columns = cols;
+      } else {
+        throw fail('unknown command `' + name + '`', 'this demo knows ' + COMMANDS + '. The database has the rest of PPL.');
+      }
+    });
+    return result;
+  }
+
+  // ------------------------------------------------------------------ rendering
+  var $ = function (id) { return document.getElementById(id); };
+  var input = $('hb-q'), out = $('hb-res'), side = $('hb-side'), status = $('hb-st');
+  var sug = $('hb-sug'), sugLabel = $('hb-sug-l'), sugQuery = $('hb-sug-q'), views = $('hb-view');
+  var EXAMPLES = [
+    'source=main "connection refused"',
+    'source=main status>=500 | stats count() as errors, p95(response_time) as p95 by host | sort - errors',
+    'source=main | stats count() as hits, p95(response_time) as p95 by path | sort - p95 | head 5',
+    'source=main level=ERROR | timechart span=5m count()'
+  ];
+  var state = { result: null, sel: 0, stack: [], view: 'answer', next: null, took: 0, scanned: 0 };
+
+  function el(tag, cls, text) { var node = document.createElement(tag); if (cls) node.className = cls; if (text != null) node.textContent = text; return node; }
+  function clock(ms) { return new Date(ms).toISOString().slice(11, 23); }
+  function marked(text, needles) {
+    var frag = document.createDocumentFragment(), source = String(text);
+    var parts = needles.filter(Boolean).map(function (nd) { return tokens(nd).join('[^a-z0-9]+'); }).filter(Boolean);
+    if (!parts.length) { frag.appendChild(document.createTextNode(source)); return frag; }
+    var re = new RegExp(parts.join('|'), 'ig'), last = 0, m;
+    while ((m = re.exec(source))) {
+      if (m[0] === '') { re.lastIndex++; continue; }
+      frag.appendChild(document.createTextNode(source.slice(last, m.index)));
+      frag.appendChild(el('mark', null, m[0]));
+      last = m.index + m[0].length;
+    }
+    frag.appendChild(document.createTextNode(source.slice(last)));
+    return frag;
+  }
+  function eventRows(events, needles, columns) {
+    var box = el('div', 'hb-ev');
+    events.forEach(function (e) {
+      var row = el('div');
+      row.appendChild(el('span', 't', clock(e._time)));
+      var hostCell = el('span', 'h'); hostCell.appendChild(marked(e.host, needles)); row.appendChild(hostCell);
+      row.appendChild(el('span', 'lx-level lx-level--' + e.level.toLowerCase(), e.level));
+      row.appendChild(el('span', null, e.status));
+      var m = el('span', 'm');
+      if (columns) {
+        columns.filter(function (c) { return ['_time', 'host', 'level', 'status'].indexOf(c) < 0; }).forEach(function (c) {
+          m.appendChild(el('span', 'kv', c + '='));
+          m.appendChild(marked(e[c], needles));
+          m.appendChild(document.createTextNode('  '));
+        });
+      } else {
+        m.appendChild(marked(e.msg, needles));
+        m.appendChild(el('span', 'kv', '  ' + e.method + ' ' + e.path + ' user=' + e.user + ' ' + e.response_time + 'ms'));
+      }
+      row.appendChild(m);
+      box.appendChild(row);
+    });
+    return box;
+  }
+  function rawLine(e) {
+    return new Date(e._time).toISOString() + ' host=' + e.host + ' level=' + e.level + ' method=' + e.method + ' path=' + e.path +
+      ' status=' + e.status + ' user=' + e.user + ' response_time=' + e.response_time + ' msg="' + e.msg + '"';
+  }
+  function more(count, shown, noun) { return count > shown ? el('div', 'hb-more', '+ ' + (count - shown) + ' more ' + noun) : null; }
+  function add(parent, node) { if (node) parent.appendChild(node); }
+
+  // the part of a query that selects events: search terms plus any `where` before the first aggregate
+  function base(r) {
+    var head = ['source=main', r.kept].filter(Boolean).join(' ');
+    return [head].concat(r.before.filter(function (st) { return /^where\b/i.test(st); })).join(' | ');
+  }
+  function behind(r) {
+    var row = r.type === 'table' && r.by.length ? r.rows[state.sel] : null;
+    if (!row) return { events: r.evidence, of: null };
+    return { events: r.evidence.filter(function (e) { return r.by.every(function (f) { return e[f] === row[f]; }); }), of: r.by.map(function (f) { return row[f]; }).join(' · ') };
+  }
+
+  function drawMain(r) {
+    out.textContent = '';
+    out.classList.remove('is-stale');
+    var view = state.view, events = r.type === 'events' ? r.rows : r.evidence;
+    if (view === 'raw') {
+      out.appendChild(el('div', 'lx-label hb-cap', 'As the lines arrived'));
+      var pre = el('div', 'hb-raw');
+      events.slice(0, 6).forEach(function (e) { var line = el('div'); line.appendChild(marked(rawLine(e), r.needles)); pre.appendChild(line); });
+      out.appendChild(pre); add(out, more(events.length, 6, 'lines'));
+      if (!events.length) out.appendChild(el('div', 'hb-more', 'No event matches. Try a shorter query.'));
+    } else if (view === 'parsed' || r.type === 'events') {
+      out.appendChild(el('div', 'lx-label hb-cap', r.type === 'events' ? 'Events, newest first' : 'The events this answer was computed from'));
+      out.appendChild(eventRows(events.slice(0, 11), r.needles, r.type === 'events' ? r.columns : null));
+      add(out, more(events.length, 11, 'events'));
+      if (!events.length) out.appendChild(el('div', 'hb-more', 'No event matches. Try a shorter query.'));
+    } else if (r.type === 'chart') {
+      var max = Math.max.apply(null, r.rows.map(function (b) { return b.n; }).concat([1]));
+      out.appendChild(el('div', 'lx-label hb-cap', 'Events per bucket, last hour'));
+      var chart = el('div', 'hb-ch'), axis = el('div', 'hb-chx');
+      r.rows.forEach(function (b) {
+        var col = el('div'); col.appendChild(document.createTextNode(b.n));
+        var bar = el('i'); bar.style.height = Math.round(b.n / max * 220) + 'px'; col.appendChild(bar);
+        chart.appendChild(col); axis.appendChild(el('span', null, clock(b.t).slice(0, 5)));
+      });
+      out.appendChild(chart); out.appendChild(axis);
+    } else {
+      var cols = r.columns.filter(function (c) { return r.rows.length ? c in r.rows[0] : true; });
+      var barCol = cols.filter(function (c) { return r.by.indexOf(c) < 0; })[0];
+      var top = Math.max.apply(null, r.rows.map(function (row) { return Number(row[barCol]) || 0; }).concat([1]));
+      out.appendChild(el('div', 'lx-label hb-cap', r.by.length ? 'Answer · select a row to read the events behind it' : 'Answer'));
+      var table = el('table', 'hb-t' + (cols.length > 3 ? ' wide' : '')), head = el('tr');
+      cols.forEach(function (c) { head.appendChild(el('th', typeof (r.rows[0] || {})[c] === 'number' ? 'num' : null, c)); });
+      head.appendChild(el('th', 'bar', ''));
+      var thead = el('thead'); thead.appendChild(head); table.appendChild(thead);
+      var body = el('tbody'), can = r.by.length > 0;
+      state.sel = Math.min(state.sel, Math.max(0, Math.min(r.rows.length, 7) - 1));
+      r.rows.slice(0, 7).forEach(function (row, i) {
+        var tr = el('tr', can ? 'can' : null);
+        if (can) tr.setAttribute('aria-selected', String(i === state.sel));
+        cols.forEach(function (c) { tr.appendChild(el('td', typeof row[c] === 'number' ? 'num' : null, row[c] == null ? '' : row[c])); });
+        var bar = el('td', 'bar'), fill = el('i'); fill.style.width = Math.max(2, Math.round((Number(row[barCol]) || 0) / top * 100)) + '%';
+        bar.appendChild(fill); tr.appendChild(bar);
+        if (can) {
+          tr.addEventListener('click', function () { if (state.sel === i) drill(); else { state.sel = i; select(); } });
+          tr.addEventListener('dblclick', function () { state.sel = i; drill(); });
+        }
+        body.appendChild(tr);
+      });
+      table.appendChild(body); out.appendChild(table);
+      add(out, more(r.rows.length, 7, 'rows'));
+    }
+  }
+
+  function drawSide(r) {
+    side.textContent = '';
+    if (r.type === 'events') {
+      side.appendChild(el('div', 'lx-label hb-cap', 'Narrow it down'));
+      var box = el('div', 'hb-fac');
+      var groups = 0;
+      ['host', 'level', 'status', 'path', 'method', 'user'].forEach(function (field) {
+        var counts = {}, order = [];
+        r.rows.forEach(function (e) { if (!(e[field] in counts)) { counts[e[field]] = 0; order.push(e[field]); } counts[e[field]]++; });
+        order.sort(function (a, b) { return counts[b] - counts[a]; });
+        if (order.length < 2 || groups >= 3) return;
+        groups += 1;
+        var group = el('div'); group.appendChild(el('h3', null, field));
+        order.slice(0, groups === 1 ? 4 : 3).forEach(function (value) {
+          var button = el('button'); button.type = 'button';
+          button.title = 'Add ' + field + '=' + value + ' to the query';
+          button.appendChild(el('span', null, value));
+          var track = el('span'), fill = el('i'); fill.style.width = Math.max(3, Math.round(counts[value] / counts[order[0]] * 100)) + '%'; track.appendChild(fill);
+          button.appendChild(track); button.appendChild(el('span', null, counts[value]));
+          button.addEventListener('click', function () { narrow(field, value); });
+          group.appendChild(button);
+        });
+        box.appendChild(group);
+      });
+      if (groups) side.appendChild(box); else side.appendChild(el('div', 'hb-more', r.rows.length ? 'Nothing left to split on.' : 'Nothing matched yet.'));
+      return;
+    }
+    var b = behind(r);
+    side.appendChild(el('div', 'lx-label hb-cap', 'Evidence · ' + b.events.length + ' event' + (b.events.length === 1 ? '' : 's') + (b.of ? ' behind ' + b.of : '')));
+    var list = el('div', 'hb-src');
+    b.events.slice(0, 5).forEach(function (e, i) {
+      var card = el('div'), top = el('div', 'top');
+      top.appendChild(el('span', 'n', '[' + (i + 1) + ']'));
+      top.appendChild(el('span', null, clock(e._time)));
+      top.appendChild(el('span', 'lx-level lx-level--' + e.level.toLowerCase(), e.level));
+      top.appendChild(el('span', null, e.host + ' · ' + e.status));
+      card.appendChild(top);
+      var msg = el('div', 'msg'); msg.appendChild(marked(e.msg, r.needles)); card.appendChild(msg);
+      list.appendChild(card);
+    });
+    side.appendChild(list);
+  }
+
+  function suggest(r) {
+    var taken = (base(r).match(/\b(host|path|status|user)\s*(?:=|>=|<=|!=|>|<)/g) || []).map(function (t) { return t.replace(/\W+$/, ''); });
+    var free = ['host', 'path', 'status', 'user'].filter(function (f) { return taken.indexOf(f) < 0; })[0];
+    if (r.type === 'events') {
+      if (!r.rows.length || !free) return null;
+      return { label: 'count these by ' + free, query: base(r) + ' | stats count() as events by ' + free + ' | sort - events' };
+    }
+    if (r.type === 'table') return r.by.length ? { label: 'see it over time', query: base(r) + ' | timechart span=5m count()' } : { label: 'read the events', query: base(r) };
+    return free ? { label: 'break it down by ' + free, query: base(r) + ' | stats count() as events by ' + free + ' | sort - events' } : null;
+  }
+
+  function setStatus(r) {
+    var count = function (n, noun) { return n + ' ' + noun + (n === 1 ? '' : 's'); };
+    var parts = r.type === 'events' ? [count(r.rows.length, 'event')] : [count(r.rows.length, r.type === 'chart' ? 'bucket' : 'row'), r.matched + ' of ' + EVENTS.length + ' events matched'];
+    status.textContent = '';
+    parts.forEach(function (p, i) { if (i) status.appendChild(document.createTextNode(' · ')); status.appendChild(i ? document.createTextNode(p) : el('b', null, p)); });
+    status.appendChild(document.createTextNode(' · ' + (state.took < 0.05 ? '<0.1' : state.took.toFixed(1)) + ' ms in your browser · ' + state.scanned.toLocaleString('en-US') + ' events scanned this visit'));
+  }
+  function render(result) {
+    state.result = result;
+    drawMain(result); drawSide(result); setStatus(result);
+    state.next = suggest(result);
+    if (state.next && state.next.query === input.value.trim()) state.next = null;
+    sug.hidden = !state.next;
+    if (state.next) { sugLabel.textContent = state.next.label; sugQuery.textContent = state.next.query; }
+    document.querySelectorAll('[data-ex]').forEach(function (b) { b.setAttribute('aria-pressed', String(EXAMPLES[b.getAttribute('data-ex')] === input.value.trim())); });
+  }
+  function select() {
+    out.querySelectorAll('tbody tr').forEach(function (tr, i) { tr.setAttribute('aria-selected', String(i === state.sel)); });
+    if (state.result) drawSide(state.result);
+  }
+  function setView(view) {
+    state.view = view;
+    views.querySelectorAll('[data-view]').forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-view') === view)); });
+    if (state.result) drawMain(state.result);
+  }
+  function clearResult(text) {
+    state.result = null; state.next = null; sug.hidden = true; side.textContent = ''; status.textContent = text;
+  }
+  function showError(error) {
+    out.textContent = ''; out.classList.remove('is-stale');
+    var box = el('div', 'hb-err');
+    box.appendChild(el('b', null, 'error: ')); box.appendChild(document.createTextNode(error.message + '\n'));
+    if (error.hint) { box.appendChild(el('u', null, ' hint: ')); box.appendChild(document.createTextNode(error.hint)); }
+    out.appendChild(box);
+    clearResult('no result');
+  }
+  function execute(strict, quiet) {
+    var query = input.value.trim();
+    if (!query) { out.textContent = ''; clearResult('type a query, or press 1 to 4'); return; }
+    var result, began = performance.now();
+    try { result = run(query); } catch (error) {
+      if (quiet) return;
+      if (strict) showError(error); else { out.classList.add('is-stale'); state.result = null; state.next = null; sug.hidden = true; status.textContent = 'keep typing · ' + error.message; }
+      return;
+    }
+    state.took = performance.now() - began; state.scanned += EVENTS.length;
+    render(result);
+  }
+  function load(query, push) {
+    if (push) state.stack.push(input.value);
+    input.value = query; state.sel = 0; execute(true);
+  }
+  function move(step) {
+    var r = state.result;
+    if (!r || r.type !== 'table' || !r.by.length || state.view !== 'answer') return false;
+    state.sel = Math.max(0, Math.min(Math.min(r.rows.length, 7) - 1, state.sel + step));
+    select();
+    return true;
+  }
+  function drill() {
+    var r = state.result;
+    if (!r || r.type !== 'table' || !r.by.length || !r.rows[state.sel]) return false;
+    var row = r.rows[state.sel], hasWhere = r.before.some(function (st) { return /^where\b/i.test(st); });
+    var next = hasWhere
+      ? base(r) + ' | where ' + r.by.map(function (f) { return f + ' = ' + (typeof row[f] === 'number' ? row[f] : '"' + row[f] + '"'); }).join(' and ')
+      : base(r) + ' ' + r.by.map(function (f) { var v = String(row[f]); return f + '=' + (/^[\w\-./:]+$/.test(v) ? v : '"' + v + '"'); }).join(' ');
+    load(next, true);
+    return true;
+  }
+  function narrow(field, value) {
+    var stages = splitTop(input.value, '|');
+    stages[0] = stages[0].trim() + ' ' + field + '=' + value + (stages.length > 1 ? ' ' : '');
+    load(stages.join('|').trim(), true);
+  }
+  function accept() { if (!state.next) return false; load(state.next.query, true); return true; }
+  function back() { if (!state.stack.length) return false; input.value = state.stack.pop(); state.sel = 0; execute(true); return true; }
+
+  // ------------------------------------------------------------------ command menu
+  var veil = $('hb-veil'), palette = $('hb-pal'), pq = $('hb-pq'), pl = $('hb-pl'), opener = null, psel = 0, pointerY = 0;
+  function go(id) { return function () { var target = $(id); if (target) target.scrollIntoView({ block: 'start' }); }; }
+  function clip(text, done) { try { navigator.clipboard.writeText(text).then(done, done); } catch (error) { done(); } }
+  function note(text) {
+    var keep = Array.prototype.slice.call(status.childNodes);
+    status.textContent = text;
+    setTimeout(function () { if (status.textContent === text) { status.textContent = ''; keep.forEach(function (n) { status.appendChild(n); }); } }, 1600);
+  }
+  function example(i) {
+    return function () {
+      state.stack = []; setView('answer'); load(EXAMPLES[i]);
+      var active = document.activeElement;
+      if (active && active !== document.body && active.blur) active.blur();
+    };
+  }
+  var ACTIONS = [
+    { label: 'Try: find a phrase', hint: '1', run: example(0) },
+    { label: 'Try: errors by host', hint: '2', run: example(1) },
+    { label: 'Try: slowest paths', hint: '3', run: example(2) },
+    { label: 'Try: errors over time', hint: '4', run: example(3) },
+    { label: 'View: answer', hint: 'the result of the query', run: function () { setView('answer'); } },
+    { label: 'View: parsed events', hint: 'what the answer was computed from', run: function () { setView('parsed'); } },
+    { label: 'View: raw lines', hint: 'as they arrived', run: function () { setView('raw'); } },
+    { label: 'Copy the install command', hint: 'curl … | sh', run: function () { clip('curl -fsSL https://lynxdb.org/install.sh | sh', function () { note('install command copied'); }); } },
+    { label: 'Go to the benchmark', hint: 'section', run: go('proof') },
+    { label: 'Go to the API', hint: 'section', run: go('api') },
+    { label: 'Go to the quick start', hint: 'section', run: go('start') },
+    { label: 'Open the docs', hint: 'docs.lynxdb.org', run: function () { window.open('https://docs.lynxdb.org/', '_blank', 'noopener'); } },
+    { label: 'Open GitHub', hint: 'lynxbase/lynxdb', run: function () { window.open('https://github.com/lynxbase/lynxdb', '_blank', 'noopener'); } }
+  ];
+  function matches() { var q = pq.value.trim().toLowerCase(); return ACTIONS.filter(function (a) { return a.label.toLowerCase().indexOf(q) >= 0; }); }
+  function drawPalette() {
+    var list = matches(); psel = Math.max(0, Math.min(psel, list.length - 1)); pl.textContent = '';
+    if (!list.length) { pl.appendChild(el('div', 'none', 'Nothing matches. Try "install" or "docs".')); return; }
+    list.slice(0, 11).forEach(function (a, i) {
+      var li = el('li'); li.setAttribute('role', 'option'); li.setAttribute('aria-selected', String(i === psel));
+      li.appendChild(el('span', null, a.label)); li.appendChild(el('small', null, a.hint));
+      li.addEventListener('click', function () { closePalette(); a.run(); });
+      pl.appendChild(li);
+    });
+  }
+  function openPalette() {
+    opener = document.activeElement; pq.value = ''; psel = 0; drawPalette();
+    var scrolls = document.documentElement.scrollHeight > window.innerHeight + 4;
+    palette.style.top = Math.max(88, scrolls ? window.scrollY + 96 : pointerY - 180) + 'px';
+    veil.hidden = false; pq.focus();
+  }
+  function closePalette() { veil.hidden = true; if (opener && opener.focus) opener.focus(); }
+
+  // ------------------------------------------------------------------ keys
+  function flash(name) {
+    document.querySelectorAll('[data-key="' + name + '"]').forEach(function (k) { k.classList.add('is-down'); setTimeout(function () { k.classList.remove('is-down'); }, 140); });
+  }
+  document.addEventListener('mousemove', function (event) { pointerY = event.pageY; });
+  document.addEventListener('keydown', function (event) {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); flash('k'); if (veil.hidden) openPalette(); else closePalette(); return; }
+    if (!veil.hidden) {
+      if (event.key === 'Escape') { event.preventDefault(); closePalette(); }
+      else if (event.key === 'ArrowDown') { event.preventDefault(); psel = Math.min(psel + 1, 10); drawPalette(); }
+      else if (event.key === 'ArrowUp') { event.preventDefault(); psel--; drawPalette(); }
+      else if (event.key === 'Enter') { event.preventDefault(); var a = matches()[psel]; if (a) { closePalette(); a.run(); } }
+      return;
+    }
+    var typing = event.target === input, here = typing || event.target === document.body;
+    var free = typing || !/^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName);
+    if (event.key === 'ArrowDown' && free) { if (move(1)) { event.preventDefault(); flash('down'); } }
+    else if (event.key === 'ArrowUp' && free) { if (move(-1)) { event.preventDefault(); flash('up'); } }
+    else if (event.key === 'Enter' && here) { event.preventDefault(); flash('enter'); if (state.view !== 'answer' || !drill()) execute(true); }
+    else if (event.key === 'Tab' && typing && !event.shiftKey && state.next) { event.preventDefault(); flash('tab'); accept(); }
+    else if (event.key === 'Escape') { flash('esc'); if (!back() && typing) input.blur(); }
+    else if (!typing && !event.metaKey && !event.ctrlKey && !event.altKey && !/^(INPUT|TEXTAREA)$/.test(event.target.tagName)) {
+      if (event.key === '/') { event.preventDefault(); flash('slash'); input.focus(); input.select(); }
+      else if (/^[1-4]$/.test(event.key)) { flash(event.key); example(Number(event.key) - 1)(); }
+    }
+  });
+  pq.addEventListener('input', function () { psel = 0; drawPalette(); });
+  veil.addEventListener('mousedown', function (event) { if (event.target === veil) closePalette(); });
+  $('hb-open').addEventListener('click', openPalette);
+  input.addEventListener('input', function () { state.sel = 0; execute(false); });
+  sug.addEventListener('click', function () { accept(); input.focus(); });
+  views.addEventListener('click', function (event) { var b = event.target.closest('[data-view]'); if (b) setView(b.getAttribute('data-view')); });
+  document.querySelectorAll('[data-ex]').forEach(function (b) { b.addEventListener('click', example(Number(b.getAttribute('data-ex')))); });
+
+  // tabs and copy buttons
+  document.querySelectorAll('[data-tabs]').forEach(function (list) {
+    var group = list.getAttribute('data-tabs');
+    list.addEventListener('click', function (event) {
+      var tab = event.target.closest('[data-tab]');
+      if (!tab) return;
+      list.querySelectorAll('[data-tab]').forEach(function (t) { t.setAttribute('aria-selected', String(t === tab)); });
+      document.querySelectorAll('[data-pane^="' + group + ':"]').forEach(function (pane) { pane.hidden = pane.getAttribute('data-pane') !== group + ':' + tab.getAttribute('data-tab'); });
+    });
+  });
+  function copier(button, label, text) {
+    button.addEventListener('click', function () { clip(text(), function () { label.textContent = 'Copied'; setTimeout(function () { label.textContent = 'Copy'; }, 1200); }); });
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (button) {
+    copier(button, button, function () { return button.parentElement.querySelector('pre').textContent.replace(/^\$\s*/, ''); });
+  });
+  document.querySelectorAll('[data-copy-text]').forEach(function (button) {
+    copier(button, button.querySelector('span'), function () { return button.getAttribute('data-copy-text'); });
+  });
+
+  // ------------------------------------------------------------------ first run: the query types itself once
+  (function intro() {
+    var text = EXAMPLES[1], i = 0, timer = null, live = true;
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function finish() {
+      if (!live) return;
+      live = false; clearTimeout(timer);
+      document.removeEventListener('keydown', finish, true); document.removeEventListener('pointerdown', finish, true);
+      if (input.value !== text) load(text);
+    }
+    if (still) { live = false; load(text); return; }
+    status.textContent = 'type a query, or press 1 to 4';
+    document.addEventListener('keydown', finish, true); document.addEventListener('pointerdown', finish, true);
+    function step() {
+      if (!live) return;
+      i += 1; input.value = text.slice(0, i);
+      if (i >= text.length) { finish(); execute(true); return; }
+      if (text.charAt(i - 1) === ' ') execute(false, true);
+      timer = setTimeout(step, text.charAt(i - 1) === '|' ? 150 : 16);
+    }
+    timer = setTimeout(step, 500);
+  })();
+
+  // ------------------------------------------------------------------ the ingest and search figure: loops only while it is on screen
+  (function pipe() {
+    var root = $('hb-pipe');
+    if (!root || !window.IntersectionObserver) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var ask = $('hb-pipe-q'), via = $('hb-pipe-via'), tally = $('hb-pipe-n');
+    var QUERY = ask.textContent, VIA = ['lynxdb query', 'POST /api/v1/query', 'POST /api/v1/query/stream'], TOTAL = root.querySelectorAll('.grid i').length;
+    var blocks = Array.prototype.slice.call(root.querySelectorAll('.grid i'));
+    var column = function (b) { return Number(b.style.getPropertyValue('--c')); };
+    var timers = [], seen = false, turn = 0;
+    function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+    function phase(name) { root.setAttribute('data-phase', name); }
+    function count(upTo) {
+      var read = 0, all = 0;
+      blocks.forEach(function (b) { if (column(b) <= upTo) { all += 1; if (b.classList.contains('hit')) read += 1; } });
+      tally.textContent = '';
+      tally.appendChild(el('b', null, read + ' of ' + all));
+      tally.appendChild(document.createTextNode(' blocks read \u00b7 ' + (all - read) + ' skipped'));
+    }
+    function type(i) {
+      ask.textContent = QUERY.slice(0, i);
+      if (i < QUERY.length) later(function () { type(i + 1); }, QUERY.charAt(i) === '|' ? 160 : 26);
+      else later(scan, 380);
+    }
+    function scan() {
+      phase('scan');
+      for (var c = 0; c < 20; c++) (function (c) { later(function () { count(c); }, c * 70 + 60); })(c);
+      later(function () { phase('answer'); later(loop, 3200); }, 1750);
+    }
+    function loop() {
+      timers = [];
+      ask.textContent = ''; via.textContent = VIA[turn++ % VIA.length];
+      tally.textContent = 'new blocks landing in today\u2026';
+      phase('ingest');
+      later(function () { phase('ask'); tally.textContent = TOTAL + ' blocks on disk'; type(0); }, 2700);
+    }
+    function start() { if (root.classList.contains('is-live')) return; root.classList.add('is-live'); loop(); }
+    function stop() {
+      timers.forEach(clearTimeout); timers = [];
+      root.classList.remove('is-live'); phase('answer');
+      ask.textContent = QUERY; count(19);
+    }
+    new IntersectionObserver(function (entries) {
+      seen = entries[0].isIntersecting;
+      if (seen && !document.hidden) start(); else stop();
+    }, { threshold: 0.35 }).observe(root);
+    document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else if (seen) start(); });
+  })();
+})();
+
+</script>
+</body>
+</html>
