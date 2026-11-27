@@ -49,3 +49,37 @@ export function toc(html) {
 export const feedHtml = html => html.replace(/<img\b[^>]*data-theme-image="dark"[^>]*>/g, '');
 
 export const others = (posts, url) => posts.filter(p => p.url !== url).slice(0, 3);
+
+export function blogSchema(site, page, title, description, image, authors = [], tags = []) {
+  const url = `${site.url}/blog${page.url}`;
+  const publisher = { '@id': `${site.url}/#organization` };
+  const schema = {
+    '@context': 'https://schema.org',
+    url,
+    inLanguage: 'en',
+    publisher,
+  };
+  if (page.url === '/') {
+    Object.assign(schema, {
+      '@type': 'Blog',
+      '@id': `${url}#blog`,
+      name: title,
+      description: site.description,
+      isPartOf: { '@id': `${site.url}/#website` },
+    });
+  } else {
+    Object.assign(schema, {
+      '@type': 'BlogPosting',
+      '@id': `${url}#article`,
+      mainEntityOfPage: url,
+      headline: title,
+      description,
+      datePublished: isoDate(page.date),
+      author: authors.map(name => ({ '@type': site.authors?.[name]?.schemaType ?? 'Person', name })),
+      keywords: tags,
+      isPartOf: { '@id': `${site.url}/blog/#blog` },
+    });
+    if (image) schema.image = new URL(image, url).href;
+  }
+  return JSON.stringify(schema).replaceAll('<', '\\u003c');
+}

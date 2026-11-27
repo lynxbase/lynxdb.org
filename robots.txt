@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /blog-src/
+Disallow: /design-system/
+
+# Search crawlers use the default policy. Keep the existing opt-out for these AI agents.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+Disallow: /
+
+Sitemap: https://lynxdb.org/sitemap.xml

@@ -4,12 +4,15 @@ import yaml from 'js-yaml';
 import pluginRss from '@11ty/eleventy-plugin-rss';
 import { createMarkdown } from './_lib/markdown.js';
 import * as filters from './_lib/filters.js';
+import { writeDiscovery } from './_lib/discovery.js';
 
 export default function (config) {
   config.setLibrary('md', createMarkdown());
   config.addDataExtension('yml', contents => yaml.load(contents));
   config.addPlugin(pluginRss);
   for (const [name, fn] of Object.entries(filters)) config.addFilter(name, fn);
+  config.addWatchTarget('index.html');
+  config.on('eleventy.after', writeDiscovery);
 
   config.addCollection('posts', api => api.getFilteredByGlob('blog-src/_posts/*.md').sort((a, b) => b.date - a.date));
 

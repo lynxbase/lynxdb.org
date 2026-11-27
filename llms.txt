@@ -1,0 +1,24 @@
+# LynxDB
+
+> Query log files from the shell or keep logs on a server with a Web UI. One binary for Linux, macOS and Windows, with PPL in both modes.
+
+## Website
+
+- [LynxDB: a log database you can pipe into](https://lynxdb.org/index.md): Query log files from the shell or keep logs on a server with a Web UI. One binary for Linux, macOS and Windows, with PPL in both modes.
+- [LynxDB blog](https://lynxdb.org/blog/index.md): Querying logs with LynxDB, how its engine reads them, and what each release changes.
+
+## Documentation and source
+
+- [Documentation](https://docs.lynxdb.org/): LynxDB reference and guides.
+- [Quick start](https://docs.lynxdb.org/docs/getting-started/quickstart/): Run a local query or start a server.
+- [PPL reference](https://docs.lynxdb.org/docs/ppl/overview/): Piped Processing Language syntax and examples.
+- [Source code](https://github.com/lynxbase/lynxdb): LynxDB source and release history.
+
+## Blog posts
+
+- [Five questions for an access log, answered from the shell](https://lynxdb.org/blog/querying-an-access-log/index.md): lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.
+
+## Optional
+
+- [Full website and blog text](https://lynxdb.org/llms-full.txt): The home page, blog index and published posts in one Markdown file.
+- [Blog feed](https://lynxdb.org/blog/feed.xml): Atom feed of published posts.
