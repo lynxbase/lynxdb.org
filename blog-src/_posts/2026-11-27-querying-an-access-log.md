@@ -2,7 +2,7 @@
 layout: post
 title: "Five questions for an access log, answered from the shell"
 authors:
-  - LynxDB team
+  - Evgenii Orlov
 thumb: thumb.png
 image: thumb.png
 excerpt: "lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened."

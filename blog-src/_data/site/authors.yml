@@ -4,3 +4,7 @@
 LynxDB team:
   picture: img/lynxdb-appicon-moss.svg
   schemaType: Organization
+
+Evgenii Orlov:
+  picture: img/eorlov.jpg
+  schemaType: Person
