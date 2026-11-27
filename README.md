@@ -24,6 +24,37 @@ posts are converted from their HTML. Each page links its copy with
 serve them as UTF-8 `text/markdown`, as `mise run serve` does. The sitemap covers
 `lynxdb.org`; documentation has its own [sitemap](https://docs.lynxdb.org/sitemap.xml).
 
+## AI agents read the blog as Markdown
+
+A blog page asked for by an AI agent is answered with its Markdown copy at the page's own address:
+`/blog/` with `/blog.md`, `/blog/slug/` with `/blog/slug.md`. A browser, a search engine (Googlebot,
+Bingbot, Applebot) and a link preview get the HTML, as before. The Worker's script
+(`worker/index.js`) runs for `/blog` and `/blog/*` only; every other address is served from the
+assets without it.
+
+A request gets Markdown when any of these holds (`worker/agents.js`):
+
+- its `Accept` header ranks `text/markdown` at least as high as `text/html`;
+- Cloudflare has verified it as a bot of the AI Crawler, AI Assistant or AI Search category;
+- its `User-Agent` names one of about 140 AI crawlers and agents: training crawlers (GPTBot,
+  ClaudeBot, CCBot, Bytespider), AI search (OAI-SearchBot, Claude-SearchBot, PerplexityBot,
+  meta-webindexer), assistants fetching a page for a user (ChatGPT-User, Claude-User,
+  Perplexity-User, MistralAI-User, Google's URL context), coding agents (Claude Code, Gemini CLI,
+  Codex, Cursor, opencode) and data providers for agents (Exa, Tavily, Firecrawl, Diffbot).
+
+The list comes from [ai.robots.txt](https://github.com/ai-robots-txt/ai.robots.txt) and the
+operators' pages; names generic enough to occur in other clients are left out. A Markdown answer
+carries `Content-Type: text/markdown; charset=utf-8`, `Vary: Accept, User-Agent` and a `Link` to the
+HTML page as canonical, and Workers Logs record the page and the agent. To see what an agent reads:
+
+```sh
+curl -A 'GPTBot/1.2' https://lynxdb.org/blog/
+curl -H 'Accept: text/markdown' https://lynxdb.org/blog/lynxdb-on-jsonbench/
+```
+
+`mise run test` tests the matching and the answers; a deploy runs it, and `mise run smoke` asks a
+blog page as GPTBot, Claude-User, Chrome and Googlebot.
+
 ## Deploy
 
 The site is a Cloudflare Worker with static assets and no script (`wrangler.jsonc`). Pushing a tag

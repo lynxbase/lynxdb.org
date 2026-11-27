@@ -1,6 +1,6 @@
 #!/bin/sh
 # Stages what the host serves into dist/: the files of a commit (HEAD by default) without the blog's
-# sources, the brand system, the tools and the build's own files. Only committed files go, so a
+# sources, the brand system, the tools, the Worker's script and the build's own files. Only committed files go, so a
 # deployment holds exactly what the commit holds; mise run check proves that is the built site.
 set -eu
 
@@ -13,7 +13,7 @@ mkdir "$out"
 git -C "$root" archive --format=tar "$rev" -- . \
 	':(exclude)blog-src' ':(exclude)design-system' ':(exclude)tools' ':(exclude).githooks' \
 	':(exclude).github' ':(exclude).gitignore' ':(exclude)package.json' ':(exclude)package-lock.json' \
-	':(exclude)mise.toml' ':(exclude)mise.lock' ':(exclude)wrangler.jsonc' ':(exclude)README.md' \
+	':(exclude)mise.toml' ':(exclude)mise.lock' ':(exclude)wrangler.jsonc' ':(exclude)worker' ':(exclude)README.md' \
 	':(exclude)LICENSE' |
 	tar -x -C "$out"
 
