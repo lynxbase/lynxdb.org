@@ -2,6 +2,8 @@
 
 > Query log files from the shell or keep logs on a server with a Web UI. One binary for Linux, macOS and Windows, with PPL in both modes.
 
+Every page of this site is also Markdown: at its address with `.md` in place of the closing slash (`/blog/slug/` at `/blog/slug.md`, `/blog/` at `/blog.md`, the home page at `/index.md`), or at the page's own address when the request sends `Accept: text/markdown`. The links below go to the Markdown.
+
 ## Website
 
 - [LynxDB: a log database you can pipe into](https://lynxdb.org/index.md): Query log files from the shell or keep logs on a server with a Web UI. One binary for Linux, macOS and Windows, with PPL in both modes.
