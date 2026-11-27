@@ -1,0 +1,19 @@
+{
+  "name": "lynxdb-org",
+  "private": true,
+  "type": "module",
+  "description": "The lynxdb.org website. The landing page is static; the blog is built from blog-src/ into blog/.",
+  "scripts": {
+    "build:blog": "eleventy --config=blog-src/eleventy.config.js",
+    "watch:blog": "eleventy --config=blog-src/eleventy.config.js --watch"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "3.1.8",
+    "@11ty/eleventy-plugin-rss": "3.1.0",
+    "js-yaml": "4.1.1",
+    "markdown-it": "14.1.0",
+    "markdown-it-anchor": "9.2.0",
+    "markdown-it-footnote": "4.0.0",
+    "prismjs": "1.30.0"
+  }
+}

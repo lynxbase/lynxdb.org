@@ -1,0 +1,6 @@
+{#- The authors of `post`: each a 24px avatar and the name, as in DuckDB's post header -#}
+<span class="byline">
+  {%- for name in post.data.authors %}
+  <span class="byline__author">{% if site.authors[name].picture %}<img class="avatar" src="{{ toSite }}{{ site.authors[name].picture }}" alt="" width="24" height="24">{% endif %}{{ name }}</span>
+  {%- endfor %}
+</span>

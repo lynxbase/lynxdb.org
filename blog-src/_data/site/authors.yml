@@ -1,0 +1,5 @@
+# site.authors: maps an author name, exactly as written in a post's `authors` list, to its avatar.
+# picture is a path from the site root (the landing's folder), shown as a 24px circle.
+
+LynxDB team:
+  picture: img/lynxdb-appicon-moss.svg

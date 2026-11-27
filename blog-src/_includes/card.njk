@@ -1,0 +1,13 @@
+{#- One post in a list: its picture, title, excerpt, date, reading time and authors. The title's link
+    covers the whole card; `toBlog` is the path from the listing page to the blog's root -#}
+{%- set href = toBlog + post.page.fileSlug + '/' -%}
+<article class="card-post{% if lead %} card-post--lead{% endif %}">
+  {%- if post.data.thumb %}
+  <div class="card-post__media"><img src="{{ href }}{{ post.data.thumb }}" alt="" width="1200" height="630" loading="{{ 'eager' if lead else 'lazy' }}" decoding="async"></div>
+  {%- endif %}
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="{{ href }}">{{ post.data.title }}</a></h2>
+    <p class="card-post__excerpt">{{ post.data.excerpt }}</p>
+    <p class="post-meta">{% include "byline.njk" %}<span class="post-meta__sep" aria-hidden="true"></span><time datetime="{{ post.date | isoDate }}">{{ post.date | readableDate }}</time><span class="post-meta__sep" aria-hidden="true"></span><span>{{ post.data.readingTime }}</span></p>
+  </div>
+</article>

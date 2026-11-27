@@ -1,0 +1,41 @@
+{#- The landing's bar (index.html), with its section links pointing back at the landing and Blog marked current -#}
+<header class="nav nav--centre">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <a class="nav__logo brand" href="{{ toSite }}"><img class="brand__mark" data-mark src="{{ toSite }}img/lynxdb-mark-faceted-on-light.svg" alt="" width="22" height="30">LynxDB</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="{{ toSite }}#server">Server</a></div>
+      <div class="nav__item"><a class="nav__link" href="{{ toSite }}#engine">Engine</a></div>
+      <div class="nav__item"><a class="nav__link" href="{{ toSite }}#benchmark">Benchmark</a></div>
+      <div class="nav__item"><a class="nav__link" href="{{ toSite }}#ingest">Ingest</a></div>
+      <div class="nav__item">
+        <a class="nav__link" href="https://docs.lynxdb.org/">Docs <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="nav__menu">
+          <div class="wrap grid">
+            <div class="menu-col span-3">
+              <p class="t-label">Start</p>
+              <a href="https://docs.lynxdb.org/docs/getting-started/quickstart">Quick start<span>Run a first query</span></a>
+              <a href="https://docs.lynxdb.org/docs/getting-started/pipe-mode">Pipe mode<span>Query files without a server</span></a>
+              <a href="https://docs.lynxdb.org/docs/getting-started/server-mode">Server mode<span>Keep logs on disk</span></a>
+            </div>
+            <div class="menu-col span-3">
+              <p class="t-label">Reference</p>
+              <a href="https://docs.lynxdb.org/docs/ppl/overview">PPL guide<span>Commands and functions</span></a>
+              <a href="https://docs.lynxdb.org/docs/guides/ingest-data">Ingest data<span>Shippers, API and syslog</span></a>
+              <a href="https://docs.lynxdb.org/docs/api/overview">REST API<span>Query and ingest over HTTP</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav__item"><a class="nav__link" href="{{ toBlog }}" aria-current="{{ 'page' if page.url == '/' else 'true' }}">Blog</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="nav__link" href="https://github.com/lynxbase/lynxdb">GitHub</a>
+      <a class="btn btn--primary" href="{{ toSite }}#install">Install LynxDB</a>
+      <button class="theme-btn" type="button" aria-pressed="false" aria-label="Dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="theme-btn__moon" d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1Z"/><g class="theme-btn__sun"><circle cx="8" cy="8" r="2.9"/><path d="M8 1.6v1.3M8 13.1v1.3M1.6 8h1.3M13.1 8h1.3M3.5 3.5l.9.9M11.6 11.6l.9.9M3.5 12.5l.9-.9M11.6 4.4l.9-.9"/></g></svg><span class="theme-btn__label" aria-hidden="true"><span class="theme-btn__to-dark">Dark theme</span><span class="theme-btn__to-light">Light theme</span></span></button>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
