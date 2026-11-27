@@ -1,7 +1,7 @@
 // node --test worker/ (mise run test): who gets Markdown, and what the Worker answers them
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import worker, { markdownPath } from './index.js';
+import worker, { pageOf } from './index.js';
 import { agentOf, markdownReason } from './agents.js';
 
 const UA = {
@@ -44,18 +44,20 @@ test('an Accept header that ranks Markdown first asks for it', () => {
   assert.equal(markdownReason(ask({ 'user-agent': UA.googlebot }, { verifiedBotCategory: 'Search Engine Crawler' })), null);
 });
 
-test('blog pages map to their Markdown copies, files and other pages do not', () => {
-  assert.equal(markdownPath('/blog'), '/blog.md');
-  assert.equal(markdownPath('/blog/'), '/blog.md');
-  assert.equal(markdownPath('/blog/lynxdb-on-jsonbench/'), '/blog/lynxdb-on-jsonbench.md');
-  assert.equal(markdownPath('/blog/lynxdb-on-jsonbench'), '/blog/lynxdb-on-jsonbench.md');
-  for (const path of ['/', '/blog/feed.xml', '/blog/lynxdb-on-jsonbench.md', '/blog/lynxdb-on-jsonbench/thumb.png', '/blog/a/b/']) {
-    assert.equal(markdownPath(path), null, path);
+test('the home page and blog pages map to their Markdown copies, files do not', () => {
+  assert.deepEqual(pageOf('/'), { page: '/', markdown: '/index.md' });
+  assert.deepEqual(pageOf('/blog'), { page: '/blog/', markdown: '/blog.md' });
+  assert.deepEqual(pageOf('/blog/'), { page: '/blog/', markdown: '/blog.md' });
+  assert.deepEqual(pageOf('/blog/lynxdb-on-jsonbench'), { page: '/blog/lynxdb-on-jsonbench/', markdown: '/blog/lynxdb-on-jsonbench.md' });
+  for (const path of ['/index.html', '/site.css', '/blog/feed.xml', '/blog/lynxdb-on-jsonbench.md', '/blog/lynxdb-on-jsonbench/thumb.png', '/blog/a/b/']) {
+    assert.equal(pageOf(path), null, path);
   }
 });
 
 // the assets: every blog page and its Markdown copy, the rest 404
 const FILES = {
+  '/': ['<!doctype html><title>LynxDB</title>', 'text/html'],
+  '/index.md': ['# LynxDB', 'text/markdown'],
   '/blog/': ['<!doctype html><title>Blog</title>', 'text/html'],
   '/blog.md': ['# LynxDB blog', 'text/markdown'],
   '/blog/lynxdb-on-jsonbench/': ['<!doctype html><title>Post</title>', 'text/html'],
@@ -84,14 +86,23 @@ test('an AI agent reads a blog page as Markdown at the page address', async () =
   const list = await get('/blog/', { 'user-agent': UA.claudeUser });
   assert.equal(await list.text(), '# LynxDB blog');
   assert.equal(list.headers.get('link'), '<https://lynxdb.org/blog/>; rel="canonical"');
+
+  const home = await get('/', { accept: 'text/markdown' });
+  assert.equal(home.headers.get('content-type'), 'text/markdown; charset=utf-8');
+  assert.equal(home.headers.get('link'), '<https://lynxdb.org/>; rel="canonical"');
+  assert.equal(await home.text(), '# LynxDB');
 });
 
-test('browsers and search engines read the HTML, which varies on the same headers', async () => {
+test('browsers and search engines read the HTML, which names its Markdown copy and llms.txt', async () => {
   for (const ua of [UA.chrome, UA.googlebot, UA.bingbot]) {
     const response = await get('/blog/lynxdb-on-jsonbench/', { 'user-agent': ua });
     assert.equal(response.headers.get('content-type'), 'text/html');
     assert.equal(response.headers.get('vary'), 'Accept, User-Agent');
+    assert.equal(response.headers.get('link'), '<https://lynxdb.org/blog/lynxdb-on-jsonbench.md>; rel="alternate"; type="text/markdown", <https://lynxdb.org/llms.txt>; rel="describedby"');
   }
+  const home = await get('/', { 'user-agent': UA.chrome });
+  assert.equal(home.headers.get('content-type'), 'text/html');
+  assert.match(home.headers.get('link'), /^<https:\/\/lynxdb\.org\/index\.md>; rel="alternate"/);
 });
 
 test('files, pages without a copy and other methods pass through untouched', async () => {

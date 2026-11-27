@@ -203,8 +203,12 @@ async function postMarkdown(inputPath, page) {
       }
       return fence ? line : absoluteLinks(line, page.canonical);
     });
-  return [`# ${data.title}`, '', byline.filter(Boolean).join(' · '), '', data.excerpt ?? '', '', lines.join('\n').trim()]
+  const content = [`# ${data.title}`, '', byline.filter(Boolean).join(' · '), '', data.excerpt ?? '', '', lines.join('\n').trim()]
     .join('\n').replace(/\n{3,}/g, '\n\n');
+  // the sitemap's lastmod: the front matter's updated (a date), else the date in the file name
+  const updated = data.updated instanceof Date ? data.updated : data.updated ? new Date(data.updated) : null;
+  const lastmod = (updated ?? new Date(Date.UTC(year, month - 1, day))).toISOString().slice(0, 10);
+  return { content, lastmod };
 }
 
 const xmlText = text => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
@@ -223,13 +227,19 @@ export async function writeDiscovery({ directories, results, outputMode, increme
     .sort((a, b) => b.inputPath.localeCompare(a.inputPath))
     .map(result => ({ result, page: readPage(result.content, result.outputPath, output) }));
   const posts = await Promise.all(postResults.map(async ({ result, page }) =>
-    ({ ...page, content: await postMarkdown(result.inputPath, page) })));
+    ({ ...page, ...(await postMarkdown(result.inputPath, page)) })));
+  // the list of posts changes when a post does; the home page has no date of its own and goes without
+  blog.lastmod = posts.map(post => post.lastmod).sort().at(-1);
   const pages = [home, blog, ...posts];
   const entry = (title, url, description) => `- ${markdownLink(title, url)}: ${description}`;
   const index = [
     '# LynxDB',
     '',
     `> ${home.description}`,
+    '',
+    'Every page of this site is also Markdown: at its address with `.md` in place of the closing slash ' +
+      '(`/blog/slug/` at `/blog/slug.md`, `/blog/` at `/blog.md`, the home page at `/index.md`), or at the ' +
+      "page's own address when the request sends `Accept: text/markdown`. The links below go to the Markdown.",
     '',
     '## Website',
     '',
@@ -262,7 +272,7 @@ export async function writeDiscovery({ directories, results, outputMode, increme
   const sitemap = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...pages.map(page => `  <url><loc>${xmlText(page.canonical)}</loc></url>`),
+    ...pages.map(page => `  <url><loc>${xmlText(page.canonical)}</loc>${page.lastmod ? `<lastmod>${page.lastmod}</lastmod>` : ''}</url>`),
     '</urlset>',
     '',
   ].join('\n');
