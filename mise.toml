@@ -41,6 +41,20 @@ description = "Build a commit (HEAD by default) in a temporary worktree; fail if
 depends = ["install"]
 run = "tools/check-site.sh"
 
+[tasks.dist]
+description = "Stage the files the host serves into dist/, from a commit (HEAD by default)"
+run = "tools/dist.sh"
+
+[tasks.deploy]
+description = "Deploy dist/ from this machine with the Wrangler login here; tags deploy through CI"
+depends = ["dist"]
+# the same Wrangler as .github/workflows/deploy.yml
+run = "npx --yes wrangler@4.168.0 deploy"
+
+[tasks.smoke]
+description = "Fetch a deployment, given its base URL, and check every page and file it should serve"
+run = "tools/smoke.sh"
+
 [tasks.hooks]
 description = "Run the check on every commit this clone pushes"
 run = "git config core.hooksPath .githooks"

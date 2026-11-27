@@ -1,0 +1,84 @@
+name: Deploy
+
+# Publishes lynxdb.org, the landing page and the blog, to the Cloudflare Worker lynxdb-org
+# (wrangler.jsonc: static assets, no script) when a tag is pushed, and again from the Actions tab
+# for the tag chosen there.
+#
+# The commit must be on main and hold the site its sources build: the job builds it again rather
+# than trusting the push hook (mise run check), stages the files the host serves into dist/
+# (mise run dist), deploys them with Wrangler, and then fetches every page of the new deployment,
+# its Markdown copy, the files for crawlers and agents, and addresses that must answer 404
+# (mise run smoke). It needs the secrets CF_ACCOUNT_ID and CF_API_TOKEN (Workers Scripts: Edit).
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://lynxdb.org/
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check that the commit is on main
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "::error title=Not on main::$GITHUB_REF_NAME is ${GITHUB_SHA:0:12}, which main does not contain. Tag a commit of main to deploy it."
+            exit 1
+          fi
+
+      # No cache: a deploy installs from mise.lock each time rather than restore what another run saved
+      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+        with:
+          version: 2026.11.12
+          cache: false
+
+      - name: Build the site again and compare it with the commit
+        run: mise run check
+      - name: Stage the files the host serves
+        run: mise run dist
+
+      - name: Deploy to Cloudflare
+        id: deploy
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          wranglerVersion: "4.168.0"
+          command: deploy
+
+      - name: Check the new deployment
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: mise run smoke "$DEPLOYMENT_URL"
+
+      - name: Write the summary
+        if: always()
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          OUTCOME: ${{ job.status }}
+        run: |
+          {
+            echo "### lynxdb.org: $OUTCOME"
+            echo
+            echo "$GITHUB_REF_NAME at \`${GITHUB_SHA:0:12}\`, Cloudflare Worker \`lynxdb-org\`."
+            echo
+            if [ -n "$DEPLOYMENT_URL" ]; then echo "- This deployment: $DEPLOYMENT_URL"; fi
+            echo "- Production: https://lynxdb.org/"
+          } >> "$GITHUB_STEP_SUMMARY"
