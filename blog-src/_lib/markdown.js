@@ -24,7 +24,6 @@ Prism.languages.ppl = {
   punctuation: /[(),]/,
 };
 
-const LABELS = { ppl: 'PPL', shell: 'Shell', sh: 'Shell', bash: 'Shell', console: 'Shell', json: 'JSON', yaml: 'YAML', yml: 'YAML', sql: 'SQL', go: 'Go', python: 'Python', text: 'Text' };
 const TERMINAL = new Set(['console', 'shell', 'sh', 'bash']);
 const CALLOUTS = { Note: 'note', Tip: 'tip', Warning: 'warning' };
 
@@ -93,13 +92,12 @@ function fence(tokens, idx) {
   const info = tokens[idx].info.trim().split(/\s+/)[0].toLowerCase();
   const lang = info || 'text';
   const code = tokens[idx].content.replace(/\n$/, '');
-  const label = LABELS[lang] || lang.toUpperCase();
   const dark = TERMINAL.has(lang);
   const body = dark ? terminal(code, lang)
     : Prism.languages[lang] ? Prism.highlight(code, Prism.languages[lang], lang) : esc(code);
   const dots = dark ? '<svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg>' : '';
   return `<figure class="code${dark ? ' code--term' : ''}" data-lang="${esc(lang)}">`
-    + `<figcaption class="code__bar">${dots}<span class="code__lang">${esc(label)}</span></figcaption>`
+    + `<div class="code__bar">${dots}</div>`
     + `<pre class="code__pre" tabindex="0"><code class="language-${esc(lang)}">${body}</code></pre></figure>\n`;
 }
 

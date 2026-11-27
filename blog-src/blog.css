@@ -193,9 +193,8 @@ html:not([data-motion="off"]) .prose :is(li, td, figcaption, .footnotes__list) a
 
 /* ---------------------------------------------------------------- code: a sheet for PPL and data, a terminal for the shell */
 .prose > .code { margin-top: 28px; margin-bottom: 8px; }
-.code { overflow: hidden; border-radius: var(--r-md); background: var(--lx-200); color: var(--lx-950); }
+.code { position: relative; overflow: hidden; border-radius: var(--r-md); background: var(--lx-200); color: var(--lx-950); }
 .code__bar { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 4px 0 16px; }
-.code__lang { color: var(--lx-600); font-size: 12px; font-weight: 500; letter-spacing: .01em; }
 .code__dots { width: 34px; height: 8px; fill: #333833; flex: none; }
 .code__copy { display: inline-grid; place-items: center; width: 32px; height: 32px; margin-left: auto; padding: 0; border: 0; border-radius: 50%; background: transparent;
               color: var(--lx-600); cursor: pointer; transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease); }
@@ -209,6 +208,9 @@ html:not([data-motion="off"]) .prose :is(li, td, figcaption, .footnotes__list) a
 .code__pre { margin: 0; padding: 2px 16px 16px; overflow-x: auto; font: 400 13px/21px var(--font-mono); white-space: pre; tab-size: 2;
              scrollbar-width: thin; scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent; }
 .code__pre:focus-visible { outline-offset: -2px; }
+/* a code sheet has no bar: its copy button sits in the top right corner, the code clear of it */
+.code:not(.code--term) .code__bar { position: absolute; top: 6px; right: 0; height: auto; padding: 0 6px; }
+.code:not(.code--term) .code__pre { padding: 14px 52px 16px 16px; }
 .code .token.keyword { color: var(--lx-moss-800); font-weight: 500; }
 .code .token.function { color: var(--lx-func); }
 .code .token.string { color: var(--bl-string); }
@@ -219,7 +221,6 @@ html:not([data-motion="off"]) .prose :is(li, td, figcaption, .footnotes__list) a
 .code--term { background: var(--bl-term); box-shadow: inset 0 0 0 1px var(--bl-term-line); color: #e4e7e2; }
 .code--term .code__bar { border-bottom: 1px solid rgb(255 255 255 / .07); }
 .code--term .code__pre { padding-top: 14px; }
-.code--term .code__lang { color: #858b84; }
 .code--term .code__copy { color: #858b84; }
 .code--term .code__copy:hover { background: rgb(241 243 239 / .08); color: #fdfefc; }
 .code--term .code__copy.is-done { color: #b5e280; }
