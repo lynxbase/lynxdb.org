@@ -12,11 +12,12 @@ export const readableDate = d => `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} $
 export const isoDate = d => d.toISOString().slice(0, 10);
 
 // prose at 200 words a minute, counted in the post's Markdown; code blocks are left out of the count,
-// as DuckDB's filter does
+// as DuckDB's filter does, and so are figures drawn in HTML
 export function readingTime(markdown) {
   const prose = markdown
     .replace(/^---\n[\s\S]*?\n---\n/, ' ')
     .replace(/^(`{3,}|~{3,})[^\n]*\n[\s\S]*?\n\1[ \t]*$/gm, ' ')
+    .replace(/<figure\b[\s\S]*?<\/figure>/g, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
     .replace(/\]\([^)]*\)/g, ' ')
