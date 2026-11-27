@@ -1,0 +1,6 @@
+# Report a vulnerability in LynxDB privately, through a GitHub security advisory.
+Contact: https://github.com/lynxbase/lynxdb/security/advisories/new
+Policy: https://github.com/lynxbase/lynxdb/blob/main/SECURITY.md
+Preferred-Languages: en
+Canonical: https://lynxdb.org/.well-known/security.txt
+Expires: 2027-11-27T00:00:00.000Z
