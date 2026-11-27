@@ -1,0 +1,4 @@
+# The site the blog is part of. url has no trailing slash; the blog is served at url + /blog/.
+title: LynxDB blog
+url: https://lynxdb.org
+description: Querying logs with LynxDB, how its engine reads them, and what each release changes.

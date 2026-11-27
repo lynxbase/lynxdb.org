@@ -2,11 +2,12 @@
   What the hero's console prints: LynxDB's JSONBench run on 1,000,000,000 Bluesky events
   (github.com/lynxbase/ClickBench/tree/main/json/lynxdb, results/20261120: m6i.8xlarge, commit
   ad9d7e3b, 20 November 2026). The events, files, load and merge times and sizes come from that run
-  and its README (the JSON sizes from JSONBench's README); the query times are the ones JSONBench's
-  page shows for it (README.md's chart), the same as in the page's benchmark section.
-  The benchmark publishes no answers, so the result rows and the block counts are estimates: the
-  same queries run with lynxdb 26.11.1.896 on the benchmark's first file (1,000,000 events, 75 blocks),
-  times 1,000. The first posters (Q4) are that file's, the earliest events of the dataset.
+  and its README (the JSON sizes from JSONBench's README); the query times are its hot times, the
+  faster of runs 2 and 3 of its result file, as in the page's benchmark section and the blog post.
+  The result rows and the block counts come from the measurement run of the same design on main
+  657aa79f at 1B (lynxdb-bench s20261125b, jobs 001 and 002, 25 November 2026): its answers and the
+  counters of its cold tries. The answers equal the published run's apart from the row of the lines
+  that are not JSON, which main refuses.
   The console's look (the shell, its prompt, the bars, the stats line) is the landing page's design
   of the CLI, not its current output.
   No DOM here: hero.js plays it, and the still in index.html is printed from it (STILL).
@@ -44,7 +45,7 @@ export function ingest(x) {
   const done = Math.floor(x), f = x - done, lanes = [0, 4, 8, 12, 15];
   const out = [
     `  ${dim('index')}  bluesky   ${dim('sort key')} kind, commit.operation, commit.collection, did`,
-    `  ${dim('files')}  1,000 · 125 GB gzip · ≈480 GB of JSON`,
+    `  ${dim('files')}  1,000 · 134 GB gzip · 482 GB of JSON`,
     '',
   ];
   for (const k of lanes) {
@@ -65,19 +66,19 @@ export function ingestDone(merged) {
 }
 
 /* ------------------------------------------------------------ Q1: a table with bars */
-// on 1M: like 448,944, follow 360,374, post 90,816, repost 58,540, block 14,040, profile 11,762 of 15 rows
-const Q1 = [['app.bsky.feed.like', 448944], ['app.bsky.graph.follow', 360374], ['app.bsky.feed.post', 90816],
-  ['app.bsky.feed.repost', 58540], ['app.bsky.graph.block', 14040], ['app.bsky.actor.profile', 11762]];
+// the 1B answer of main 657aa79f (lynxdb-bench s20261125b, job 001): the first 6 of 45 rows
+const Q1 = [['app.bsky.feed.like', 473243192], ['app.bsky.graph.follow', 332659015], ['app.bsky.feed.post', 94474144],
+  ['app.bsky.feed.repost', 59136018], ['app.bsky.graph.block', 16299949], ['app.bsky.actor.profile', 8075073]];
 const hbar = n => `<span class="bx__hb" style="--n: ${n.toFixed(2)}"></span>`;
 export const Q1_TEXT = 'stats count() as count by commit.collection | sort - count';
 export function q1Out() {
   const max = Q1[0][1];
   return [
     `  ${dim('commit.collection'.padEnd(26))}${dim('count'.padStart(13))}`,
-    ...Q1.map(([c, n]) => `  ${c.padEnd(26)}${num(grp(n * 1000).padStart(13))}  ${hbar(n / max * 24)}`),
-    `  ${dim('… 9 more rows')}`,
+    ...Q1.map(([c, n]) => `  ${c.padEnd(26)}${num(grp(n).padStart(13))}  ${hbar(n / max * 24)}`),
+    `  ${dim('… 39 more rows')}`,
     '',
-    stat(15, '1', '1,000,000,000 events counted from the index, 0 blocks read'),
+    stat(45, '1', '1,000,000,000 events counted from the index, 0 blocks read'),
   ];
 }
 
@@ -92,7 +93,7 @@ export function q4Out() {
     ...Q4.map(([d, t], i) => `  { ${dim('"did"')}: <span class="t-s">"${d}"</span>, ${dim('"first_post_ts"')}: <span class="t-s">"${t}"</span> }${i < 2 ? ',' : ''}`),
     ']',
     '',
-    stat(3, '4', '9,000 blocks read, 66,000 skipped by the sort key and token filters'),
+    stat(3, '3', '32 blocks read, 61,214 skipped by the sort key, token filters and time'),
   ];
 }
 
@@ -106,18 +107,18 @@ export function q2Out() {
     node('Aggregate', `${esc('count(), distinct_count(did)')} ${dim('by')} commit.collection`),
     node('Filter', `kind = 'commit' ${dim('and')} commit.operation = 'create'  ${ok('pushed into the scan')}`),
     node('Scan', `bluesky ${dim('· reads 5 columns: _time, kind, commit.operation, commit.collection, did')}`),
-    `  ${' '.repeat(10)}${dim('blocks')} ${num('75,000')}  ${ok('65,000 counted from the index')}  ${num('7,000')} read  ${dim('3,000 skipped by the sort key')}`,
+    `  ${' '.repeat(10)}${dim('blocks')} ${num('61,246')}  ${ok('57,967 counted from the index')}  ${num('14')} read  ${dim('3,265 skipped by the sort key')}`,
     '',
-    `  ${ok('●')} <b class="t-ms">49 ms</b>  ${dim('954,611,000 events matched')}`,
+    `  ${ok('●')} <b class="t-ms">49 ms</b>  ${dim('947,048,380 events matched')}`,
   ];
 }
 
 /* ------------------------------------------------------------ the scenes, as the panel shows them */
 // grid: what the 1,000 squares of the index (1M events each) show; bar: the query lit in the panel
 export const PANEL = {
-  q1: { bar: 1, grid: 'index', note: '75,000 blocks from the index · 0 read' },
-  q4: { bar: 4, grid: 'post', note: '9,000 blocks read · 66,000 skipped' },
-  q2: { bar: 2, grid: 'creates', note: '65,000 blocks from the index · 7,000 read' },
+  q1: { bar: 1, grid: 'index', note: '61,246 blocks from the index · 0 read' },
+  q4: { bar: 4, grid: 'post', note: '32 blocks read · 61,214 skipped' },
+  q2: { bar: 2, grid: 'creates', note: '57,967 blocks from the index · 14 read' },
 };
 
 // the still: the shell open on Q1, finished

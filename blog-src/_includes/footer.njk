@@ -1,0 +1,32 @@
+{#- The landing's close and footer (index.html), with links pointing back at the landing -#}
+{%- set copyIcon = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5"/></svg>' -%}
+<footer class="footer closing blog-close" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--word">
+      <div class="section-head">
+        <h2 id="close-h">Start with one log file</h2>
+        <p class="t-lead">Install the binary, then pipe a file into <code>lynxdb query</code>.</p>
+        <div class="close__row">
+          <div class="cmd close__cmd"><code>curl -fsSL https://lynxdb.org/install.sh | sh</code><button class="cmd__copy" type="button" data-copy aria-label="Copy the install command">{{ copyIcon | safe }}</button></div>
+          <a class="btn btn--primary" href="{{ toSite }}#install">Install LynxDB<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+        </div>
+      </div>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo brand" href="{{ toSite }}"><img class="brand__mark" data-mark src="{{ toSite }}img/lynxdb-mark-faceted-on-light.svg" alt="" width="22" height="30" loading="lazy">LynxDB</a>
+          <p class="footer__lede">An open-source log database in one binary.<span class="footer__more"> Query a file from the shell, or keep a billion events on one server.</span></p>
+        </div>
+        <div class="span-2 start-7 footer__col footer__col--product"><h3>Product</h3><ul><li><a href="{{ toSite }}#server">Server</a></li><li><a href="{{ toSite }}#engine">Engine</a></li><li><a href="{{ toSite }}#benchmark">Benchmark</a></li><li><a href="{{ toSite }}#ingest">Ingest</a></li><li><a href="{{ toBlog }}">Blog</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Docs</h3><ul><li><a href="https://docs.lynxdb.org/docs/getting-started/quickstart">Quick start</a></li><li><a href="https://docs.lynxdb.org/docs/ppl/overview">PPL guide</a></li><li><a href="https://docs.lynxdb.org/docs/guides/ingest-data">Ingest data</a></li><li class="footer__more"><a href="https://docs.lynxdb.org/docs/api/overview">REST API</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Community</h3><ul><li><a href="https://github.com/lynxbase/lynxdb">GitHub</a></li><li><a href="https://discord.gg/RgggCFdgWK">Discord</a></li><li><a href="https://github.com/lynxbase/lynxdb/releases">Releases</a></li><li><a href="https://github.com/lynxbase/lynxdb/blob/main/CONTRIBUTING.md">Contributing</a></li><li class="footer__more"><a href="https://github.com/lynxbase/lynxdb/blob/main/SECURITY.md">Security</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 LynxDB &nbsp; <a href="https://github.com/lynxbase/lynxdb/blob/main/LICENSE">Apache 2.0</a> &nbsp; Product names and logos are trademarks of their owners.</span>
+        <a class="feed-link" href="{{ toBlog }}feed.xml">Blog feed</a>
+      </div>
+    </div>
+  </div>
+  <span class="sr-only" role="status" data-copy-status></span>
+</footer>

@@ -1,0 +1,15 @@
+#!/bin/sh
+# Before a push, every commit it sends as a branch or tag tip must hold the site its sources build
+# (tools/check-site.sh). mise run hooks turns this on for a clone; git push --no-verify skips it once.
+set -eu
+
+root=$(git rev-parse --show-toplevel)
+status=0
+checked=" "
+while read -r _ local_sha _ _; do
+	case $local_sha in *[!0]*) ;; *) continue ;; esac # a deleted ref
+	case $checked in *" $local_sha "*) continue ;; esac
+	checked="$checked$local_sha "
+	"$root/tools/check-site.sh" "$local_sha" || status=1
+done
+exit $status

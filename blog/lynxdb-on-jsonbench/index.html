@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-buttons="solid" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fourteen blocks of 61,246: how LynxDB answers JSONBench in 0.18 s · LynxDB blog</title>
+<meta name="description" content="LynxDB answers JSONBench&#39;s five queries over 1 billion Bluesky events in 0.18 s on a warm cache; ClickHouse&#39;s published result is 6.9 s. Most of the answer comes from metadata kept per block: the exact distinct count in Q2 opens 14 of 61,246 blocks. Without its sort key LynxDB takes 10.2 s, and ClickHouse is faster.">
+<meta name="robots" content="max-image-preview:large">
+<link rel="canonical" href="https://lynxdb.org/blog/lynxdb-on-jsonbench/">
+<link rel="alternate" type="text/markdown" href="https://lynxdb.org/blog/lynxdb-on-jsonbench.md">
+<link rel="describedby" href="/llms.txt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LynxDB">
+<meta property="og:title" content="Fourteen blocks of 61,246: how LynxDB answers JSONBench in 0.18 s">
+<meta property="og:description" content="LynxDB answers JSONBench&#39;s five queries over 1 billion Bluesky events in 0.18 s on a warm cache; ClickHouse&#39;s published result is 6.9 s. Most of the answer comes from metadata kept per block: the exact distinct count in Q2 opens 14 of 61,246 blocks. Without its sort key LynxDB takes 10.2 s, and ClickHouse is faster.">
+<meta property="og:url" content="https://lynxdb.org/blog/lynxdb-on-jsonbench/">
+<meta property="og:image" content="https://lynxdb.org/blog/lynxdb-on-jsonbench/thumb.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-11-27">
+<meta property="article:tag" content="Benchmarks">
+<script type="application/ld+json">{"@context":"https://schema.org","url":"https://lynxdb.org/blog/lynxdb-on-jsonbench/","inLanguage":"en","publisher":{"@id":"https://lynxdb.org/#organization"},"@type":"BlogPosting","@id":"https://lynxdb.org/blog/lynxdb-on-jsonbench/#article","mainEntityOfPage":"https://lynxdb.org/blog/lynxdb-on-jsonbench/","headline":"Fourteen blocks of 61,246: how LynxDB answers JSONBench in 0.18 s","description":"LynxDB answers JSONBench's five queries over 1 billion Bluesky events in 0.18 s on a warm cache; ClickHouse's published result is 6.9 s. Most of the answer comes from metadata kept per block: the exact distinct count in Q2 opens 14 of 61,246 blocks. Without its sort key LynxDB takes 10.2 s, and ClickHouse is faster.","datePublished":"2026-11-27","author":[{"@type":"Person","name":"Evgenii Orlov"}],"keywords":["Benchmarks"],"isPartOf":{"@id":"https://lynxdb.org/blog/#blog"},"image":"https://lynxdb.org/blog/lynxdb-on-jsonbench/thumb.png"}</script>
+<link rel="icon" href="../../img/lynxdb-appicon-moss.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f1f3ef">
+<link rel="alternate" type="application/atom+xml" title="LynxDB blog" href="../feed.xml">
+<link rel="preload" href="../../fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/system.css">
+<link rel="stylesheet" href="../../assets/motion/motion.css">
+<script>(() => { let t = null; try { t = localStorage.getItem('lynxdb-theme'); } catch (e) {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); })()</script>
+<style>
+:root {
+  --p-bg: #f1f3ef; --p-surface: #fdfefc; --p-ink: #171b17; --p-muted: #616760;
+  --p-accent: #227847; --p-accent-ink: #f1f3ef; --p-action: #227847; --p-action-ink: #f1f3ef;
+  --p-inv-bg: #171b17; --p-inv-surface: #232723; --p-inv-ink: #f1f3ef; --p-inv-muted: #969994;
+  --p-inv-accent: #227847; --p-inv-accent-ink: #f1f3ef; --p-inv-action: #227847; --p-inv-action-ink: #f1f3ef;
+  --font-display: "Geist", system-ui, sans-serif;
+  --font-text: "Geist", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 600;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.045em;
+}
+</style>
+<link rel="stylesheet" href="../../site.css">
+<link rel="stylesheet" href="../blog.css">
+</head>
+<body class="blog-page">
+<header class="nav nav--centre">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <a class="nav__logo brand" href="../../"><img class="brand__mark" data-mark src="../../img/lynxdb-mark-faceted-on-light.svg" alt="" width="22" height="30">LynxDB</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="../../#server">Server</a></div>
+      <div class="nav__item"><a class="nav__link" href="../../#engine">Engine</a></div>
+      <div class="nav__item"><a class="nav__link" href="../../#benchmark">Benchmark</a></div>
+      <div class="nav__item"><a class="nav__link" href="../../#ingest">Ingest</a></div>
+      <div class="nav__item">
+        <a class="nav__link" href="https://docs.lynxdb.org/">Docs <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="nav__menu">
+          <div class="wrap grid">
+            <div class="menu-col span-3">
+              <p class="t-label">Start</p>
+              <a href="https://docs.lynxdb.org/docs/getting-started/quickstart">Quick start<span>Run a first query</span></a>
+              <a href="https://docs.lynxdb.org/docs/getting-started/pipe-mode">Pipe mode<span>Query files without a server</span></a>
+              <a href="https://docs.lynxdb.org/docs/getting-started/server-mode">Server mode<span>Keep logs on disk</span></a>
+            </div>
+            <div class="menu-col span-3">
+              <p class="t-label">Reference</p>
+              <a href="https://docs.lynxdb.org/docs/ppl/overview">PPL guide<span>Commands and functions</span></a>
+              <a href="https://docs.lynxdb.org/docs/guides/ingest-data">Ingest data<span>Shippers, API and syslog</span></a>
+              <a href="https://docs.lynxdb.org/docs/api/overview">REST API<span>Query and ingest over HTTP</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav__item"><a class="nav__link" href="../" aria-current="true">Blog</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="nav__link" href="https://github.com/lynxbase/lynxdb">GitHub</a>
+      <a class="btn btn--primary" href="../../#install">Install LynxDB</a>
+      <button class="theme-btn" type="button" aria-pressed="false" aria-label="Dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="theme-btn__moon" d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1Z"/><g class="theme-btn__sun"><circle cx="8" cy="8" r="2.9"/><path d="M8 1.6v1.3M8 13.1v1.3M1.6 8h1.3M13.1 8h1.3M3.5 3.5l.9.9M11.6 11.6l.9.9M3.5 12.5l.9-.9M11.6 4.4l.9-.9"/></g></svg><span class="theme-btn__label" aria-hidden="true"><span class="theme-btn__to-dark">Dark theme</span><span class="theme-btn__to-light">Light theme</span></span></button>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+
+<main id="content" class="blog-main">
+<div class="wrap post">
+  <header class="post__head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="../">Blog</a><span class="crumbs__sep" aria-hidden="true">/</span><span>Benchmarks</span></nav>
+    <h1 class="post__title">Fourteen blocks of 61,246: how LynxDB answers JSONBench in 0.18 s</h1>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>17 min read</span></p>
+  </header>
+  <p class="post__lead">LynxDB answers JSONBench&#39;s five queries over 1 billion Bluesky events in 0.18 s on a warm cache; ClickHouse&#39;s published result is 6.9 s. Most of the answer comes from metadata kept per block: the exact distinct count in Q2 opens 14 of 61,246 blocks. Without its sort key LynxDB takes 10.2 s, and ClickHouse is faster.</p>
+  <details class="toc toc--inline">
+    <summary>On this page</summary>
+    <nav aria-label="On this page"><ol class="toc__list"><li><a href="#how-jsonbench-measures-a-database">How JSONBench measures a database</a><ol><li><a href="#how-the-lynxdb-entry-loads-and-queries">How the LynxDB entry loads and queries</a></li><li><a href="#how-the-page-scores">How the page scores</a></li></ol></li><li><a href="#one-billion-events-five-systems">One billion events, five systems</a></li><li><a href="#the-sort-key-decides-what-each-query-reads">The sort key decides what each query reads</a><ol><li><a href="#q1-sums-value-counts-from-92-footers">Q1 sums value counts from 92 footers</a></li><li><a href="#q2-counts-distinct-users-from-key-runs">Q2 counts distinct users from key runs</a></li><li><a href="#q3-counts-from-hour-buckets">Q3 counts from hour buckets</a></li><li><a href="#q4-scans-in-time-order-and-stops-early">Q4 scans in time order and stops early</a></li><li><a href="#q5-is-the-query-that-reads-data">Q5 is the query that reads data</a></li></ol></li><li><a href="#without-the-sort-key-clickhouse-is-faster">Without the sort key, ClickHouse is faster</a><ol><li><a href="#memory-on-the-hash-path">Memory on the hash path</a></li></ol></li><li><a href="#where-the-sort-key-helps-and-where-it-works-against-it">Where the sort key helps and where it works against it</a></li><li><a href="#what-the-jsonbench-page-shows-and-hides">What the JSONBench page shows and hides</a></li><li><a href="#why-clickhouse-s-table-is-twice-the-size">Why ClickHouse's table is twice the size</a></li><li><a href="#what-i-have-not-measured">What I have not measured</a></li></ol></nav>
+  </details>
+  <aside class="post__rail">
+    <nav class="toc toc--rail" aria-labelledby="toc-title"><p class="toc__title" id="toc-title">On this page</p><ol class="toc__list"><li><a href="#how-jsonbench-measures-a-database">How JSONBench measures a database</a><ol><li><a href="#how-the-lynxdb-entry-loads-and-queries">How the LynxDB entry loads and queries</a></li><li><a href="#how-the-page-scores">How the page scores</a></li></ol></li><li><a href="#one-billion-events-five-systems">One billion events, five systems</a></li><li><a href="#the-sort-key-decides-what-each-query-reads">The sort key decides what each query reads</a><ol><li><a href="#q1-sums-value-counts-from-92-footers">Q1 sums value counts from 92 footers</a></li><li><a href="#q2-counts-distinct-users-from-key-runs">Q2 counts distinct users from key runs</a></li><li><a href="#q3-counts-from-hour-buckets">Q3 counts from hour buckets</a></li><li><a href="#q4-scans-in-time-order-and-stops-early">Q4 scans in time order and stops early</a></li><li><a href="#q5-is-the-query-that-reads-data">Q5 is the query that reads data</a></li></ol></li><li><a href="#without-the-sort-key-clickhouse-is-faster">Without the sort key, ClickHouse is faster</a><ol><li><a href="#memory-on-the-hash-path">Memory on the hash path</a></li></ol></li><li><a href="#where-the-sort-key-helps-and-where-it-works-against-it">Where the sort key helps and where it works against it</a></li><li><a href="#what-the-jsonbench-page-shows-and-hides">What the JSONBench page shows and hides</a></li><li><a href="#why-clickhouse-s-table-is-twice-the-size">Why ClickHouse's table is twice the size</a></li><li><a href="#what-i-have-not-measured">What I have not measured</a></li></ol></nav>
+  </aside>
+  <article class="prose">
+<p>On 20 November 2026 I ran LynxDB through JSONBench at 1 billion documents on an AWS m6i.8xlarge and posted the totals on LinkedIn: 14 minutes to load, 93 GB on disk, 0.18 s for the five queries. The replies asked for cold times, for what the load time includes, whether the answers match ClickHouse's, and above all what a query reads to come back that fast. The counters the server reports for every query answer most of that, and they also show where the result does not carry over.</p>
+<aside class="callout callout--note"><p class="callout__label">Note</p><div class="callout__body">
+<p>Two sets of runs appear below. The published run is commit ad9d7e3b on 20 November: its result files are what the JSONBench page and the LinkedIn post show. The per-query counters (blocks opened, bytes read, memory) come from measurement runs on main 657aa79f on 24 and 25 November, on the same machine type with the same physical design. Their query times agree with the published ones within a few milliseconds. Each number says which run it is from.</p>
+</div></aside>
+<p>Sizes on disk and bytes read are in decimal units (MB, GB); memory is in GiB.</p>
+<h2 id="how-jsonbench-measures-a-database" tabindex="-1"><a class="heading-link" href="#how-jsonbench-measures-a-database">How JSONBench measures a database</a></h2>
+<p>JSONBench is ClickHouse's benchmark for JSON documents, kept in the <code class="nowrap">json/</code> directory of the ClickBench repository. Its data is the Bluesky Jetstream feed: 1,000 gzipped files of 1 million JSON lines each, and a dataset of size N is the first N files. At 1 billion the files take 134.1 GB gzipped and 482.1 GB as JSON.</p>
+<p>Every system runs on a fresh m6i.8xlarge (32 vCPUs, 128 GB of memory, Ubuntu 24.04, a gp3 volume)<sup class="fn-ref"><a href="#fn1" id="fnref1" aria-describedby="notes-title">1</a></sup>, and the same driver measures it:</p>
+<ol>
+<li>Install and start the system, then time its <code class="nowrap">load</code> script followed by <code class="nowrap">sync</code>. That is the load time.</li>
+<li>Count the documents it holds.</li>
+<li>For each query: stop the server, drop the page cache, start it again and run the query three times. Run 1 is the cold time; the faster of runs 2 and 3 is the hot time.</li>
+<li>Read the size on disk after all queries, so merges that finish during the queries count.</li>
+</ol>
+<p>The five queries, in PPL as the LynxDB entry runs them:</p>
+<figure class="code" data-lang="ppl"><div class="code__bar"></div><pre class="code__pre" tabindex="0"><code class="language-ppl"><span class="token keyword">source</span><span class="token operator">=</span>bluesky <span class="token pipe">|</span> <span class="token keyword">stats</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> count <span class="token keyword">by</span> commit.collection <span class="token pipe">|</span> <span class="token keyword">sort</span> <span class="token operator">-</span> count
+<span class="token keyword">source</span><span class="token operator">=</span>bluesky <span class="token pipe">|</span> <span class="token keyword">where</span> kind <span class="token operator">=</span> <span class="token string">'commit'</span> <span class="token keyword">and</span> commit.operation <span class="token operator">=</span> <span class="token string">'create'</span> <span class="token pipe">|</span> <span class="token keyword">stats</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> count<span class="token punctuation">,</span> <span class="token function">distinct_count</span><span class="token punctuation">(</span>did<span class="token punctuation">)</span> <span class="token keyword">as</span> users <span class="token keyword">by</span> commit.collection <span class="token pipe">|</span> <span class="token keyword">sort</span> <span class="token operator">-</span> count
+<span class="token keyword">source</span><span class="token operator">=</span>bluesky <span class="token pipe">|</span> <span class="token keyword">where</span> kind <span class="token operator">=</span> <span class="token string">'commit'</span> <span class="token keyword">and</span> commit.operation <span class="token operator">=</span> <span class="token string">'create'</span> <span class="token keyword">and</span> commit.collection <span class="token keyword">in</span> <span class="token punctuation">(</span><span class="token string">'app.bsky.feed.post'</span><span class="token punctuation">,</span> <span class="token string">'app.bsky.feed.repost'</span><span class="token punctuation">,</span> <span class="token string">'app.bsky.feed.like'</span><span class="token punctuation">)</span> <span class="token pipe">|</span> <span class="token keyword">eval</span> hour_of_day <span class="token operator">=</span> <span class="token function">hour</span><span class="token punctuation">(</span>_time<span class="token punctuation">)</span> <span class="token pipe">|</span> <span class="token keyword">stats</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> count <span class="token keyword">by</span> commit.collection<span class="token punctuation">,</span> hour_of_day <span class="token pipe">|</span> <span class="token keyword">sort</span> hour_of_day<span class="token punctuation">,</span> commit.collection
+<span class="token keyword">source</span><span class="token operator">=</span>bluesky <span class="token pipe">|</span> <span class="token keyword">where</span> kind <span class="token operator">=</span> <span class="token string">'commit'</span> <span class="token keyword">and</span> commit.operation <span class="token operator">=</span> <span class="token string">'create'</span> <span class="token keyword">and</span> commit.collection <span class="token operator">=</span> <span class="token string">'app.bsky.feed.post'</span> <span class="token pipe">|</span> <span class="token keyword">stats</span> <span class="token function">min</span><span class="token punctuation">(</span>_time<span class="token punctuation">)</span> <span class="token keyword">as</span> first_post_ts <span class="token keyword">by</span> did <span class="token pipe">|</span> <span class="token keyword">sort</span> first_post_ts <span class="token pipe">|</span> <span class="token keyword">head</span> <span class="token number">3</span>
+<span class="token keyword">source</span><span class="token operator">=</span>bluesky <span class="token pipe">|</span> <span class="token keyword">where</span> kind <span class="token operator">=</span> <span class="token string">'commit'</span> <span class="token keyword">and</span> commit.operation <span class="token operator">=</span> <span class="token string">'create'</span> <span class="token keyword">and</span> commit.collection <span class="token operator">=</span> <span class="token string">'app.bsky.feed.post'</span> <span class="token pipe">|</span> <span class="token keyword">stats</span> <span class="token function">min</span><span class="token punctuation">(</span>_time<span class="token punctuation">)</span> <span class="token keyword">as</span> tmin<span class="token punctuation">,</span> <span class="token function">max</span><span class="token punctuation">(</span>_time<span class="token punctuation">)</span> <span class="token keyword">as</span> tmax <span class="token keyword">by</span> did <span class="token pipe">|</span> <span class="token keyword">eval</span> activity_span <span class="token operator">=</span> <span class="token function">timestampdiff</span><span class="token punctuation">(</span>MILLISECOND<span class="token punctuation">,</span> <span class="token function">from_unixtime</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span> tmax<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">timestampdiff</span><span class="token punctuation">(</span>MILLISECOND<span class="token punctuation">,</span> <span class="token function">from_unixtime</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span> tmin<span class="token punctuation">)</span> <span class="token pipe">|</span> <span class="token keyword">fields</span> did<span class="token punctuation">,</span> activity_span <span class="token pipe">|</span> <span class="token keyword">sort</span> <span class="token operator">-</span> activity_span <span class="token pipe">|</span> <span class="token keyword">head</span> <span class="token number">3</span></code></pre></figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Query</th>
+<th>What it asks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1</td>
+<td>Events per collection</td>
+</tr>
+<tr>
+<td>Q2</td>
+<td>Create events per collection, with the exact number of distinct users</td>
+</tr>
+<tr>
+<td>Q3</td>
+<td>Post, repost and like creates per collection and UTC hour of day</td>
+</tr>
+<tr>
+<td>Q4</td>
+<td>The 3 users with the earliest first post</td>
+</tr>
+<tr>
+<td>Q5</td>
+<td>The 3 users with the longest span between their first and last post</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each system writes them in its own language. Q2 in ClickHouse SQL and in VictoriaLogs' LogsQL:</p>
+<figure class="code" data-lang="sql"><div class="code__bar"></div><pre class="code__pre" tabindex="0"><code class="language-sql"><span class="token keyword">SELECT</span> <span class="token keyword">data</span><span class="token punctuation">.</span><span class="token keyword">commit</span><span class="token punctuation">.</span>collection <span class="token keyword">AS</span> event<span class="token punctuation">,</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">AS</span> count<span class="token punctuation">,</span> uniqExact<span class="token punctuation">(</span><span class="token keyword">data</span><span class="token punctuation">.</span>did<span class="token punctuation">)</span> <span class="token keyword">AS</span> users
+<span class="token keyword">FROM</span> bluesky <span class="token keyword">WHERE</span> <span class="token keyword">data</span><span class="token punctuation">.</span>kind <span class="token operator">=</span> <span class="token string">'commit'</span> <span class="token operator">AND</span> <span class="token keyword">data</span><span class="token punctuation">.</span><span class="token keyword">commit</span><span class="token punctuation">.</span>operation <span class="token operator">=</span> <span class="token string">'create'</span>
+<span class="token keyword">GROUP</span> <span class="token keyword">BY</span> event <span class="token keyword">ORDER</span> <span class="token keyword">BY</span> count <span class="token keyword">DESC</span><span class="token punctuation">;</span></code></pre></figure>
+<figure class="code" data-lang="text"><div class="code__bar"></div><pre class="code__pre" tabindex="0"><code class="language-text">{kind=commit,commit.operation=create} | by (commit.collection) count() count, count_uniq(did) users | sort (count desc)</code></pre></figure>
+<p>The semantics match across LynxDB, ClickHouse and VictoriaLogs: <code class="nowrap">distinct_count</code> is exact like <code class="nowrap">uniqExact</code>, and <code class="nowrap">hour(_time)</code> is the hour in UTC. Elasticsearch and OpenSearch count distinct users approximately, with HyperLogLog++.</p>
+<h3 id="how-the-lynxdb-entry-loads-and-queries" tabindex="-1"><a class="heading-link" href="#how-the-lynxdb-entry-loads-and-queries">How the LynxDB entry loads and queries</a></h3>
+<p>The entry declares its physical design when <code class="nowrap">load</code> creates the index, as ClickHouse's script creates its table with <code class="nowrap">ORDER BY</code>:</p>
+<figure class="code" data-lang="json"><div class="code__bar"></div><pre class="code__pre" tabindex="0"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"sort_key"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"kind"</span><span class="token punctuation">,</span> <span class="token string">"commit.operation"</span><span class="token punctuation">,</span> <span class="token string">"commit.collection"</span><span class="token punctuation">,</span> <span class="token string">"did"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"time_fields"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"time_us"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"partition"</span><span class="token operator">:</span> <span class="token string">"366d"</span>
+<span class="token punctuation">}</span></code></pre></figure>
+<p>Rows are ordered by those four fields and then by time, the same five columns as ClickHouse's <code class="nowrap">ORDER BY</code>. One 366-day partition holds every event, as ClickHouse's table has no <code class="nowrap">PARTITION BY</code>. LynxDB's own default, daily partitions and no sort key, gets its own section below.</p>
+<p><code class="nowrap">load</code> sends 16 files at once, each decompressed with <code class="nowrap">gzip -dc</code> and posted with <code class="nowrap">curl</code> to <code class="nowrap">/api/v1/ingest</code>. It ends with <code>POST /api/v1/indexes/bluesky/compact</code>, which returns when the final merge is done, so the load time includes the merges and the queries run with none in flight. In the published run the files took 394 s and the merge 430 s of the 824 s.</p>
+<p><code class="nowrap">query</code> is one HTTP request per query, timed by <code class="nowrap">curl</code> as the VictoriaLogs entry is:</p>
+<figure class="code code--term" data-lang="shell"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-shell"><span class="token function">curl</span> <span class="token parameter variable">-sS</span> <span class="token parameter variable">-G</span> <span class="token string">'http://127.0.0.1:3100/api/v1/query'</span> --data-urlencode <span class="token string">"q=<span class="token variable">${query}</span>"</span></code></pre></figure>
+<p>Every response carries what the executor did in <code class="nowrap">meta.stats</code>. This is the <code class="nowrap">meta</code> of the cold Q2 try in the 25 November measurement run, with the counters that are zero left out:</p>
+<figure class="code" data-lang="json"><div class="code__bar"></div><pre class="code__pre" tabindex="0"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"took_ms"</span><span class="token operator">:</span> <span class="token number">54.395</span><span class="token punctuation">,</span>
+  <span class="token property">"rows"</span><span class="token operator">:</span> <span class="token number">43</span><span class="token punctuation">,</span>
+  <span class="token property">"stats"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"blocks"</span><span class="token operator">:</span> <span class="token number">14</span><span class="token punctuation">,</span>
+    <span class="token property">"skipped_by_key"</span><span class="token operator">:</span> <span class="token number">3265</span><span class="token punctuation">,</span>
+    <span class="token property">"counted_by_index"</span><span class="token operator">:</span> <span class="token number">57967</span><span class="token punctuation">,</span>
+    <span class="token property">"blocks_matched"</span><span class="token operator">:</span> <span class="token number">57981</span><span class="token punctuation">,</span>
+    <span class="token property">"rows_matched"</span><span class="token operator">:</span> <span class="token number">947048380</span><span class="token punctuation">,</span>
+    <span class="token property">"held_bytes"</span><span class="token operator">:</span> <span class="token number">2831000</span><span class="token punctuation">,</span>
+    <span class="token property">"ordered"</span><span class="token operator">:</span> <span class="token boolean">true</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre></figure>
+<p>Q2 from the command line, with <code class="nowrap">head 5</code>, against a server on my laptop (an Apple M4 Pro) that holds the first file of the dataset, 1 million events:</p>
+<figure class="code code--term" data-lang="console"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-console"><span class="t-p">$</span> <span class="t-cmd"><span class="t-c">lynxdb</span> query --server http://127.0.0.1:3311 \
+    <span class="t-q">'<span class="token keyword">source</span><span class="token operator">=</span>bluesky <span class="token pipe">|</span> <span class="token keyword">where</span> kind <span class="token operator">=</span> <span class="token string">"commit"</span> <span class="token keyword">and</span> commit.operation <span class="token operator">=</span> <span class="token string">"create"</span> <span class="token pipe">|</span> <span class="token keyword">stats</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> count<span class="token punctuation">,</span> <span class="token function">distinct_count</span><span class="token punctuation">(</span>did<span class="token punctuation">)</span> <span class="token keyword">as</span> users <span class="token keyword">by</span> commit.collection <span class="token pipe">|</span> <span class="token keyword">sort</span> <span class="token operator">-</span> count <span class="token pipe">|</span> <span class="token keyword">head</span> <span class="token number">5</span>'</span></span>
+<span class="t-table"><span class="t-d">┌───────────────────────┬─────────┬─────────┐</span>
+<span class="t-d">│</span><b> commit.collection     </b><span class="t-d">│</span><b> count   </b><span class="t-d">│</span><b> users   </b><span class="t-d">│</span>
+<span class="t-d">├───────────────────────┼─────────┼─────────┤</span>
+<span class="t-d">│</span> app.bsky.feed.like    <span class="t-d">│</span><span class="t-n"> 444,523 </span><span class="t-d">│</span><span class="t-n"> 117,617 </span><span class="t-d">│</span>
+<span class="t-d">│</span> app.bsky.graph.follow <span class="t-d">│</span><span class="t-n"> 337,978 </span><span class="t-d">│</span><span class="t-n">  63,957 </span><span class="t-d">│</span>
+<span class="t-d">│</span> app.bsky.feed.post    <span class="t-d">│</span><span class="t-n">  86,812 </span><span class="t-d">│</span><span class="t-n">  50,464 </span><span class="t-d">│</span>
+<span class="t-d">│</span> app.bsky.feed.repost  <span class="t-d">│</span><span class="t-n">  56,993 </span><span class="t-d">│</span><span class="t-n">  26,581 </span><span class="t-d">│</span>
+<span class="t-d">│</span> app.bsky.graph.block  <span class="t-d">│</span><span class="t-n">  13,838 </span><span class="t-d">│</span><span class="t-n">   5,785 </span><span class="t-d">│</span>
+<span class="t-d">└───────────────────────┴─────────┴─────────┘</span></span>
+<span class="t-d">(5 rows)</span>
+<span class="t-d">───</span>
+  <span class="t-d">Rows</span>  <b>5</b>
+  <span class="t-d">Took</span>  <b>5ms</b></code></pre></figure>
+<h3 id="how-the-page-scores" tabindex="-1"><a class="heading-link" href="#how-the-page-scores">How the page scores</a></h3>
+<p>Per query, the page divides each system's time plus 10 ms by the best time plus 10 ms, and takes the geometric mean of those ratios over the five queries. The combined score weighs that mean for the hot runs at 60%, for the cold runs at 20%, and the load time and the size, each against the best, at 10% each. Lower is better.</p>
+<p>The LynxDB entry is not in ClickHouse's repository. It lives in the fork <a href="https://github.com/lynxbase/ClickBench/tree/main/json/lynxdb">lynxbase/ClickBench</a>, and I ran it on my own AWS account in eu-north-1, not in ClickBench's CI. The other systems' rows are the results published in ClickBench.</p>
+<h2 id="one-billion-events-five-systems" tabindex="-1"><a class="heading-link" href="#one-billion-events-five-systems">One billion events, five systems</a></h2>
+<figure class="fig">
+<div class="fig-panel">
+<div class="fig-group">
+<div class="fig-head"><b>Hot sum of the five queries</b><span>seconds, log scale</span></div>
+<ol class="fig-bars">
+<li class="fig-bar is-lx"><span>LynxDB</span><span class="fig-track"><i style="--w: 6.2%"></i></span><b>0.18 s</b></li>
+<li class="fig-bar"><span>ClickHouse</span><span class="fig-track"><i style="--w: 45.9%"></i></span><b>6.87 s</b></li>
+<li class="fig-bar"><span>VictoriaLogs</span><span class="fig-track"><i style="--w: 63.5%"></i></span><b>34.68 s</b></li>
+<li class="fig-bar"><span>Elasticsearch</span><span class="fig-track"><i style="--w: 60.8%"></i></span><b>27.09 s</b></li>
+<li class="fig-bar"><span>OpenSearch</span><span class="fig-track"><i style="--w: 92.8%"></i></span><b>516.98 s</b></li>
+<li class="fig-sub">later runs, not on the JSONBench page</li>
+<li class="fig-bar is-alt"><span>LynxDB, no key</span><span class="fig-track"><i style="--w: 50.2%"></i></span><b>10.19 s</b></li>
+<li class="fig-bar is-alt"><span>ClickHouse 26.12</span><span class="fig-track"><i style="--w: 39.8%"></i></span><b>3.91 s</b></li>
+</ol>
+<div class="fig-axis" aria-hidden="true"><span><i style="--x: 0%">0.1</i><i style="--x: 25%">1</i><i style="--x: 50%">10</i><i class="fig-wide" style="--x: 75%">100</i><i style="--x: 100%">1,000</i></span></div>
+</div>
+<div class="fig-cols">
+<div class="fig-group">
+<div class="fig-head"><b>Load time</b><span>s, log scale</span></div>
+<ol class="fig-bars" style="--ticks: 3">
+<li class="fig-bar is-lx"><span>LynxDB</span><span class="fig-track"><i style="--w: 30.5%"></i></span><b>824 s</b></li>
+<li class="fig-bar"><span>ClickHouse</span><span class="fig-track"><i style="--w: 59.4%"></i></span><b>6,042 s</b></li>
+<li class="fig-bar"><span>VictoriaLogs</span><span class="fig-track"><i style="--w: 34.4%"></i></span><b>1,078 s</b></li>
+<li class="fig-bar"><span>Elasticsearch</span><span class="fig-track"><i style="--w: 78.2%"></i></span><b>22,255 s</b></li>
+<li class="fig-bar"><span>OpenSearch</span><span class="fig-track"><i style="--w: 93.6%"></i></span><b>64,360 s</b></li>
+</ol>
+<div class="fig-axis" aria-hidden="true"><span><i style="--x: 0%">100</i><i style="--x: 33.33%">1k</i><i style="--x: 66.67%; --t: -50%">10k</i></span></div>
+</div>
+<div class="fig-group">
+<div class="fig-head"><b>Size on disk</b><span>GB</span></div>
+<ol class="fig-bars" style="--ticks: 2">
+<li class="fig-bar is-lx"><span>LynxDB</span><span class="fig-track"><i style="--w: 23.2%"></i></span><b>92.7 GB</b></li>
+<li class="fig-bar"><span>ClickHouse</span><span class="fig-track"><i style="--w: 48.9%"></i></span><b>195.8 GB</b></li>
+<li class="fig-bar"><span>VictoriaLogs</span><span class="fig-track"><i style="--w: 30.3%"></i></span><b>121.4 GB</b></li>
+<li class="fig-bar"><span>Elasticsearch</span><span class="fig-track"><i style="--w: 96.2%"></i></span><b>384.7 GB</b></li>
+<li class="fig-bar"><span>OpenSearch</span><span class="fig-track"><i style="--w: 71.3%"></i></span><b>285.1 GB</b></li>
+</ol>
+<div class="fig-axis" aria-hidden="true"><span><i style="--x: 0%">0</i><i style="--x: 50%">200</i><i style="--x: 100%">400</i></span></div>
+</div>
+</div>
+</div>
+<figcaption>JSONBench at 1 billion documents on an AWS m6i.8xlarge. LynxDB is the published run (commit ad9d7e3b, 20 November 2026); the other solid rows are the results published in ClickBench. The outlined rows are later runs on the same machine type: LynxDB at main 657aa79f with its default design and no sort key (25 November), and ClickHouse 26.12.1 rerun by me (24 November).</figcaption>
+</figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>System, version, date</th>
+<th>Load</th>
+<th>Size</th>
+<th>Hot sum</th>
+<th>Cold sum</th>
+<th>Documents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LynxDB ad9d7e3b, 2026-11-20</td>
+<td>824 s</td>
+<td>92.7 GB</td>
+<td>0.18 s</td>
+<td>0.48 s</td>
+<td>1,000,000,000</td>
+</tr>
+<tr>
+<td>ClickHouse 26.11.1, 2026-11-16</td>
+<td>6,042 s</td>
+<td>195.8 GB</td>
+<td>6.87 s</td>
+<td>9.24 s</td>
+<td>999,999,258</td>
+</tr>
+<tr>
+<td>VictoriaLogs v1.53.0, 2026-11-02</td>
+<td>1,078 s</td>
+<td>121.4 GB</td>
+<td>34.68 s</td>
+<td>40.22 s</td>
+<td>999,999,241</td>
+</tr>
+<tr>
+<td>Elasticsearch 9.5.6, 2026-11-02</td>
+<td>22,255 s</td>
+<td>384.7 GB</td>
+<td>27.09 s</td>
+<td>27.35 s</td>
+<td>999,999,034</td>
+</tr>
+<tr>
+<td>OpenSearch 3.9.0, 2026-11-04</td>
+<td>64,360 s</td>
+<td>285.1 GB</td>
+<td>516.98 s</td>
+<td>202.13 s</td>
+<td>999,999,241</td>
+</tr>
+</tbody>
+</table></div>
+<p>The hot times per query, in seconds:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Query</th>
+<th>LynxDB</th>
+<th>ClickHouse</th>
+<th>VictoriaLogs</th>
+<th>Elasticsearch</th>
+<th>OpenSearch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1</td>
+<td>0.0012</td>
+<td>0.239</td>
+<td>0.033</td>
+<td>0.618</td>
+<td>19.922</td>
+</tr>
+<tr>
+<td>Q2</td>
+<td>0.049</td>
+<td>2.767</td>
+<td>19.155</td>
+<td>4.930</td>
+<td>59.570</td>
+</tr>
+<tr>
+<td>Q3</td>
+<td>0.062</td>
+<td>2.302</td>
+<td>1.521</td>
+<td>14.213</td>
+<td>412.161</td>
+</tr>
+<tr>
+<td>Q4</td>
+<td>0.0028</td>
+<td>0.757</td>
+<td>5.914</td>
+<td>3.443</td>
+<td>6.960</td>
+</tr>
+<tr>
+<td>Q5</td>
+<td>0.063</td>
+<td>0.805</td>
+<td>8.053</td>
+<td>3.887</td>
+<td>18.367</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cold, the published run took 1.8, 49.7, 103.3, 8.0 and 319.8 ms for Q1 to Q5. Q5 makes up 257 of the 305 ms between the cold and hot sums, because it is the only query that reads much column data.</p>
+<p>The page's combined score puts ClickHouse at 19.03 times LynxDB's, VictoriaLogs at 29.55, Elasticsearch at 65.2 and OpenSearch at 399.7 (my replication of the page's code). The ratio grows with the data: ClickHouse's is 1.89 at 1 million documents and 7.25 at 100 million.</p>
+<p>OpenSearch's Q3 is slower hot than cold (412 s against 91 s), which inflates its hot sum; Elasticsearch's Q3 does the same (14.2 s against 5.9 s).</p>
+<h2 id="the-sort-key-decides-what-each-query-reads" tabindex="-1"><a class="heading-link" href="#the-sort-key-decides-what-each-query-reads">The sort key decides what each query reads</a></h2>
+<p>In the measurement run the 1B store holds 92 parts with 61,246 blocks of up to 16,384 rows. Besides the column data, each part ends in a footer that describes its blocks:</p>
+<ul>
+<li>the first sort key of every block, its row count and its time range;</li>
+<li>for every block, how many distinct key prefixes it holds at each depth of the sort key (<code class="nowrap">KeyRuns</code>), and how many leading key columns its first row shares with the last row of the block before (<code class="nowrap">KeyShared</code>);</li>
+<li>exact value counts for string fields with at most 256 values;</li>
+<li>row counts per UTC minute, hour and day for every block.</li>
+</ul>
+<p>Next to the column data, each block also has token filters for its string columns. When the server starts it reads 151 MiB (158 MB) in 1.39 s. About 34 MB of that is its own executable, which it loads into the page cache before it listens; the rest is the part footers, which opening the index reads. The benchmark's <code class="nowrap">check</code> passes only after that, so no query pays for the read. The ClickHouse entry also loads its primary keys at startup. How the footer is laid out and built is the subject of the next post, <a href="../inside-the-lynxdb-engine/">Inside the LynxDB engine</a>.</p>
+<p>With the benchmark's sort key, four of the five queries find most of their answer in that metadata.</p>
+<figure class="fig">
+<div class="fig-panel">
+<div class="fig-head"><b>Where each answer comes from</b><span>sort key: kind, operation, collection, did</span></div>
+<div class="fig-flow">
+<div class="fig-flow__head"><span>blocks read</span></div>
+<div class="fig-frame">
+<div class="fig-frame__label"><span>Part footers, in memory<br>read when the server starts</span></div>
+<div class="fig-flow__row"><span><code>Q1</code><span>events per collection</span></span><span class="fig-arrow"></span><div class="fig-box"><b>Value counts</b><span>commit.collection, per part</span></div><em>0</em></div>
+<div class="fig-flow__row"><span><code>Q2</code><span>creates and users</span></span><span class="fig-arrow"></span><div class="fig-box"><b>Key runs</b><span>KeyRuns, KeyShared per block</span></div><em>14</em></div>
+<div class="fig-flow__row"><span><code>Q3</code><span>creates by hour</span></span><span class="fig-arrow"></span><div class="fig-box"><b>Hour buckets</b><span>rows per UTC hour, per block</span></div><em>5</em></div>
+</div>
+<div class="fig-frame">
+<div class="fig-frame__label"><span>Column data, on disk</span></div>
+<div class="fig-flow__row"><span><code>Q4</code><span>first posters</span></span><span class="fig-arrow"></span><div class="fig-box"><b>Time-ordered scan with a bound</b><span>stops past the 3rd first post</span></div><em>32</em></div>
+<div class="fig-flow__row"><span><code>Q5</code><span>longest activity</span></span><span class="fig-arrow"></span><div class="fig-box"><b>Run ends from _time</b><span>first and last row per did</span></div><em>5,513</em></div>
+</div>
+<hr>
+<div class="fig-flow__row"><span><code>Q2 Q3 Q5</code><span>no sort key</span></span><span class="fig-arrow"></span><div class="fig-box"><b>Hash aggregation over every block</b><span>Q1 and Q4 keep their paths</span></div><em>61,041</em></div>
+</div>
+</div>
+<figcaption>The path each query takes on the 1B store, and the number of blocks whose rows were read on the cold try. Counts from the measurement run on main 657aa79f (25 November 2026): 61,246 blocks with the sort key, 61,043 without it.</figcaption>
+</figure>
+<h3 id="q1-sums-value-counts-from-92-footers" tabindex="-1"><a class="heading-link" href="#q1-sums-value-counts-from-92-footers">Q1 sums value counts from 92 footers</a></h3>
+<p>Q1 has no filter and groups by <code class="nowrap">commit.collection</code>, a field with a few dozen values. Every part's footer already holds the exact count of each value, so the executor adds up 92 small tables and opens no block. The cold try read 0.07 MB and took 1.9 ms, with or without the sort key.</p>
+<h3 id="q2-counts-distinct-users-from-key-runs" tabindex="-1"><a class="heading-link" href="#q2-counts-distinct-users-from-key-runs">Q2 counts distinct users from key runs</a></h3>
+<p>Q2 filters on the first two key columns, groups by the third and counts distinct values of the fourth. In key order, the rows of one user sit next to each other inside a collection, so the number of distinct users in a collection is the number of <code class="nowrap">did</code> runs in it.</p>
+<p>The footer stores those runs per block. If a block holds one collection (<code class="nowrap">KeyRuns</code> at depth 3 is 1), the executor adds the block's row count to the collection's count and its <code class="nowrap">KeyRuns</code> at depth 4 to the users, less one when the block's first row continues the previous block's last user (<code class="nowrap">KeyShared</code> of 4). Only blocks in which the collection changes have to be opened.</p>
+<figure class="fig">
+<div class="fig-panel">
+<div class="fig-head"><b>Q2 on 61,246 blocks in sort-key order</b><span>schematic</span></div>
+<div class="fig-strip" style="--cols: 36">
+<div class="fig-ranges is-over" aria-hidden="true"><span style="--c: 3; --n: 29">kind = commit, operation = create</span></div>
+<div class="fig-blocks" aria-hidden="true"><i class="is-skip"></i><i class="is-skip"></i><i class="is-read"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-read"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-read"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-read"></i><i class="is-meta"></i><i class="is-read"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-meta"></i><i class="is-read"></i><i class="is-meta"></i><i class="is-read"></i><i class="is-skip"></i><i class="is-skip"></i><i class="is-skip"></i><i class="is-skip"></i><i class="is-skip"></i></div>
+<div class="fig-ranges is-under" aria-hidden="true"><span style="--c: 4; --n: 8">like</span><span class="fig-wide" style="--c: 13; --n: 3">post</span><span class="fig-wide" style="--c: 17; --n: 3">repost</span><span style="--c: 23; --n: 6">follow</span></div>
+</div>
+<div class="fig-group">
+<div class="fig-head"><span>the 61,246 blocks to scale</span></div>
+<div class="fig-share" aria-hidden="true"><i class="is-skip" style="--g: 3265"></i><i class="is-meta" style="--g: 57967"></i><i class="is-read" style="--g: 14"></i></div>
+<ul class="fig-legend"><li><i class="is-skip"></i>skipped by key <b>3,265</b></li><li><i class="is-meta"></i>counted from key runs <b>57,967</b></li><li><i class="is-read"></i>opened <b>14</b></li></ul>
+</div>
+<div class="fig-cols">
+<div class="fig-box"><b><i class="is-meta"></i>A block inside one collection</b><span>KeyRuns(3) = 1</span><span>count += rows</span><span>users += KeyRuns(4)</span><span>users -= 1 if KeyShared ≥ 4</span></div>
+<div class="fig-box"><b><i class="is-read"></i>A block where the collection changes</b><span>KeyRuns(3) &gt; 1</span><span>opened, and its rows grouped as they are read</span></div>
+</div>
+</div>
+<figcaption>Q2's path through the 1B store. Blocks outside <code>kind = commit</code>, <code>operation = create</code> are skipped by their first keys; blocks that hold one collection are counted from the footer; blocks where a collection changes are opened. The strip is a schematic, one square for many blocks; the share bar and the counts are from the cold Q2 try of the measurement run (main 657aa79f, 25 November 2026).</figcaption>
+</figure>
+<p>Most of the 43 collections with create events are tiny and share blocks, so 14 blocks hold every collection boundary. The cold try read 1.9 MB (1.4 MB in two repeats), used 0.20 CPU-seconds and peaked at 190 MiB, for 0.056 s cold and 0.053 s hot (0.050 and 0.049 s in the published run).</p>
+<p>The count is exact as long as the parts follow one another in key order, so that a user's runs never sit in two places; after the final merge they do. With daily partitions and the same key the store has 488 parts in several key-ordered streams, and Q2 counts 63,003 blocks from another per-block record (<code class="nowrap">counted_by_entries</code>), opens 1,090, reads 1.5 GB and takes 2.77 s cold and 1.05 s hot.</p>
+<h3 id="q3-counts-from-hour-buckets" tabindex="-1"><a class="heading-link" href="#q3-counts-from-hour-buckets">Q3 counts from hour buckets</a></h3>
+<p>The hour of day is not in the sort key, so Q3 uses the time buckets: a block that holds a single collection, all of it <code class="nowrap">commit</code> and <code class="nowrap">create</code>, contributes its row counts per UTC hour straight from the footer.</p>
+<p>Key ranges from the <code class="nowrap">in</code> list skip 21,796 blocks and the token filters 1,922. Of the remaining 37,528, the executor counts 37,523 from their hour records and reads rows from 5, so the <code class="nowrap">blocks</code> counter says 37,528 while the device read 0.5 MB. Walking those records still costs 1.34 CPU-seconds; the cold try took 0.099 s (0.103 s in the published run).</p>
+<h3 id="q4-scans-in-time-order-and-stops-early" tabindex="-1"><a class="heading-link" href="#q4-scans-in-time-order-and-stops-early">Q4 scans in time order and stops early</a></h3>
+<p>Q4 asks for the three smallest <code class="nowrap">min(_time)</code> per user among post creates. The planner turns <code class="nowrap">sort | head 3</code> into a top-3, and the executor visits blocks in order of their earliest row. Once it has three users, it skips every block whose earliest row is later than the third of them: such a block cannot hold a smaller first post.</p>
+<p>It opened 32 blocks, read 3.2 MB and took 7.1 ms cold. The rest were skipped: 3,686 by key, 5,481 by time, and 52,047 under the token counter, which I read as whole parts with no <code class="nowrap">app.bsky.feed.post</code> in their footer value counts. Q4 does not need the key either: on the store without one it opens a single block.</p>
+<h3 id="q5-is-the-query-that-reads-data" tabindex="-1"><a class="heading-link" href="#q5-is-the-query-that-reads-data">Q5 is the query that reads data</a></h3>
+<p>Q5 needs the first and last post of each of 3.9 million users, 89.9 million rows. In key order a user's posts are one run sorted by time, so the executor reads the <code class="nowrap">_time</code> column of the 5,513 blocks of post creates and takes the ends of each run, with no hash table.</p>
+<p>That is 518 MB from the device, 1.5 CPU-seconds and 734 MiB of peak memory, for 0.317 s cold and 0.063 s hot<sup class="fn-ref"><a href="#fn2" id="fnref2" aria-describedby="notes-title">2</a></sup>.</p>
+<h2 id="without-the-sort-key-clickhouse-is-faster" tabindex="-1"><a class="heading-link" href="#without-the-sort-key-clickhouse-is-faster">Without the sort key, ClickHouse is faster</a></h2>
+<p>LynxDB's default design, daily partitions and no sort key, loads the 1B dataset in 1,008 s into 107.8 GB and runs the five queries in 10.19 s hot and 34.95 s cold (main 657aa79f, 25 November). ClickHouse 26.11's published sums are 6.87 s and 9.24 s.</p>
+<figure class="fig">
+<div class="fig-panel" style="--fig-label: 76px">
+<div class="fig-head"><b>The cold try with and without the sort key</b><span>MB read (log scale), blocks read, time</span></div>
+<ol class="fig-bars has-notes" style="--ticks: 7">
+<li class="fig-sub"><b>Q1</b> events per collection</li>
+<li class="fig-bar is-lx"><span>sort key</span><span class="fig-track"><i style="--w: 12.1%"></i></span><b>0.07 MB</b><small>0 blocks · 0.0019 s</small></li>
+<li class="fig-bar"><span>no key</span><span class="fig-track"><i style="--w: 12.1%"></i></span><b>0.07 MB</b><small>0 blocks · 0.0019 s</small></li>
+<li class="fig-sub"><b>Q2</b> creates and users</li>
+<li class="fig-bar is-lx"><span>sort key</span><span class="fig-track"><i style="--w: 32.5%"></i></span><b>1.9 MB</b><small>14 blocks · 0.056 s</small></li>
+<li class="fig-bar"><span>no key</span><span class="fig-track"><i style="--w: 86.7%"></i></span><b>11,792 MB</b><small>61,041 blocks · 13.43 s</small></li>
+<li class="fig-sub"><b>Q3</b> creates by hour</li>
+<li class="fig-bar is-lx"><span>sort key</span><span class="fig-track"><i style="--w: 24.3%"></i></span><b>0.5 MB</b><small>5 blocks · 0.099 s</small></li>
+<li class="fig-bar"><span>no key</span><span class="fig-track"><i style="--w: 79.3%"></i></span><b>3,530 MB</b><small>61,041 blocks · 9.31 s</small></li>
+<li class="fig-sub"><b>Q4</b> first posters</li>
+<li class="fig-bar is-lx"><span>sort key</span><span class="fig-track"><i style="--w: 35.7%"></i></span><b>3.2 MB</b><small>32 blocks · 0.0071 s</small></li>
+<li class="fig-bar"><span>no key</span><span class="fig-track"><i style="--w: 17.6%"></i></span><b>0.17 MB</b><small>1 block · 0.0109 s</small></li>
+<li class="fig-sub"><b>Q5</b> longest activity</li>
+<li class="fig-bar is-lx"><span>sort key</span><span class="fig-track"><i style="--w: 67.3%"></i></span><b>518 MB</b><small>5,513 blocks · 0.317 s</small></li>
+<li class="fig-bar"><span>no key</span><span class="fig-track"><i style="--w: 87.7%"></i></span><b>13,755 MB</b><small>61,041 blocks · 12.13 s</small></li>
+</ol>
+<div class="fig-axis" aria-hidden="true"><span><i style="--x: 0%">0.01</i><i style="--x: 28.57%">1</i><i style="--x: 57.14%">100</i><i style="--x: 85.71%; --t: -50%">10,000</i></span></div>
+</div>
+<figcaption>Bytes read from the device on the cold try of each query, the blocks whose rows were read (with the key, Q3 also counts 37,523 blocks from their hour buckets) and the cold time. 1B store on an m6i.8xlarge, main 657aa79f, 25 November 2026: with the sort key in one partition (61,246 blocks), and in LynxDB's default design of daily partitions without a key (61,043 blocks).</figcaption>
+</figure>
+<p>Q1 and Q4 keep their paths. Q2, Q3 and Q5 read every block and group rows in hash tables: Q2 reads 11.8 GB, uses 137 CPU-seconds and peaks at 14.5 GiB, for 13.43 s cold and 5.17 s hot, and Q5 takes 12.13 s cold and 3.91 s hot.</p>
+<p>Daily partitions with the sort key sit between the two at 1.35 s hot, most of it Q2, which loses the key-run count across partitions.</p>
+<h3 id="memory-on-the-hash-path" tabindex="-1"><a class="heading-link" href="#memory-on-the-hash-path">Memory on the hash path</a></h3>
+<p>The hash aggregation behind the no-key numbers changed after the published run. Until 24 November each scan goroutine kept a private log of its groups and distinct values until the scan ended, so memory grew with the number of rows. Commit 8655937b, merged that day, stages them under one shared budget of 1 GiB (and as much again for distinct values) and drains them into hash partitions that all goroutines share.</p>
+<figure class="fig">
+<div class="fig-panel" style="--fig-label: 76px">
+<div class="fig-head"><b>Peak memory of the server on the cold try</b><span>GiB, no sort key</span></div>
+<ol class="fig-bars">
+<li class="fig-sub"><b>top accounts</b> stats count() by did | sort - n | head 10</li>
+<li class="fig-bar"><span>before</span><span class="fig-track"><i style="--w: 96.8%"></i></span><b>38.71</b></li>
+<li class="fig-bar is-lx"><span>after</span><span class="fig-track"><i style="--w: 33.7%"></i></span><b>13.48</b></li>
+<li class="fig-sub"><b>Q2</b> creates and users</li>
+<li class="fig-bar"><span>before</span><span class="fig-track"><i style="--w: 62.8%"></i></span><b>25.12</b></li>
+<li class="fig-bar is-lx"><span>after</span><span class="fig-track"><i style="--w: 36.3%"></i></span><b>14.50</b></li>
+<li class="fig-sub"><b>distinct accounts</b> stats distinct_count(did)</li>
+<li class="fig-bar"><span>before</span><span class="fig-track"><i style="--w: 58.1%"></i></span><b>23.23</b></li>
+<li class="fig-bar is-lx"><span>after</span><span class="fig-track"><i style="--w: 32.3%"></i></span><b>12.90</b></li>
+<li class="fig-sub"><b>Q5</b> longest activity</li>
+<li class="fig-bar"><span>before</span><span class="fig-track"><i style="--w: 48.9%"></i></span><b>19.54</b></li>
+<li class="fig-bar is-lx"><span>after</span><span class="fig-track"><i style="--w: 39.3%"></i></span><b>15.73</b></li>
+</ol>
+<div class="fig-axis" aria-hidden="true"><span><i style="--x: 0%">0</i><i style="--x: 25%">10</i><i style="--x: 50%">20</i><i style="--x: 75%">30</i><i style="--x: 100%">40</i></span></div>
+</div>
+<figcaption>Peak memory of the server (VmHWM) on the cold try, 1B store without a sort key (daily partitions, 107.8 GB), m6i.8xlarge, 24 November 2026: main 400bddbb before the change, 8655937b after.</figcaption>
+</figure>
+<p>Times moved little: Q2 went from 14.38 s to 13.48 s cold. Built with a very large budget, the same commit went back to 37.38 GiB for top accounts, so the budget is what cuts the memory. The sort-key design builds no such tables for Q2 to Q5.</p>
+<h2 id="where-the-sort-key-helps-and-where-it-works-against-it" tabindex="-1"><a class="heading-link" href="#where-the-sort-key-helps-and-where-it-works-against-it">Where the sort key helps and where it works against it</a></h2>
+<p>Five queries are a narrow test, so I also wrote 25 log-style queries and ran all 30 cold and hot at 1B on the same machine type: LynxDB on the benchmark's design (main 657aa79f, 25 November), ClickHouse 26.12.1 and VictoriaLogs v1.54.0 (24 November). LynxDB is faster than both on 21 of the 30 cold and 19 of the 30 hot, and it does so from the smallest store of the five systems: 92.7 GB against 121.4 to 384.7 GB.</p>
+<figure class="fig" data-fig-ratio>
+<div class="fig-panel fig-ratio">
+<div class="fig-head"><b>LynxDB against the faster of ClickHouse and VictoriaLogs</b><span>cold time ratio, log scale</span></div>
+<div class="fig-controls" hidden><div class="fig-seg" role="group" aria-label="Compare LynxDB with"><button type="button" data-vs="best" aria-pressed="true">Faster of the two</button><button type="button" data-vs="ch" aria-pressed="false">ClickHouse</button><button type="button" data-vs="vl" aria-pressed="false">VictoriaLogs</button></div><div class="fig-seg" role="group" aria-label="Run"><button type="button" data-run="cold" aria-pressed="true">Cold</button><button type="button" data-run="hot" aria-pressed="false">Hot</button></div></div>
+<p class="fig-count" aria-live="polite">LynxDB is faster on <b>21</b> of <span>30</span> queries. Open a query for its PPL and times.</p>
+<div class="fig-axis" aria-hidden="true"><span><i style="--x: 50%; --t: calc(-100% - 8px)">LynxDB faster</i><i style="--x: 50%; --t: 8px">LynxDB slower</i></span></div>
+<ol class="fig-bars" style="--ticks: 8">
+<li class="fig-sub" data-group="fast"><b>Clearly faster, <span>15</span></b> under 0.85×</li>
+<li class="fig-qrow" data-q="anyfield_word_count"><details><summary class="fig-bar"><span>a word in any field</span><span class="fig-track"><i style="--x0: min(24.4%, calc(50% - 3px)); --w: 25.6%"></i></span><b>0.009×</b></summary><div class="fig-qrow__body"><p>Counts events with the word &#x27;earthquake&#x27; in any field. LynxDB read rows from 2,855 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky earthquake | stats count() as n</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.884 s</td><td>0.516 s</td></tr><tr><td>ClickHouse</td><td>591 s</td><td>no run</td></tr><tr><td>VictoriaLogs</td><td>98.4 s</td><td>43.3 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="Q4"><details><summary class="fig-bar"><span>Q4 first posters</span><span class="fig-track"><i style="--x0: min(25.5%, calc(50% - 3px)); --w: 24.5%"></i></span><b>0.011×</b></summary><div class="fig-qrow__body"><p>The three accounts whose first post is the earliest. LynxDB read rows from 32 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where kind = &#x27;commit&#x27; and commit.operation = &#x27;create&#x27; and commit.collection = &#x27;app.bsky.feed.post&#x27; | stats min(_time) as first_post_ts by did | sort first_post_ts | head 3</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.0071 s</td><td>0.0017 s</td></tr><tr><td>ClickHouse</td><td>0.644 s</td><td>0.486 s</td></tr><tr><td>VictoriaLogs</td><td>6.91 s</td><td>5.56 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="Q1"><details><summary class="fig-bar"><span>Q1 events per collection</span><span class="fig-track"><i style="--x0: min(28.1%, calc(50% - 3px)); --w: 21.9%"></i></span><b>0.018×</b></summary><div class="fig-qrow__body"><p>Counts all events by collection. LynxDB read rows from 0 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | stats count() as count by commit.collection | sort - count</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.0019 s</td><td>0.0016 s</td></tr><tr><td>ClickHouse</td><td>0.132 s</td><td>0.0990 s</td></tr><tr><td>VictoriaLogs</td><td>0.106 s</td><td>0.0471 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="Q2"><details><summary class="fig-bar"><span>Q2 creates and users</span><span class="fig-track"><i style="--x0: min(30.8%, calc(50% - 3px)); --w: 19.2%"></i></span><b>0.029×</b></summary><div class="fig-qrow__body"><p>Counts create events per collection, with the exact number of distinct accounts. LynxDB read rows from 14 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where kind = &#x27;commit&#x27; and commit.operation = &#x27;create&#x27; | stats count() as count, distinct_count(did) as users by commit.collection | sort - count</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.0558 s</td><td>0.0533 s</td></tr><tr><td>ClickHouse</td><td>1.93 s</td><td>1.70 s</td></tr><tr><td>VictoriaLogs</td><td>20.6 s</td><td>18.5 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="word_absent_count"><details><summary class="fig-bar"><span>count an absent word</span><span class="fig-track"><i style="--x0: min(31.1%, calc(50% - 3px)); --w: 18.9%"></i></span><b>0.031×</b></summary><div class="fig-qrow__body"><p>Counts events whose post text holds a word that appears nowhere; the answer is 0. LynxDB read rows from 0 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where match(commit.record.text, &#x27;zqxjkvwpyhh&#x27;) | stats count() as n</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.0948 s</td><td>0.0010 s</td></tr><tr><td>ClickHouse</td><td>3.06 s</td><td>0.0030 s</td></tr><tr><td>VictoriaLogs</td><td>3.81 s</td><td>3.04 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="Q3"><details><summary class="fig-bar"><span>Q3 creates by hour</span><span class="fig-track"><i style="--x0: min(34.6%, calc(50% - 3px)); --w: 15.4%"></i></span><b>0.059×</b></summary><div class="fig-qrow__body"><p>Counts post, repost and like creates per collection and UTC hour of day. LynxDB read rows from 5 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where kind = &#x27;commit&#x27; and commit.operation = &#x27;create&#x27; and commit.collection in (&#x27;app.bsky.feed.post&#x27;, &#x27;app.bsky.feed.repost&#x27;, &#x27;app.bsky.feed.like&#x27;) | eval hour_of_day = hour(_time) | stats count() as count by commit.collection, hour_of_day | sort hour_of_day, commit.collection</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.0988 s</td><td>0.0607 s</td></tr><tr><td>ClickHouse</td><td>1.89 s</td><td>1.11 s</td></tr><tr><td>VictoriaLogs</td><td>1.67 s</td><td>1.52 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="rkey_lookup"><details><summary class="fig-bar"><span>one record by its key</span><span class="fig-track"><i style="--x0: min(39.6%, calc(50% - 3px)); --w: 10.4%"></i></span><b>0.15×</b></summary><div class="fig-qrow__body"><p>The event with one given record key; one row matches. LynxDB read rows from 71 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky commit.rkey=&quot;3lbhuei4dic2u&quot;</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.165 s</td><td>0.0117 s</td></tr><tr><td>ClickHouse</td><td>5.47 s</td><td>0.0100 s</td></tr><tr><td>VictoriaLogs</td><td>1.12 s</td><td>0.0674 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="word_rare_count"><details><summary class="fig-bar"><span>count a rare word</span><span class="fig-track"><i style="--x0: min(40.8%, calc(50% - 3px)); --w: 9.2%"></i></span><b>0.18×</b></summary><div class="fig-qrow__body"><p>Counts events whose post text holds the rare word &#x27;earthquake&#x27;. LynxDB read rows from 2,243 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where match(commit.record.text, &#x27;earthquake&#x27;) | stats count() as n</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.559 s</td><td>0.419 s</td></tr><tr><td>ClickHouse</td><td>3.06 s</td><td>0.447 s</td></tr><tr><td>VictoriaLogs</td><td>3.86 s</td><td>3.32 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="tail100"><details><summary class="fig-bar"><span>latest 100 events</span><span class="fig-track"><i style="--x0: min(42.8%, calc(50% - 3px)); --w: 7.2%"></i></span><b>0.27×</b></summary><div class="fig-qrow__body"><p>The 100 most recent events of any kind. LynxDB read rows from 128 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | sort - _time | head 100</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.0981 s</td><td>0.0522 s</td></tr><tr><td>ClickHouse</td><td>3.58 s</td><td>0.0820 s</td></tr><tr><td>VictoriaLogs</td><td>0.368 s</td><td>0.124 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="tail100_posts"><details><summary class="fig-bar"><span>latest 100 posts</span><span class="fig-track"><i style="--x0: min(43.3%, calc(50% - 3px)); --w: 6.7%"></i></span><b>0.29×</b></summary><div class="fig-qrow__body"><p>The 100 most recent events in the post collection. LynxDB read rows from 254 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where commit.collection = &#x27;app.bsky.feed.post&#x27; | sort - _time | head 100</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.138 s</td><td>0.0651 s</td></tr><tr><td>ClickHouse</td><td>0.483 s</td><td>0.197 s</td></tr><tr><td>VictoriaLogs</td><td>0.470 s</td><td>0.211 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="langs"><details><summary class="fig-bar"><span>top post languages</span><span class="fig-track"><i style="--x0: min(44.3%, calc(50% - 3px)); --w: 5.7%"></i></span><b>0.35×</b></summary><div class="fig-qrow__body"><p>The 10 most common language lists of posts. LynxDB read rows from 10,918 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where commit.collection = &#x27;app.bsky.feed.post&#x27; | stats count() as n by commit.record.langs | sort - n | head 10</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.117 s</td><td>0.0031 s</td></tr><tr><td>ClickHouse</td><td>0.351 s</td><td>0.308 s</td></tr><tr><td>VictoriaLogs</td><td>0.338 s</td><td>0.264 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="user_heavy_tail"><details><summary class="fig-bar"><span>latest 100 of a busy account</span><span class="fig-track"><i style="--x0: min(45.1%, calc(50% - 3px)); --w: 4.9%"></i></span><b>0.41×</b></summary><div class="fig-qrow__body"><p>The 100 most recent events of one busy account. LynxDB read rows from 57 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky did=&quot;did:plc:74p5m4owldmqdvaday77brpt&quot; | sort - _time | head 100</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.0668 s</td><td>0.0148 s</td></tr><tr><td>ClickHouse</td><td>0.164 s</td><td>0.0160 s</td></tr><tr><td>VictoriaLogs</td><td>0.407 s</td><td>0.164 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="user_light_tail"><details><summary class="fig-bar"><span>latest 100 of a quiet account</span><span class="fig-track"><i style="--x0: min(45.3%, calc(50% - 3px)); --w: 4.7%"></i></span><b>0.42×</b></summary><div class="fig-qrow__body"><p>The 100 most recent events of one quiet account. LynxDB read rows from 50 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky did=&quot;did:plc:yj3sjq3blzpynh27cumnp5ks&quot; | sort - _time | head 100</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.0927 s</td><td>0.0197 s</td></tr><tr><td>ClickHouse</td><td>0.219 s</td><td>0.0260 s</td></tr><tr><td>VictoriaLogs</td><td>1.51 s</td><td>0.428 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="word_rare_tail"><details><summary class="fig-bar"><span>latest 100 with a rare word</span><span class="fig-track"><i style="--x0: min(46.0%, calc(50% - 3px)); --w: 4.0%"></i></span><b>0.48×</b></summary><div class="fig-qrow__body"><p>The 100 most recent events whose post text holds &#x27;earthquake&#x27;. LynxDB read rows from 2,228 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where match(commit.record.text, &#x27;earthquake&#x27;) | sort - _time | head 100</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.836 s</td><td>0.483 s</td></tr><tr><td>ClickHouse</td><td>3.91 s</td><td>0.182 s</td></tr><tr><td>VictoriaLogs</td><td>1.74 s</td><td>1.14 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="Q5"><details><summary class="fig-bar"><span>Q5 longest activity</span><span class="fig-track"><i style="--x0: min(46.0%, calc(50% - 3px)); --w: 4.0%"></i></span><b>0.48×</b></summary><div class="fig-qrow__body"><p>The three accounts with the longest span between their first and last post. LynxDB read rows from 5,513 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where kind = &#x27;commit&#x27; and commit.operation = &#x27;create&#x27; and commit.collection = &#x27;app.bsky.feed.post&#x27; | stats min(_time) as tmin, max(_time) as tmax by did | eval activity_span = timestampdiff(MILLISECOND, from_unixtime(0), tmax) - timestampdiff(MILLISECOND, from_unixtime(0), tmin) | fields did, activity_span | sort - activity_span | head 3</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.317 s</td><td>0.0634 s</td></tr><tr><td>ClickHouse</td><td>0.658 s</td><td>0.504 s</td></tr><tr><td>VictoriaLogs</td><td>9.53 s</td><td>7.94 s</td></tr></tbody></table></div></details></li>
+<li class="fig-sub" data-group="even"><b>About even, <span>6</span></b> 0.85× to 1.18×</li>
+<li class="fig-qrow" data-q="word_common_count"><details><summary class="fig-bar"><span>count a common word</span><span class="fig-track"><i style="--x0: min(49.4%, calc(50% - 3px)); --w: 0.6%"></i></span><b>0.89×</b></summary><div class="fig-qrow__body"><p>Counts events whose post text holds the common word &#x27;love&#x27;. LynxDB read rows from 5,503 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where match(commit.record.text, &#x27;love&#x27;) | stats count() as n</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>2.76 s</td><td>1.00 s</td></tr><tr><td>ClickHouse</td><td>3.10 s</td><td>1.06 s</td></tr><tr><td>VictoriaLogs</td><td>3.81 s</td><td>3.21 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="regex_count"><details><summary class="fig-bar"><span>count a regex match</span><span class="fig-track"><i style="--x0: min(49.4%, calc(50% - 3px)); --w: 0.6%"></i></span><b>0.89×</b></summary><div class="fig-qrow__body"><p>Counts events whose post text matches a phone-number pattern. LynxDB read rows from 5,775 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where regexp_match(commit.record.text, &#x27;[0-9]{3}-[0-9]{3}-[0-9]{4}&#x27;) | stats count() as n</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>2.76 s</td><td>0.358 s</td></tr><tr><td>ClickHouse</td><td>3.09 s</td><td>0.685 s</td></tr><tr><td>VictoriaLogs</td><td>10.7 s</td><td>10.3 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="substring_count"><details><summary class="fig-bar"><span>count a substring</span><span class="fig-track"><i style="--x0: min(49.4%, calc(50% - 3px)); --w: 0.6%"></i></span><b>0.9×</b></summary><div class="fig-qrow__body"><p>Counts events whose post text contains &#x27;bitcoin&#x27; anywhere, inside words too. LynxDB read rows from 5,775 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where like(commit.record.text, &#x27;%bitcoin%&#x27;) | stats count() as n</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>2.75 s</td><td>0.828 s</td></tr><tr><td>ClickHouse</td><td>3.07 s</td><td>0.801 s</td></tr><tr><td>VictoriaLogs</td><td>12.1 s</td><td>11.8 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="phrase_count"><details><summary class="fig-bar"><span>count a phrase</span><span class="fig-track"><i style="--x0: min(49.5%, calc(50% - 3px)); --w: 0.5%"></i></span><b>0.9×</b></summary><div class="fig-qrow__body"><p>Counts events whose post text holds the phrase &#x27;good morning&#x27;. LynxDB read rows from 5,493 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where match_phrase(commit.record.text, &#x27;good morning&#x27;) | stats count() as n</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>2.76 s</td><td>0.986 s</td></tr><tr><td>ClickHouse</td><td>3.05 s</td><td>1.02 s</td></tr><tr><td>VictoriaLogs</td><td>3.81 s</td><td>3.14 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="text_length"><details><summary class="fig-bar"><span>length of post text</span><span class="fig-track"><i style="--x0: min(49.5%, calc(50% - 3px)); --w: 0.5%"></i></span><b>0.9×</b></summary><div class="fig-qrow__body"><p>The average and the longest length of post text. LynxDB read rows from 10,918 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where commit.collection = &#x27;app.bsky.feed.post&#x27; | stats avg(length(commit.record.text)) as avg_len, max(length(commit.record.text)) as max_len</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>2.76 s</td><td>1.58 s</td></tr><tr><td>ClickHouse</td><td>3.05 s</td><td>1.08 s</td></tr><tr><td>VictoriaLogs</td><td>3.80 s</td><td>1.14 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="head100"><details><summary class="fig-bar"><span>first 100 events</span><span class="fig-track"><i style="--x0: min(49.8%, calc(50% - 3px)); --w: 0.2%"></i></span><b>0.96×</b></summary><div class="fig-qrow__body"><p>The first 100 events the index returns, with no order asked for. LynxDB read rows from 1 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | head 100</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.0391 s</td><td>0.0109 s</td></tr><tr><td>ClickHouse</td><td>0.126 s</td><td>0.0040 s</td></tr><tr><td>VictoriaLogs</td><td>0.0406 s</td><td>0.0285 s</td></tr></tbody></table></div></details></li>
+<li class="fig-sub" data-group="slow"><b>Slower, <span>9</span></b> over 1.18×</li>
+<li class="fig-qrow" data-q="word_common_tail"><details><summary class="fig-bar"><span>latest 100 with a common word</span><span class="fig-track"><i style="--x0: 50%; --w: 2.1%"></i></span><b>1.5×</b></summary><div class="fig-qrow__body"><p>The 100 most recent events whose post text holds &#x27;love&#x27;. LynxDB read rows from 2,792 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where match(commit.record.text, &#x27;love&#x27;) | sort - _time | head 100</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>1.33 s</td><td>0.592 s</td></tr><tr><td>ClickHouse</td><td>3.88 s</td><td>0.217 s</td></tr><tr><td>VictoriaLogs</td><td>0.897 s</td><td>0.304 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="user_heavy_count"><details><summary class="fig-bar"><span>a busy account by collection</span><span class="fig-track"><i style="--x0: 50%; --w: 3.4%"></i></span><b>1.9×</b></summary><div class="fig-qrow__body"><p>One busy account&#x27;s events, counted per collection. LynxDB read rows from 84 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky did=&quot;did:plc:74p5m4owldmqdvaday77brpt&quot; | stats count() as n by commit.collection</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>0.137 s</td><td>0.0022 s</td></tr><tr><td>ClickHouse</td><td>0.0730 s</td><td>0.0090 s</td></tr><tr><td>VictoriaLogs</td><td>2.25 s</td><td>0.328 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="top_users"><details><summary class="fig-bar"><span>top 10 accounts</span><span class="fig-track"><i style="--x0: 50%; --w: 3.4%"></i></span><b>1.9×</b></summary><div class="fig-qrow__body"><p>The 10 accounts with the most events. LynxDB read rows from 61,246 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | stats count() as n by did | sort - n | head 10</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>2.74 s</td><td>0.784 s</td></tr><tr><td>ClickHouse</td><td>1.46 s</td><td>1.22 s</td></tr><tr><td>VictoriaLogs</td><td>35.4 s</td><td>32.1 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="distinct_users"><details><summary class="fig-bar"><span>distinct accounts</span><span class="fig-track"><i style="--x0: 50%; --w: 4.8%"></i></span><b>2.4×</b></summary><div class="fig-qrow__body"><p>Counts the distinct accounts over all events. LynxDB read rows from 61,246 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | stats distinct_count(did) as users</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>2.72 s</td><td>0.430 s</td></tr><tr><td>ClickHouse</td><td>1.12 s</td><td>0.880 s</td></tr><tr><td>VictoriaLogs</td><td>22.0 s</td><td>19.7 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="top_reply_roots"><details><summary class="fig-bar"><span>top 10 reply roots</span><span class="fig-track"><i style="--x0: 50%; --w: 10.8%"></i></span><b>7.4×</b></summary><div class="fig-qrow__body"><p>The 10 threads with the most replies. LynxDB read rows from 61,246 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where isnotnull(commit.record.reply.root.uri) | stats count() as n by commit.record.reply.root.uri | sort - n | head 10</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>7.24 s</td><td>1.12 s</td></tr><tr><td>ClickHouse</td><td>0.985 s</td><td>0.564 s</td></tr><tr><td>VictoriaLogs</td><td>3.00 s</td><td>2.38 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="replies_by_hour"><details><summary class="fig-bar"><span>replies per hour</span><span class="fig-track"><i style="--x0: 50%; --w: 14.3%"></i></span><b>14×</b></summary><div class="fig-qrow__body"><p>Events that reply to another post, counted per UTC hour of day. LynxDB read rows from 61,246 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky | where isnotnull(commit.record.reply.parent.uri) | eval hour_of_day = hour(_time) | stats count() as n by hour_of_day | sort hour_of_day</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>6.79 s</td><td>0.629 s</td></tr><tr><td>ClickHouse</td><td>1.02 s</td><td>0.443 s</td></tr><tr><td>VictoriaLogs</td><td>0.488 s</td><td>0.356 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="window5m_tail"><details><summary class="fig-bar"><span>latest 100 in 5 minutes</span><span class="fig-track"><i style="--x0: 50%; --w: 14.4%"></i></span><b>14×</b></summary><div class="fig-qrow__body"><p>The 100 most recent events in that 5-minute window. LynxDB read rows from 58,553 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky earliest=&#x27;2024-11-28 12:00:00&#x27; latest=&#x27;2024-11-28 12:05:00&#x27; | sort - _time | head 100</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>3.62 s</td><td>0.223 s</td></tr><tr><td>ClickHouse</td><td>3.52 s</td><td>0.0390 s</td></tr><tr><td>VictoriaLogs</td><td>0.257 s</td><td>0.0741 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="window1h_word"><details><summary class="fig-bar"><span>a word within 1 hour</span><span class="fig-track"><i style="--x0: 50%; --w: 16.9%"></i></span><b>22×</b></summary><div class="fig-qrow__body"><p>Counts events with &#x27;love&#x27; in the post text from 12:00 to 13:00 on 28 November 2024. LynxDB read rows from 5,478 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky earliest=&#x27;2024-11-28 12:00:00&#x27; latest=&#x27;2024-11-28 13:00:00&#x27; | where match(commit.record.text, &#x27;love&#x27;) | stats count() as n</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>3.17 s</td><td>0.507 s</td></tr><tr><td>ClickHouse</td><td>3.54 s</td><td>0.0710 s</td></tr><tr><td>VictoriaLogs</td><td>0.142 s</td><td>0.0686 s</td></tr></tbody></table></div></details></li>
+<li class="fig-qrow" data-q="window5m_count"><details><summary class="fig-bar"><span>count in a 5-minute window</span><span class="fig-track"><i style="--x0: 50%; --w: 23.3%"></i></span><b>73×</b></summary><div class="fig-qrow__body"><p>Counts events per collection from 12:00 to 12:05 on 28 November 2024. LynxDB read rows from 30 of 61,246 blocks on the cold try.</p><pre><code>source=bluesky earliest=&#x27;2024-11-28 12:00:00&#x27; latest=&#x27;2024-11-28 12:05:00&#x27; | stats count() as n by commit.collection</code></pre><table class="fig-times"><thead><tr><th scope="col">Time</th><th scope="col">cold</th><th scope="col">hot</th></tr></thead><tbody><tr><td>LynxDB</td><td>3.48 s</td><td>0.151 s</td></tr><tr><td>ClickHouse</td><td>3.39 s</td><td>0.0360 s</td></tr><tr><td>VictoriaLogs</td><td>0.0479 s</td><td>0.0060 s</td></tr></tbody></table></div></details></li>
+<li class="fig-sub" data-group="none" hidden><b>No time to compare, <span>0</span></b> no hot run on ClickHouse</li>
+</ol>
+<div class="fig-axis" aria-hidden="true"><span><i style="--x: 12.5%; --t: -50%">0.001×</i><i style="--x: 50%">1×</i><i style="--x: 87.5%; --t: -50%">1000×</i></span></div>
+</div>
+<figcaption>LynxDB's time divided by the time of the faster of ClickHouse and VictoriaLogs (or of the one chosen), for the five JSONBench queries and 25 log queries at 1B on an m6i.8xlarge. Cold is the first run after a restart with the page cache dropped, hot the faster of runs 2 and 3. LynxDB: main 657aa79f with the benchmark's sort key in one partition (25 November 2026). ClickHouse 26.12.1 and VictoriaLogs v1.54.0: 24 November 2026. ClickHouse has no hot time for the query over any field: its one cold run took 591 s.</figcaption>
+</figure>
+<script type="module" src="fig-ratio.js"></script>
+<p>The 15 clear wins are the queries where the sort key, the footer or a token filter rules out most blocks before a row is read. Besides the five JSONBench queries:</p>
+<ul>
+<li>A word in any field (<code>source=bluesky earthquake | stats count()</code>) takes 0.88 s cold, against 98.4 s for VictoriaLogs and 591 s for ClickHouse. The token filters skip 58,391 of the 61,246 blocks.</li>
+<li>The latest 100 events take 0.098 s, against 0.37 s and 3.58 s. The block time ranges in the footer leave 128 blocks to read.</li>
+<li>One record by its key (<code>commit.rkey=&quot;3lbhuei4dic2u&quot;</code>) takes 0.17 s, against 1.12 s and 5.47 s, from 71 blocks.</li>
+</ul>
+<p>Six more come out within 11% of the faster rival: the five that read all post text (a common word, a phrase, a substring, a regular expression and the length of the text, about 2.75 s against ClickHouse's 3.05 s) and the first 100 events.</p>
+<p>The nine losses come from the same sort key. Rows are ordered by kind, operation, collection and user before time, so a time window is spread over almost every block of the one long partition: counting events per collection in a 5-minute window skips only 2,691 blocks by time, reads 4.7 GB and takes 3.48 s cold, against VictoriaLogs' 0.048 s. LynxDB's default design, daily partitions without a key, counts the same window in 0.0064 s, and loses JSONBench instead.</p>
+<p>A field outside the key and present in few events is the other weak spot: replies per hour (a field in 4.5% of events) reads all 61,246 blocks, 6.79 s against VictoriaLogs' 0.49 s. Top and distinct accounts (2.74 and 2.72 s against ClickHouse's 1.46 and 1.12 s) group by <code class="nowrap">did</code> across every collection, and the latest 100 posts containing a common word need the time order that the key does not give (1.33 s against 0.90 s). Some ClickHouse hot times may also benefit from its query condition cache; I have not checked.</p>
+<p>Text search shows the same trade-off between the two LynxDB designs. The key packs the post text into about 5,500 blocks of 16,384 posts each, while without it posts are under one row in ten of every block. A rare word (<code>match(commit.record.text, 'earthquake')</code>) opens 2,273 blocks with the key and 7,744 without, but reads 1.6 GB against 0.7 GB and takes 0.56 s cold against 0.36 s. A regular expression gets no help from token filters: 2.76 s cold and 0.36 s hot with the key, 4.08 s and 0.14 s without.</p>
+<p>On the five JSONBench queries alone, ClickHouse 26.12.1, which the ClickHouse entry's scripts installed when I reran it on 24 November, sums 3.91 s hot and 5.32 s cold, against 6.87 s and 9.24 s for the published 26.11: faster than LynxDB without a sort key, slower than LynxDB with one.</p>
+<p>The load scripts differ as well. LynxDB's loads 16 files at once, VictoriaLogs' 8, and ClickHouse's one file per <code class="nowrap">INSERT</code>, one after another; LynxDB also waits for its final merge inside the load time. The load-time ratio says as much about the scripts as about the engines.</p>
+<h2 id="what-the-jsonbench-page-shows-and-hides" tabindex="-1"><a class="heading-link" href="#what-the-jsonbench-page-shows-and-hides">What the JSONBench page shows and hides</a></h2>
+<p>LynxDB stores nested objects as columns named by their dotted paths and returns events flat: <code class="nowrap">{&quot;a&quot;: {&quot;b&quot;: 1}}</code> and <code class="nowrap">{&quot;a.b&quot;: 1}</code> come back the same, while arrays, empty objects and nulls are kept. Its <code class="nowrap">retains_structure</code> is therefore <code class="nowrap">no</code>, and the JSONBench page's Flattening filter leaves such systems out by default. In that default view ClickHouse leads at 1B.</p>
+<p>The page also scores the size of each entry's scripts after <code class="nowrap">zstd -19</code>. LynxDB's is 1,954 bytes, against ClickHouse 746, VictoriaLogs 1,331, OpenSearch 3,023 and Elasticsearch 3,538, which ranks it 20th of 29. At the smaller sizes Opteryx loads faster (1M to 100M), and CLP is smaller at 1M and 10M.</p>
+<p>The dataset has 759 lines that LynxDB does not load as documents: 755 are not JSON objects (documents longer than 64 KiB split over two lines), and 4 are objects in file_0178 whose <code class="nowrap">commit.record.langs</code> is nested 2,163 levels deep, beyond LynxDB's limit of 256. The published run kept all 759 as text events, so it counts 1,000,000,000 lines and scores 100% data quality, where ClickHouse loads 999,999,258 and VictoriaLogs 999,999,241. Since 23 November <code class="nowrap">/api/v1/ingest</code> refuses such lines, and main holds 999,999,241 events, as many as VictoriaLogs.</p>
+<p>The entry's README states that the answers match ClickHouse's at 10M and 100M, apart from the row of the non-JSON lines. At 1B I compared the stored answers of main 657aa79f (25 November) with those of ClickHouse 26.12. Q3, Q4 and Q5 are identical. Q2 differs in one row: <code class="nowrap">app.bsky.labeler.service</code> has 188 events and 117 users against 189 and 118. Q1 differs in two: <code class="nowrap">app.bsky.graph.list</code> 276,933 against 276,948 and <code class="nowrap">app.bsky.labeler.service</code> 1,757 against 1,759. The 17 events are exactly the difference between the documents the two systems loaded; I have not traced which documents they are.</p>
+<h2 id="why-clickhouse-s-table-is-twice-the-size" tabindex="-1"><a class="heading-link" href="#why-clickhouse-s-table-is-twice-the-size">Why ClickHouse's table is twice the size</a></h2>
+<p>LynxDB stores each field once, as its own column, and keeps no copy of the raw JSON: 92.7 GB for a billion documents is 92.7 bytes each, against 482 bytes of JSON. In the measurement run's store, token filters take 7.9 GB of 91.9 GB.</p>
+<p>ClickHouse's table is about LynxDB's size at 1M and 10M documents (1.01 and 1.03 times) and twice it from 100M (2.05) to 1B (2.11). Its schema uses the JSON type with the <code class="nowrap">advanced</code> serialization for shared data, and ClickHouse's blog says that since 25.8 this format stores &quot;a copy of the data in the original format alongside the advanced one&quot;, which &quot;effectively doubles the storage requirement&quot;<sup class="fn-ref"><a href="#fn3" id="fnref3" aria-describedby="notes-title">3</a></sup>. My sampling of the 26.11 table agrees with that: fresh parts take 94 to 102 bytes per row and merged parts 191 to 199, both with ZSTD(3). The blog does not say the copy is tied to merged parts; that link is my reading of the sample.</p>
+<h2 id="what-i-have-not-measured" tabindex="-1"><a class="heading-link" href="#what-i-have-not-measured">What I have not measured</a></h2>
+<ul>
+<li>Queries while ingest and merges run. Before the final merge the parts overlap in key range, so Q2 would most likely take the multi-stream path shown above for daily partitions; I have no numbers for it.</li>
+<li>A ClickHouse projection or materialized view. One would likely do Q2's work at write time; neither side uses them in this benchmark.</li>
+<li>ClickHouse loaded in parallel, as LynxDB is.</li>
+<li>The answers of the published build ad9d7e3b at 1B.</li>
+</ul>
+<p>The result files, the scripts and the README are in <a href="https://github.com/lynxbase/ClickBench/tree/main/json/lynxdb">lynxbase/ClickBench</a>; <code class="nowrap">./benchmark.sh</code> in <code class="nowrap">json/lynxdb</code> runs the entry through the shared JSONBench driver. If the method has a flaw, tell me and I will rerun it. The next post, <a href="../inside-the-lynxdb-engine/">Inside the LynxDB engine</a>, opens the part file: the footer, the key runs, the time buckets and the hash path.</p>
+<section class="footnotes" aria-labelledby="notes-title">
+<h2 class="footnotes__title" id="notes-title">Notes</h2>
+<ol class="footnotes__list">
+<li id="fn1" class="footnote-item"><p>JSONBench's standard volume is 2,000 GB of gp3 at 16,000 IOPS and 1,000 MB/s. The volume of LynxDB's published run was not recorded; the measurement runs used 1,000 GB at 16,000 IOPS and 1,000 MiB/s. <a href="#fnref1" class="fn-back" aria-label="Back to the text"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10V2.5M2.5 6 6 2.5 9.5 6"/></svg></a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>Q5's counters account for 61,218 of the 61,246 blocks: 5,513 opened and 55,705 skipped by key. The other 28 are not reported by any counter. <a href="#fnref2" class="fn-back" aria-label="Back to the text"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10V2.5M2.5 6 6 2.5 9.5 6"/></svg></a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="https://clickhouse.com/blog/json-data-type-gets-even-better">JSON data type gets even better</a>, ClickHouse blog. <a href="#fnref3" class="fn-back" aria-label="Back to the text"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10V2.5M2.5 6 6 2.5 9.5 6"/></svg></a></p>
+</li>
+</ol>
+</section>
+
+  </article>
+  <p class="post__end"><a class="back-link" href="../"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M11 6H3M6.5 2.5 3 6l3.5 3.5"/></svg>All posts</a></p>
+</div>
+<aside class="more" aria-labelledby="more-h">
+  <div class="wrap">
+    <div class="more__head"><h2 id="more-h">More posts</h2><a class="link" href="../">All posts</a></div>
+    <div class="card-grid"><article class="card-post">
+  <div class="card-post__media"><img src="../inside-the-lynxdb-engine/thumb.png" alt="" width="1200" height="630" loading="lazy" decoding="async"></div>
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="../inside-the-lynxdb-engine/">Twenty-eight bytes from the end: inside the LynxDB engine</a></h2>
+    <p class="card-post__excerpt">LynxDB opens a part file from its last 28 bytes, which locate a footer that describes every block: its first sort key, its key runs, its rows per hour. This post follows the Bluesky events from JSON lines into that footer, shows which queries end there and what the design costs, and sets each piece beside ClickHouse&#39;s MergeTree.</p>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>16 min read</span></p>
+  </div>
+</article>
+<article class="card-post">
+  <div class="card-post__media"><img src="../querying-an-access-log/thumb.png" alt="" width="1200" height="630" loading="lazy" decoding="async"></div>
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="../querying-an-access-log/">Five questions for an access log, answered from the shell</a></h2>
+    <p class="card-post__excerpt">lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.</p>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>4 min read</span></p>
+  </div>
+</article>
+
+    </div>
+  </div>
+</aside>
+
+</main>
+
+<footer class="footer closing blog-close" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--word">
+      <div class="section-head">
+        <h2 id="close-h">Start with one log file</h2>
+        <p class="t-lead">Install the binary, then pipe a file into <code>lynxdb query</code>.</p>
+        <div class="close__row">
+          <div class="cmd close__cmd"><code>curl -fsSL https://lynxdb.org/install.sh | sh</code><button class="cmd__copy" type="button" data-copy aria-label="Copy the install command"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5"/></svg></button></div>
+          <a class="btn btn--primary" href="../../#install">Install LynxDB<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+        </div>
+      </div>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo brand" href="../../"><img class="brand__mark" data-mark src="../../img/lynxdb-mark-faceted-on-light.svg" alt="" width="22" height="30" loading="lazy">LynxDB</a>
+          <p class="footer__lede">An open-source log database in one binary.<span class="footer__more"> Query a file from the shell, or keep a billion events on one server.</span></p>
+        </div>
+        <div class="span-2 start-7 footer__col footer__col--product"><h3>Product</h3><ul><li><a href="../../#server">Server</a></li><li><a href="../../#engine">Engine</a></li><li><a href="../../#benchmark">Benchmark</a></li><li><a href="../../#ingest">Ingest</a></li><li><a href="../">Blog</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Docs</h3><ul><li><a href="https://docs.lynxdb.org/docs/getting-started/quickstart">Quick start</a></li><li><a href="https://docs.lynxdb.org/docs/ppl/overview">PPL guide</a></li><li><a href="https://docs.lynxdb.org/docs/guides/ingest-data">Ingest data</a></li><li class="footer__more"><a href="https://docs.lynxdb.org/docs/api/overview">REST API</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Community</h3><ul><li><a href="https://github.com/lynxbase/lynxdb">GitHub</a></li><li><a href="https://discord.gg/RgggCFdgWK">Discord</a></li><li><a href="https://github.com/lynxbase/lynxdb/releases">Releases</a></li><li><a href="https://github.com/lynxbase/lynxdb/blob/main/CONTRIBUTING.md">Contributing</a></li><li class="footer__more"><a href="https://github.com/lynxbase/lynxdb/blob/main/SECURITY.md">Security</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 LynxDB &nbsp; <a href="https://github.com/lynxbase/lynxdb/blob/main/LICENSE">Apache 2.0</a> &nbsp; Product names and logos are trademarks of their owners.</span>
+        <a class="feed-link" href="../feed.xml">Blog feed</a>
+      </div>
+    </div>
+  </div>
+  <span class="sr-only" role="status" data-copy-status></span>
+</footer>
+
+
+<script type="module" src="../../theme.js"></script>
+<script type="module" src="../blog.js"></script>
+</body>
+</html>

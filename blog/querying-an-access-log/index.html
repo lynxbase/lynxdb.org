@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-buttons="solid" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Five questions for an access log, answered from the shell · LynxDB blog</title>
+<meta name="description" content="lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.">
+<meta name="robots" content="max-image-preview:large">
+<link rel="canonical" href="https://lynxdb.org/blog/querying-an-access-log/">
+<link rel="alternate" type="text/markdown" href="https://lynxdb.org/blog/querying-an-access-log.md">
+<link rel="describedby" href="/llms.txt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LynxDB">
+<meta property="og:title" content="Five questions for an access log, answered from the shell">
+<meta property="og:description" content="lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.">
+<meta property="og:url" content="https://lynxdb.org/blog/querying-an-access-log/">
+<meta property="og:image" content="https://lynxdb.org/blog/querying-an-access-log/thumb.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-11-27">
+<meta property="article:tag" content="Using LynxDB">
+<script type="application/ld+json">{"@context":"https://schema.org","url":"https://lynxdb.org/blog/querying-an-access-log/","inLanguage":"en","publisher":{"@id":"https://lynxdb.org/#organization"},"@type":"BlogPosting","@id":"https://lynxdb.org/blog/querying-an-access-log/#article","mainEntityOfPage":"https://lynxdb.org/blog/querying-an-access-log/","headline":"Five questions for an access log, answered from the shell","description":"lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.","datePublished":"2026-11-27","author":[{"@type":"Person","name":"Evgenii Orlov"}],"keywords":["Using LynxDB"],"isPartOf":{"@id":"https://lynxdb.org/blog/#blog"},"image":"https://lynxdb.org/blog/querying-an-access-log/thumb.png"}</script>
+<link rel="icon" href="../../img/lynxdb-appicon-moss.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f1f3ef">
+<link rel="alternate" type="application/atom+xml" title="LynxDB blog" href="../feed.xml">
+<link rel="preload" href="../../fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/system.css">
+<link rel="stylesheet" href="../../assets/motion/motion.css">
+<script>(() => { let t = null; try { t = localStorage.getItem('lynxdb-theme'); } catch (e) {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); })()</script>
+<style>
+:root {
+  --p-bg: #f1f3ef; --p-surface: #fdfefc; --p-ink: #171b17; --p-muted: #616760;
+  --p-accent: #227847; --p-accent-ink: #f1f3ef; --p-action: #227847; --p-action-ink: #f1f3ef;
+  --p-inv-bg: #171b17; --p-inv-surface: #232723; --p-inv-ink: #f1f3ef; --p-inv-muted: #969994;
+  --p-inv-accent: #227847; --p-inv-accent-ink: #f1f3ef; --p-inv-action: #227847; --p-inv-action-ink: #f1f3ef;
+  --font-display: "Geist", system-ui, sans-serif;
+  --font-text: "Geist", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 600;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.045em;
+}
+</style>
+<link rel="stylesheet" href="../../site.css">
+<link rel="stylesheet" href="../blog.css">
+</head>
+<body class="blog-page">
+<header class="nav nav--centre">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <a class="nav__logo brand" href="../../"><img class="brand__mark" data-mark src="../../img/lynxdb-mark-faceted-on-light.svg" alt="" width="22" height="30">LynxDB</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="../../#server">Server</a></div>
+      <div class="nav__item"><a class="nav__link" href="../../#engine">Engine</a></div>
+      <div class="nav__item"><a class="nav__link" href="../../#benchmark">Benchmark</a></div>
+      <div class="nav__item"><a class="nav__link" href="../../#ingest">Ingest</a></div>
+      <div class="nav__item">
+        <a class="nav__link" href="https://docs.lynxdb.org/">Docs <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="nav__menu">
+          <div class="wrap grid">
+            <div class="menu-col span-3">
+              <p class="t-label">Start</p>
+              <a href="https://docs.lynxdb.org/docs/getting-started/quickstart">Quick start<span>Run a first query</span></a>
+              <a href="https://docs.lynxdb.org/docs/getting-started/pipe-mode">Pipe mode<span>Query files without a server</span></a>
+              <a href="https://docs.lynxdb.org/docs/getting-started/server-mode">Server mode<span>Keep logs on disk</span></a>
+            </div>
+            <div class="menu-col span-3">
+              <p class="t-label">Reference</p>
+              <a href="https://docs.lynxdb.org/docs/ppl/overview">PPL guide<span>Commands and functions</span></a>
+              <a href="https://docs.lynxdb.org/docs/guides/ingest-data">Ingest data<span>Shippers, API and syslog</span></a>
+              <a href="https://docs.lynxdb.org/docs/api/overview">REST API<span>Query and ingest over HTTP</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav__item"><a class="nav__link" href="../" aria-current="true">Blog</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="nav__link" href="https://github.com/lynxbase/lynxdb">GitHub</a>
+      <a class="btn btn--primary" href="../../#install">Install LynxDB</a>
+      <button class="theme-btn" type="button" aria-pressed="false" aria-label="Dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="theme-btn__moon" d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1Z"/><g class="theme-btn__sun"><circle cx="8" cy="8" r="2.9"/><path d="M8 1.6v1.3M8 13.1v1.3M1.6 8h1.3M13.1 8h1.3M3.5 3.5l.9.9M11.6 11.6l.9.9M3.5 12.5l.9-.9M11.6 4.4l.9-.9"/></g></svg><span class="theme-btn__label" aria-hidden="true"><span class="theme-btn__to-dark">Dark theme</span><span class="theme-btn__to-light">Light theme</span></span></button>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+
+<main id="content" class="blog-main">
+<div class="wrap post">
+  <header class="post__head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="../">Blog</a><span class="crumbs__sep" aria-hidden="true">/</span><span>Using LynxDB</span></nav>
+    <h1 class="post__title">Five questions for an access log, answered from the shell</h1>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>4 min read</span></p>
+  </header>
+  <p class="post__lead">lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.</p>
+  <details class="toc toc--inline">
+    <summary>On this page</summary>
+    <nav aria-label="On this page"><ol class="toc__list"><li><a href="#the-file">The file</a></li><li><a href="#how-many-events-over-what-time">How many events, over what time</a></li><li><a href="#which-levels">Which levels</a></li><li><a href="#where-the-server-errors-are">Where the server errors are</a><ol><li><a href="#by-host">By host</a></li><li><a href="#which-paths">Which paths</a></li><li><a href="#when">When</a></li></ol></li><li><a href="#from-standard-input">From standard input</a></li><li><a href="#the-commands-in-this-post">The commands in this post</a></li><li><a href="#keeping-the-log-on-a-server">Keeping the log on a server</a></li></ol></nav>
+  </details>
+  <aside class="post__rail">
+    <nav class="toc toc--rail" aria-labelledby="toc-title"><p class="toc__title" id="toc-title">On this page</p><ol class="toc__list"><li><a href="#the-file">The file</a></li><li><a href="#how-many-events-over-what-time">How many events, over what time</a></li><li><a href="#which-levels">Which levels</a></li><li><a href="#where-the-server-errors-are">Where the server errors are</a><ol><li><a href="#by-host">By host</a></li><li><a href="#which-paths">Which paths</a></li><li><a href="#when">When</a></li></ol></li><li><a href="#from-standard-input">From standard input</a></li><li><a href="#the-commands-in-this-post">The commands in this post</a></li><li><a href="#keeping-the-log-on-a-server">Keeping the log on a server</a></li></ol></nav>
+  </aside>
+  <article class="prose">
+<p>Something breaks, and the evidence is a log file on a host. This post asks such a file five questions with <code class="nowrap">lynxdb query</code>, the pipe mode of <a href="https://github.com/lynxbase/lynxdb">LynxDB</a>: it loads the file, runs one <a href="https://docs.lynxdb.org/docs/ppl/overview">PPL</a> query over it and prints the result. Every command below was run with LynxDB 26.11.1.896, and every output is what it printed.</p>
+<h2 id="the-file" tabindex="-1"><a class="heading-link" href="#the-file">The file</a></h2>
+<p><code class="nowrap">access.log</code> is test data from the LynxDB repository<sup class="fn-ref"><a href="#fn1" id="fnref1" aria-describedby="notes-title">1</a></sup>: 1,000 requests to five hosts, one per line, a timestamp followed by <code class="nowrap">key=value</code> pairs.</p>
+<figure class="code code--term" data-lang="console"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-console"><span class="t-p">$</span> <span class="t-cmd"><span class="t-c">head</span> -n 2 access.log</span>
+2025-01-15T08:00:00.105Z host=web-03 level=ERROR method=GET path=/api/v1/users status=502 user=grace response_time=786 bytes=32228 msg=&quot;GET /api/v1/users completed&quot;
+2025-01-15T08:00:00.543Z host=api-02 level=ERROR method=DELETE path=/api/v1/search status=502 user=grace response_time=462 bytes=46701 msg=&quot;DELETE /api/v1/search completed&quot;</code></pre></figure>
+<p>There is no schema to declare. LynxDB reads the timestamp into <code class="nowrap">_time</code> and each <code class="nowrap">key=value</code> pair into a field when the query runs, so <code class="nowrap">status</code> and <code class="nowrap">response_time</code> compare as numbers.</p>
+<h2 id="how-many-events-over-what-time" tabindex="-1"><a class="heading-link" href="#how-many-events-over-what-time">How many events, over what time</a></h2>
+<figure class="code code--term" data-lang="console"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-console"><span class="t-p">$</span> <span class="t-cmd"><span class="t-c">lynxdb</span> query --file access.log --no-stats \
+    <span class="t-q">'<span class="token keyword">stats</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> events<span class="token punctuation">,</span> <span class="token function">min</span><span class="token punctuation">(</span>_time<span class="token punctuation">)</span> <span class="token keyword">as</span> first<span class="token punctuation">,</span> <span class="token function">max</span><span class="token punctuation">(</span>_time<span class="token punctuation">)</span> <span class="token keyword">as</span> last'</span></span>
+<span class="t-table"><span class="t-d">┌────────┬───────────────────────────────────┬───────────────────────────────────┐</span>
+<span class="t-d">│</span><b> events </b><span class="t-d">│</span><b> first                             </b><span class="t-d">│</span><b> last                              </b><span class="t-d">│</span>
+<span class="t-d">├────────┼───────────────────────────────────┼───────────────────────────────────┤</span>
+<span class="t-d">│</span><span class="t-n">  1,000 </span><span class="t-d">│</span> 2025-01-15 08:00:00.105 +0000 UTC <span class="t-d">│</span> 2025-01-15 08:08:19.524 +0000 UTC <span class="t-d">│</span>
+<span class="t-d">└────────┴───────────────────────────────────┴───────────────────────────────────┘</span></span>
+<span class="t-d">(1 row)</span></code></pre></figure>
+<p>A thousand events in eight minutes and twenty seconds, from 08:00:00 to 08:08:19 UTC on 15 January 2025.</p>
+<aside class="callout callout--note"><p class="callout__label">Note</p><div class="callout__body">
+<p>With <code class="nowrap">--file</code>, <code class="nowrap">lynxdb query</code> needs no server. It loads the file into a temporary index named <code class="nowrap">main</code>, runs the query and exits. A query that names no <code class="nowrap">source</code> reads <code class="nowrap">main</code>, so the queries in this post start straight with a command.</p>
+</div></aside>
+<h2 id="which-levels" tabindex="-1"><a class="heading-link" href="#which-levels">Which levels</a></h2>
+<p>Without <code class="nowrap">--no-stats</code>, the CLI prints a footer under the table: the rows returned, the time the query took and the events it scanned.</p>
+<figure class="code code--term" data-lang="console"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-console"><span class="t-p">$</span> <span class="t-cmd"><span class="t-c">lynxdb</span> query --file access.log <span class="t-q">'<span class="token keyword">stats</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">by</span> level'</span></span>
+<span class="t-table"><span class="t-d">┌─────────┬───────┐</span>
+<span class="t-d">│</span><b> count() </b><span class="t-d">│</span><b> level </b><span class="t-d">│</span>
+<span class="t-d">├─────────┼───────┤</span>
+<span class="t-d">│</span><span class="t-n">     294 </span><span class="t-d">│</span> ERROR <span class="t-d">│</span>
+<span class="t-d">│</span><span class="t-n">     359 </span><span class="t-d">│</span> INFO  <span class="t-d">│</span>
+<span class="t-d">│</span><span class="t-n">     347 </span><span class="t-d">│</span> WARN  <span class="t-d">│</span>
+<span class="t-d">└─────────┴───────┘</span></span>
+<span class="t-d">(3 rows)</span>
+<span class="t-d">───</span>
+  <span class="t-d">Rows</span>  <b>3</b>
+  <span class="t-d">Took</span>  <b>27ms</b>
+  <span class="t-d">Scanned</span>  <b>1,000</b></code></pre></figure>
+<p>The time is from an Apple M4 Pro laptop. The rest of this post passes <code class="nowrap">--no-stats</code> to keep the outputs short.</p>
+<h2 id="where-the-server-errors-are" tabindex="-1"><a class="heading-link" href="#where-the-server-errors-are">Where the server errors are</a></h2>
+<p>204 of the 1,000 requests ended with a status of 500 or more. Three queries narrow them down.</p>
+<h3 id="by-host" tabindex="-1"><a class="heading-link" href="#by-host">By host</a></h3>
+<p><code class="nowrap">eval</code> adds a field to every event. Here <code class="nowrap">error</code> is 1 for a server error and 0 otherwise, so one <code class="nowrap">stats</code> counts the requests and the errors of each host together. A query this long reads better kept in a file, <code class="nowrap">errors-by-host.ppl</code>:</p>
+<figure class="code" data-lang="ppl"><div class="code__bar"></div><pre class="code__pre" tabindex="0"><code class="language-ppl"><span class="token keyword">eval</span> error <span class="token operator">=</span> <span class="token function">if</span><span class="token punctuation">(</span>status <span class="token operator">>=</span> <span class="token number">500</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+<span class="token pipe">|</span> <span class="token keyword">stats</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> requests<span class="token punctuation">,</span> <span class="token function">sum</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token keyword">as</span> errors <span class="token keyword">by</span> host
+<span class="token pipe">|</span> <span class="token keyword">eval</span> pct <span class="token operator">=</span> <span class="token function">round</span><span class="token punctuation">(</span>errors <span class="token operator">*</span> <span class="token number">100.0</span> <span class="token operator">/</span> requests<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token pipe">|</span> <span class="token keyword">sort</span> <span class="token operator">-</span> pct</code></pre></figure>
+<figure class="code code--term" data-lang="console"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-console"><span class="t-p">$</span> <span class="t-cmd"><span class="t-c">lynxdb</span> query --file access.log --no-stats <span class="t-s">&quot;$(cat errors-by-host.ppl)&quot;</span></span>
+<span class="t-table"><span class="t-d">┌────────┬────────┬──────┬──────────┐</span>
+<span class="t-d">│</span><b> host   </b><span class="t-d">│</span><b> errors </b><span class="t-d">│</span><b> pct  </b><span class="t-d">│</span><b> requests </b><span class="t-d">│</span>
+<span class="t-d">├────────┼────────┼──────┼──────────┤</span>
+<span class="t-d">│</span> api-02 <span class="t-d">│</span><span class="t-n">     48 </span><span class="t-d">│</span><span class="t-n"> 22.6 </span><span class="t-d">│</span><span class="t-n">      212 </span><span class="t-d">│</span>
+<span class="t-d">│</span> web-02 <span class="t-d">│</span><span class="t-n">     43 </span><span class="t-d">│</span><span class="t-n"> 22.3 </span><span class="t-d">│</span><span class="t-n">      193 </span><span class="t-d">│</span>
+<span class="t-d">│</span> web-03 <span class="t-d">│</span><span class="t-n">     41 </span><span class="t-d">│</span><span class="t-n"> 21.1 </span><span class="t-d">│</span><span class="t-n">      194 </span><span class="t-d">│</span>
+<span class="t-d">│</span> web-01 <span class="t-d">│</span><span class="t-n">     38 </span><span class="t-d">│</span><span class="t-n"> 19.7 </span><span class="t-d">│</span><span class="t-n">      193 </span><span class="t-d">│</span>
+<span class="t-d">│</span> api-01 <span class="t-d">│</span><span class="t-n">     34 </span><span class="t-d">│</span><span class="t-n"> 16.3 </span><span class="t-d">│</span><span class="t-n">      208 </span><span class="t-d">│</span>
+<span class="t-d">└────────┴────────┴──────┴──────────┘</span></span>
+<span class="t-d">(5 rows)</span></code></pre></figure>
+<p>No host stands out: api-02 fails 22.6% of its requests and api-01, the best, 16.3%.</p>
+<h3 id="which-paths" tabindex="-1"><a class="heading-link" href="#which-paths">Which paths</a></h3>
+<figure class="code code--term" data-lang="console"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-console"><span class="t-p">$</span> <span class="t-cmd"><span class="t-c">lynxdb</span> query --file access.log --no-stats <span class="t-q">'<span class="token keyword">where</span> status <span class="token operator">>=</span> <span class="token number">500</span> <span class="token pipe">|</span> <span class="token keyword">top</span> <span class="token number">3</span> path'</span></span>
+<span class="t-table"><span class="t-d">┌───────┬────────────────┐</span>
+<span class="t-d">│</span><b> count </b><span class="t-d">│</span><b> path           </b><span class="t-d">│</span>
+<span class="t-d">├───────┼────────────────┤</span>
+<span class="t-d">│</span><span class="t-n">    28 </span><span class="t-d">│</span> /api/v1/users  <span class="t-d">│</span>
+<span class="t-d">│</span><span class="t-n">    27 </span><span class="t-d">│</span> /api/v1/orders <span class="t-d">│</span>
+<span class="t-d">│</span><span class="t-n">    25 </span><span class="t-d">│</span> /api/v1/health <span class="t-d">│</span>
+<span class="t-d">└───────┴────────────────┘</span></span>
+<span class="t-d">(3 rows)</span></code></pre></figure>
+<p><code class="nowrap">top</code> counts the values of a field and keeps the most common. The users, orders and health endpoints lead with 25 to 28 errors each, close together again.</p>
+<h3 id="when" tabindex="-1"><a class="heading-link" href="#when">When</a></h3>
+<figure class="code code--term" data-lang="console"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-console"><span class="t-p">$</span> <span class="t-cmd"><span class="t-c">lynxdb</span> query --file access.log --no-stats \
+    <span class="t-q">'<span class="token keyword">where</span> status <span class="token operator">>=</span> <span class="token number">500</span> <span class="token pipe">|</span> <span class="token keyword">timechart</span> <span class="token keyword">span</span><span class="token operator">=</span><span class="token number">1m</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span>'</span></span>
+<span class="t-table"><span class="t-d">┌───────────────────────────────┬─────────┐</span>
+<span class="t-d">│</span><b> _time                         </b><span class="t-d">│</span><b> count() </b><span class="t-d">│</span>
+<span class="t-d">├───────────────────────────────┼─────────┤</span>
+<span class="t-d">│</span> 2025-01-15 08:00:00 +0000 UTC <span class="t-d">│</span><span class="t-n">      20 </span><span class="t-d">│</span>
+<span class="t-d">│</span> 2025-01-15 08:01:00 +0000 UTC <span class="t-d">│</span><span class="t-n">      23 </span><span class="t-d">│</span>
+<span class="t-d">│</span> 2025-01-15 08:02:00 +0000 UTC <span class="t-d">│</span><span class="t-n">      23 </span><span class="t-d">│</span>
+<span class="t-d">│</span> 2025-01-15 08:03:00 +0000 UTC <span class="t-d">│</span><span class="t-n">      25 </span><span class="t-d">│</span>
+<span class="t-d">│</span> 2025-01-15 08:04:00 +0000 UTC <span class="t-d">│</span><span class="t-n">      28 </span><span class="t-d">│</span>
+<span class="t-d">│</span> 2025-01-15 08:05:00 +0000 UTC <span class="t-d">│</span><span class="t-n">      24 </span><span class="t-d">│</span>
+<span class="t-d">│</span> 2025-01-15 08:06:00 +0000 UTC <span class="t-d">│</span><span class="t-n">      26 </span><span class="t-d">│</span>
+<span class="t-d">│</span> 2025-01-15 08:07:00 +0000 UTC <span class="t-d">│</span><span class="t-n">      23 </span><span class="t-d">│</span>
+<span class="t-d">│</span> 2025-01-15 08:08:00 +0000 UTC <span class="t-d">│</span><span class="t-n">      12 </span><span class="t-d">│</span>
+<span class="t-d">└───────────────────────────────┴─────────┘</span></span>
+<span class="t-d">(9 rows)</span></code></pre></figure>
+<p>Set against all requests per minute (<code>timechart span=1m count()</code> without the <code class="nowrap">where</code>), the errors hold steady: 20 to 28 of the 120 requests in every full minute. Nothing spikes, so the cause is not one bad minute.</p>
+<figure class="figure"><span class="figure__media"><img src="errors-per-minute.svg" alt="Requests per minute in access.log, split into server errors and other statuses" width="480" height="293" loading="lazy" decoding="async" data-theme-image="light"><img src="errors-per-minute-dark.svg" alt="Requests per minute in access.log, split into server errors and other statuses" width="480" height="293" loading="lazy" decoding="async" data-theme-image="dark"></span><figcaption>Requests per minute in access.log: server errors on the baseline, the other statuses above them. The file ends at 08:08:19, so the last minute holds 40 requests.</figcaption></figure>
+<h2 id="from-standard-input" tabindex="-1"><a class="heading-link" href="#from-standard-input">From standard input</a></h2>
+<p><code class="nowrap">--file -</code> reads standard input, so the log can come out of another command: <code class="nowrap">kubectl logs</code>, <code class="nowrap">journalctl</code> or <code class="nowrap">ssh</code> to the host. A result of one value prints as the bare value, ready for a shell variable.</p>
+<figure class="code code--term" data-lang="console"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-console"><span class="t-p">$</span> <span class="t-cmd"><span class="t-c">cat</span> access.log | <span class="t-c">lynxdb</span> query --file - --no-stats \
+    <span class="t-q">'<span class="token keyword">where</span> status <span class="token operator">>=</span> <span class="token number">500</span> <span class="token pipe">|</span> <span class="token keyword">stats</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">as</span> errors'</span></span>
+204</code></pre></figure>
+<p>The help text puts the whole of pipe mode in three sentences:</p>
+<figure class="pull-quote"><blockquote>
+<p>Run a PPL query against a LynxDB server, or with --file against local files. --file - reads standard input. Local input is loaded into the index main, and a local query that names no source reads main.</p>
+</blockquote>
+<figcaption class="pull-quote__by"><code class="nowrap">lynxdb query --help</code></figcaption>
+</figure>
+<aside class="callout callout--tip"><p class="callout__label">Tip</p><div class="callout__body">
+<p>When its output goes to a pipe instead of a terminal, <code class="nowrap">lynxdb query</code> writes one JSON object per line, ready for <code class="nowrap">jq</code>. <code class="nowrap">--format</code> (<code class="nowrap">-F</code>) picks another format: <code class="nowrap">table</code>, <code class="nowrap">csv</code>, <code class="nowrap">tsv</code>, <code class="nowrap">markdown</code>, <code class="nowrap">json</code> or <code class="nowrap">raw</code>.</p>
+</div></aside>
+<h2 id="the-commands-in-this-post" tabindex="-1"><a class="heading-link" href="#the-commands-in-this-post">The commands in this post</a></h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>PPL command</th>
+<th>What it did here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="nowrap">stats</code></td>
+<td>Counted events, overall or per value of a field (<code class="nowrap">by level</code>, <code class="nowrap">by host</code>)</td>
+</tr>
+<tr>
+<td><code class="nowrap">where</code></td>
+<td>Kept the events that match a condition (<code class="nowrap">status &gt;= 500</code>)</td>
+</tr>
+<tr>
+<td><code class="nowrap">eval</code></td>
+<td>Added a field to every event, computed from the others</td>
+</tr>
+<tr>
+<td><code class="nowrap">sort</code></td>
+<td>Ordered the rows; <code class="nowrap">- pct</code> sorts by <code class="nowrap">pct</code>, highest first</td>
+</tr>
+<tr>
+<td><code class="nowrap">top</code></td>
+<td>Listed the most common values of a field with their counts</td>
+</tr>
+<tr>
+<td><code class="nowrap">timechart</code></td>
+<td>Counted events per time bucket (<code class="nowrap">span=1m</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The <a href="https://docs.lynxdb.org/docs/ppl/overview">PPL guide</a> covers the other commands and every function.</p>
+<h2 id="keeping-the-log-on-a-server" tabindex="-1"><a class="heading-link" href="#keeping-the-log-on-a-server">Keeping the log on a server</a></h2>
+<p>Pipe mode reads the file again for every query. To search the same events later, or logs from many hosts, load them into <code class="nowrap">lynxdb server</code> and run the same PPL against the stored index:</p>
+<figure class="code code--term" data-lang="shell"><div class="code__bar"><svg class="code__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg></div><pre class="code__pre" tabindex="0"><code class="language-shell"><span class="token comment"># in one terminal</span>
+lynxdb server
+<span class="token comment"># in another</span>
+lynxdb ingest access.log <span class="token parameter variable">--index</span> web
+lynxdb query <span class="token string">'source=web | where status >= 500 | top 3 path'</span></code></pre></figure>
+<figure class="figure"><span class="figure__media"><img src="web-ui.png" alt="The search page of lynxdb server with the query source=web, where status &gt;= 500 and a histogram of the matches" width="1280" height="498" loading="lazy" decoding="async" data-theme-image="light"><img src="web-ui-dark.png" alt="The search page of lynxdb server with the query source=web, where status &gt;= 500 and a histogram of the matches" width="1280" height="498" loading="lazy" decoding="async" data-theme-image="dark"></span><figcaption>The Web UI section of lynxdb.org draws the search page of <code class="nowrap">lynxdb server</code> on this file: 169 of the 840 events from 08:00 to 08:07 have a status of 500 or more.</figcaption></figure>
+<p>More in the <a href="https://docs.lynxdb.org/docs/getting-started/server-mode">server mode guide</a>.</p>
+<section class="footnotes" aria-labelledby="notes-title">
+<h2 class="footnotes__title" id="notes-title">Notes</h2>
+<ol class="footnotes__list">
+<li id="fn1" class="footnote-item"><p>The file is <a href="https://github.com/lynxbase/lynxdb/blob/main/testdata/logs/access.log"><code class="nowrap">testdata/logs/access.log</code></a> in the LynxDB repository. Clone the repository to run the commands as they are, or point them at a log of your own. <a href="#fnref1" class="fn-back" aria-label="Back to the text"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10V2.5M2.5 6 6 2.5 9.5 6"/></svg></a></p>
+</li>
+</ol>
+</section>
+
+  </article>
+  <p class="post__end"><a class="back-link" href="../"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M11 6H3M6.5 2.5 3 6l3.5 3.5"/></svg>All posts</a></p>
+</div>
+<aside class="more" aria-labelledby="more-h">
+  <div class="wrap">
+    <div class="more__head"><h2 id="more-h">More posts</h2><a class="link" href="../">All posts</a></div>
+    <div class="card-grid"><article class="card-post">
+  <div class="card-post__media"><img src="../inside-the-lynxdb-engine/thumb.png" alt="" width="1200" height="630" loading="lazy" decoding="async"></div>
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="../inside-the-lynxdb-engine/">Twenty-eight bytes from the end: inside the LynxDB engine</a></h2>
+    <p class="card-post__excerpt">LynxDB opens a part file from its last 28 bytes, which locate a footer that describes every block: its first sort key, its key runs, its rows per hour. This post follows the Bluesky events from JSON lines into that footer, shows which queries end there and what the design costs, and sets each piece beside ClickHouse&#39;s MergeTree.</p>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>16 min read</span></p>
+  </div>
+</article>
+<article class="card-post">
+  <div class="card-post__media"><img src="../lynxdb-on-jsonbench/thumb.png" alt="" width="1200" height="630" loading="lazy" decoding="async"></div>
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="../lynxdb-on-jsonbench/">Fourteen blocks of 61,246: how LynxDB answers JSONBench in 0.18 s</a></h2>
+    <p class="card-post__excerpt">LynxDB answers JSONBench&#39;s five queries over 1 billion Bluesky events in 0.18 s on a warm cache; ClickHouse&#39;s published result is 6.9 s. Most of the answer comes from metadata kept per block: the exact distinct count in Q2 opens 14 of 61,246 blocks. Without its sort key LynxDB takes 10.2 s, and ClickHouse is faster.</p>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>17 min read</span></p>
+  </div>
+</article>
+
+    </div>
+  </div>
+</aside>
+
+</main>
+
+<footer class="footer closing blog-close" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--word">
+      <div class="section-head">
+        <h2 id="close-h">Start with one log file</h2>
+        <p class="t-lead">Install the binary, then pipe a file into <code>lynxdb query</code>.</p>
+        <div class="close__row">
+          <div class="cmd close__cmd"><code>curl -fsSL https://lynxdb.org/install.sh | sh</code><button class="cmd__copy" type="button" data-copy aria-label="Copy the install command"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5"/></svg></button></div>
+          <a class="btn btn--primary" href="../../#install">Install LynxDB<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+        </div>
+      </div>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo brand" href="../../"><img class="brand__mark" data-mark src="../../img/lynxdb-mark-faceted-on-light.svg" alt="" width="22" height="30" loading="lazy">LynxDB</a>
+          <p class="footer__lede">An open-source log database in one binary.<span class="footer__more"> Query a file from the shell, or keep a billion events on one server.</span></p>
+        </div>
+        <div class="span-2 start-7 footer__col footer__col--product"><h3>Product</h3><ul><li><a href="../../#server">Server</a></li><li><a href="../../#engine">Engine</a></li><li><a href="../../#benchmark">Benchmark</a></li><li><a href="../../#ingest">Ingest</a></li><li><a href="../">Blog</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Docs</h3><ul><li><a href="https://docs.lynxdb.org/docs/getting-started/quickstart">Quick start</a></li><li><a href="https://docs.lynxdb.org/docs/ppl/overview">PPL guide</a></li><li><a href="https://docs.lynxdb.org/docs/guides/ingest-data">Ingest data</a></li><li class="footer__more"><a href="https://docs.lynxdb.org/docs/api/overview">REST API</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Community</h3><ul><li><a href="https://github.com/lynxbase/lynxdb">GitHub</a></li><li><a href="https://discord.gg/RgggCFdgWK">Discord</a></li><li><a href="https://github.com/lynxbase/lynxdb/releases">Releases</a></li><li><a href="https://github.com/lynxbase/lynxdb/blob/main/CONTRIBUTING.md">Contributing</a></li><li class="footer__more"><a href="https://github.com/lynxbase/lynxdb/blob/main/SECURITY.md">Security</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 LynxDB &nbsp; <a href="https://github.com/lynxbase/lynxdb/blob/main/LICENSE">Apache 2.0</a> &nbsp; Product names and logos are trademarks of their owners.</span>
+        <a class="feed-link" href="../feed.xml">Blog feed</a>
+      </div>
+    </div>
+  </div>
+  <span class="sr-only" role="status" data-copy-status></span>
+</footer>
+
+
+<script type="module" src="../../theme.js"></script>
+<script type="module" src="../blog.js"></script>
+</body>
+</html>

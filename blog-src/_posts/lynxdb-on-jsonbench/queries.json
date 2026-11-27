@@ -1,0 +1,580 @@
+{
+ "about": "Cold and hot times in seconds at 1B on an m6i.8xlarge; cold is the first try after a restart with the page cache dropped, hot the faster of tries 2 and 3. blocks_read: blocks whose rows LynxDB read on the cold try, of 61,246.",
+ "runs": {
+  "lynxdb": "main 657aa79f, sort key in one partition, 2026-11-25 (lynxdb-bench s20261125b/002)",
+  "clickhouse": "26.12.1.416, 2026-11-24 (lynxdb-bench s20261124b/004)",
+  "victorialogs": "v1.54.0, 2026-11-24 (lynxdb-bench s20261124b/002)"
+ },
+ "queries": [
+  {
+   "id": "Q1",
+   "name": "Q1 events per collection",
+   "ppl": "source=bluesky | stats count() as count by commit.collection | sort - count",
+   "about": "Counts all events by collection.",
+   "blocks_read": 0,
+   "lynxdb": {
+    "cold": 0.0019,
+    "hot": 0.0016
+   },
+   "clickhouse": {
+    "cold": 0.132,
+    "hot": 0.099
+   },
+   "victorialogs": {
+    "cold": 0.1064,
+    "hot": 0.0471
+   }
+  },
+  {
+   "id": "Q2",
+   "name": "Q2 creates and users",
+   "ppl": "source=bluesky | where kind = 'commit' and commit.operation = 'create' | stats count() as count, distinct_count(did) as users by commit.collection | sort - count",
+   "about": "Counts create events per collection, with the exact number of distinct accounts.",
+   "blocks_read": 14,
+   "lynxdb": {
+    "cold": 0.0558,
+    "hot": 0.0533
+   },
+   "clickhouse": {
+    "cold": 1.934,
+    "hot": 1.697
+   },
+   "victorialogs": {
+    "cold": 20.5564,
+    "hot": 18.5081
+   }
+  },
+  {
+   "id": "Q3",
+   "name": "Q3 creates by hour",
+   "ppl": "source=bluesky | where kind = 'commit' and commit.operation = 'create' and commit.collection in ('app.bsky.feed.post', 'app.bsky.feed.repost', 'app.bsky.feed.like') | eval hour_of_day = hour(_time) | stats count() as count by commit.collection, hour_of_day | sort hour_of_day, commit.collection",
+   "about": "Counts post, repost and like creates per collection and UTC hour of day.",
+   "blocks_read": 5,
+   "lynxdb": {
+    "cold": 0.0988,
+    "hot": 0.0607
+   },
+   "clickhouse": {
+    "cold": 1.889,
+    "hot": 1.107
+   },
+   "victorialogs": {
+    "cold": 1.6734,
+    "hot": 1.5236
+   }
+  },
+  {
+   "id": "Q4",
+   "name": "Q4 first posters",
+   "ppl": "source=bluesky | where kind = 'commit' and commit.operation = 'create' and commit.collection = 'app.bsky.feed.post' | stats min(_time) as first_post_ts by did | sort first_post_ts | head 3",
+   "about": "The three accounts whose first post is the earliest.",
+   "blocks_read": 32,
+   "lynxdb": {
+    "cold": 0.0071,
+    "hot": 0.0017
+   },
+   "clickhouse": {
+    "cold": 0.644,
+    "hot": 0.486
+   },
+   "victorialogs": {
+    "cold": 6.9069,
+    "hot": 5.5607
+   }
+  },
+  {
+   "id": "Q5",
+   "name": "Q5 longest activity",
+   "ppl": "source=bluesky | where kind = 'commit' and commit.operation = 'create' and commit.collection = 'app.bsky.feed.post' | stats min(_time) as tmin, max(_time) as tmax by did | eval activity_span = timestampdiff(MILLISECOND, from_unixtime(0), tmax) - timestampdiff(MILLISECOND, from_unixtime(0), tmin) | fields did, activity_span | sort - activity_span | head 3",
+   "about": "The three accounts with the longest span between their first and last post.",
+   "blocks_read": 5513,
+   "lynxdb": {
+    "cold": 0.3169,
+    "hot": 0.0634
+   },
+   "clickhouse": {
+    "cold": 0.658,
+    "hot": 0.504
+   },
+   "victorialogs": {
+    "cold": 9.5266,
+    "hot": 7.9442
+   }
+  },
+  {
+   "id": "tail100",
+   "name": "latest 100 events",
+   "ppl": "source=bluesky | sort - _time | head 100",
+   "about": "The 100 most recent events of any kind.",
+   "blocks_read": 128,
+   "lynxdb": {
+    "cold": 0.0981,
+    "hot": 0.0522
+   },
+   "clickhouse": {
+    "cold": 3.577,
+    "hot": 0.082
+   },
+   "victorialogs": {
+    "cold": 0.3677,
+    "hot": 0.1239
+   }
+  },
+  {
+   "id": "tail100_posts",
+   "name": "latest 100 posts",
+   "ppl": "source=bluesky | where commit.collection = 'app.bsky.feed.post' | sort - _time | head 100",
+   "about": "The 100 most recent events in the post collection.",
+   "blocks_read": 254,
+   "lynxdb": {
+    "cold": 0.1377,
+    "hot": 0.0651
+   },
+   "clickhouse": {
+    "cold": 0.483,
+    "hot": 0.197
+   },
+   "victorialogs": {
+    "cold": 0.4698,
+    "hot": 0.2113
+   }
+  },
+  {
+   "id": "head100",
+   "name": "first 100 events",
+   "ppl": "source=bluesky | head 100",
+   "about": "The first 100 events the index returns, with no order asked for.",
+   "blocks_read": 1,
+   "lynxdb": {
+    "cold": 0.0391,
+    "hot": 0.0109
+   },
+   "clickhouse": {
+    "cold": 0.126,
+    "hot": 0.004
+   },
+   "victorialogs": {
+    "cold": 0.0406,
+    "hot": 0.0285
+   }
+  },
+  {
+   "id": "user_heavy_tail",
+   "name": "latest 100 of a busy account",
+   "ppl": "source=bluesky did=\"did:plc:74p5m4owldmqdvaday77brpt\" | sort - _time | head 100",
+   "about": "The 100 most recent events of one busy account.",
+   "blocks_read": 57,
+   "lynxdb": {
+    "cold": 0.0668,
+    "hot": 0.0148
+   },
+   "clickhouse": {
+    "cold": 0.164,
+    "hot": 0.016
+   },
+   "victorialogs": {
+    "cold": 0.4074,
+    "hot": 0.1637
+   }
+  },
+  {
+   "id": "user_heavy_count",
+   "name": "a busy account by collection",
+   "ppl": "source=bluesky did=\"did:plc:74p5m4owldmqdvaday77brpt\" | stats count() as n by commit.collection",
+   "about": "One busy account's events, counted per collection.",
+   "blocks_read": 84,
+   "lynxdb": {
+    "cold": 0.1366,
+    "hot": 0.0022
+   },
+   "clickhouse": {
+    "cold": 0.073,
+    "hot": 0.009
+   },
+   "victorialogs": {
+    "cold": 2.2516,
+    "hot": 0.3278
+   }
+  },
+  {
+   "id": "user_light_tail",
+   "name": "latest 100 of a quiet account",
+   "ppl": "source=bluesky did=\"did:plc:yj3sjq3blzpynh27cumnp5ks\" | sort - _time | head 100",
+   "about": "The 100 most recent events of one quiet account.",
+   "blocks_read": 50,
+   "lynxdb": {
+    "cold": 0.0927,
+    "hot": 0.0197
+   },
+   "clickhouse": {
+    "cold": 0.219,
+    "hot": 0.026
+   },
+   "victorialogs": {
+    "cold": 1.5085,
+    "hot": 0.4283
+   }
+  },
+  {
+   "id": "rkey_lookup",
+   "name": "one record by its key",
+   "ppl": "source=bluesky commit.rkey=\"3lbhuei4dic2u\"",
+   "about": "The event with one given record key; one row matches.",
+   "blocks_read": 71,
+   "lynxdb": {
+    "cold": 0.1653,
+    "hot": 0.0117
+   },
+   "clickhouse": {
+    "cold": 5.468,
+    "hot": 0.01
+   },
+   "victorialogs": {
+    "cold": 1.1247,
+    "hot": 0.0674
+   }
+  },
+  {
+   "id": "word_rare_count",
+   "name": "count a rare word",
+   "ppl": "source=bluesky | where match(commit.record.text, 'earthquake') | stats count() as n",
+   "about": "Counts events whose post text holds the rare word 'earthquake'.",
+   "blocks_read": 2243,
+   "lynxdb": {
+    "cold": 0.5592,
+    "hot": 0.4191
+   },
+   "clickhouse": {
+    "cold": 3.06,
+    "hot": 0.447
+   },
+   "victorialogs": {
+    "cold": 3.8555,
+    "hot": 3.3193
+   }
+  },
+  {
+   "id": "word_rare_tail",
+   "name": "latest 100 with a rare word",
+   "ppl": "source=bluesky | where match(commit.record.text, 'earthquake') | sort - _time | head 100",
+   "about": "The 100 most recent events whose post text holds 'earthquake'.",
+   "blocks_read": 2228,
+   "lynxdb": {
+    "cold": 0.8359,
+    "hot": 0.4834
+   },
+   "clickhouse": {
+    "cold": 3.91,
+    "hot": 0.182
+   },
+   "victorialogs": {
+    "cold": 1.7389,
+    "hot": 1.1395
+   }
+  },
+  {
+   "id": "word_common_count",
+   "name": "count a common word",
+   "ppl": "source=bluesky | where match(commit.record.text, 'love') | stats count() as n",
+   "about": "Counts events whose post text holds the common word 'love'.",
+   "blocks_read": 5503,
+   "lynxdb": {
+    "cold": 2.7562,
+    "hot": 1.0027
+   },
+   "clickhouse": {
+    "cold": 3.098,
+    "hot": 1.058
+   },
+   "victorialogs": {
+    "cold": 3.8124,
+    "hot": 3.2117
+   }
+  },
+  {
+   "id": "word_common_tail",
+   "name": "latest 100 with a common word",
+   "ppl": "source=bluesky | where match(commit.record.text, 'love') | sort - _time | head 100",
+   "about": "The 100 most recent events whose post text holds 'love'.",
+   "blocks_read": 2792,
+   "lynxdb": {
+    "cold": 1.3263,
+    "hot": 0.5919
+   },
+   "clickhouse": {
+    "cold": 3.885,
+    "hot": 0.217
+   },
+   "victorialogs": {
+    "cold": 0.8975,
+    "hot": 0.3043
+   }
+  },
+  {
+   "id": "word_absent_count",
+   "name": "count an absent word",
+   "ppl": "source=bluesky | where match(commit.record.text, 'zqxjkvwpyhh') | stats count() as n",
+   "about": "Counts events whose post text holds a word that appears nowhere; the answer is 0.",
+   "blocks_read": 0,
+   "lynxdb": {
+    "cold": 0.0948,
+    "hot": 0.001
+   },
+   "clickhouse": {
+    "cold": 3.065,
+    "hot": 0.003
+   },
+   "victorialogs": {
+    "cold": 3.8113,
+    "hot": 3.0435
+   }
+  },
+  {
+   "id": "anyfield_word_count",
+   "name": "a word in any field",
+   "ppl": "source=bluesky earthquake | stats count() as n",
+   "about": "Counts events with the word 'earthquake' in any field.",
+   "blocks_read": 2855,
+   "lynxdb": {
+    "cold": 0.8841,
+    "hot": 0.5163
+   },
+   "clickhouse": {
+    "cold": 590.654,
+    "hot": null
+   },
+   "victorialogs": {
+    "cold": 98.4306,
+    "hot": 43.271
+   }
+  },
+  {
+   "id": "phrase_count",
+   "name": "count a phrase",
+   "ppl": "source=bluesky | where match_phrase(commit.record.text, 'good morning') | stats count() as n",
+   "about": "Counts events whose post text holds the phrase 'good morning'.",
+   "blocks_read": 5493,
+   "lynxdb": {
+    "cold": 2.7573,
+    "hot": 0.9861
+   },
+   "clickhouse": {
+    "cold": 3.051,
+    "hot": 1.023
+   },
+   "victorialogs": {
+    "cold": 3.806,
+    "hot": 3.1436
+   }
+  },
+  {
+   "id": "substring_count",
+   "name": "count a substring",
+   "ppl": "source=bluesky | where like(commit.record.text, '%bitcoin%') | stats count() as n",
+   "about": "Counts events whose post text contains 'bitcoin' anywhere, inside words too.",
+   "blocks_read": 5775,
+   "lynxdb": {
+    "cold": 2.7544,
+    "hot": 0.828
+   },
+   "clickhouse": {
+    "cold": 3.072,
+    "hot": 0.801
+   },
+   "victorialogs": {
+    "cold": 12.1171,
+    "hot": 11.7911
+   }
+  },
+  {
+   "id": "regex_count",
+   "name": "count a regex match",
+   "ppl": "source=bluesky | where regexp_match(commit.record.text, '[0-9]{3}-[0-9]{3}-[0-9]{4}') | stats count() as n",
+   "about": "Counts events whose post text matches a phone-number pattern.",
+   "blocks_read": 5775,
+   "lynxdb": {
+    "cold": 2.763,
+    "hot": 0.3585
+   },
+   "clickhouse": {
+    "cold": 3.092,
+    "hot": 0.685
+   },
+   "victorialogs": {
+    "cold": 10.6786,
+    "hot": 10.3045
+   }
+  },
+  {
+   "id": "window5m_count",
+   "name": "count in a 5-minute window",
+   "ppl": "source=bluesky earliest='2024-11-28 12:00:00' latest='2024-11-28 12:05:00' | stats count() as n by commit.collection",
+   "about": "Counts events per collection from 12:00 to 12:05 on 28 November 2024.",
+   "blocks_read": 30,
+   "lynxdb": {
+    "cold": 3.4807,
+    "hot": 0.1508
+   },
+   "clickhouse": {
+    "cold": 3.393,
+    "hot": 0.036
+   },
+   "victorialogs": {
+    "cold": 0.0479,
+    "hot": 0.006
+   }
+  },
+  {
+   "id": "window5m_tail",
+   "name": "latest 100 in 5 minutes",
+   "ppl": "source=bluesky earliest='2024-11-28 12:00:00' latest='2024-11-28 12:05:00' | sort - _time | head 100",
+   "about": "The 100 most recent events in that 5-minute window.",
+   "blocks_read": 58553,
+   "lynxdb": {
+    "cold": 3.6206,
+    "hot": 0.2232
+   },
+   "clickhouse": {
+    "cold": 3.517,
+    "hot": 0.039
+   },
+   "victorialogs": {
+    "cold": 0.2569,
+    "hot": 0.0741
+   }
+  },
+  {
+   "id": "window1h_word",
+   "name": "a word within 1 hour",
+   "ppl": "source=bluesky earliest='2024-11-28 12:00:00' latest='2024-11-28 13:00:00' | where match(commit.record.text, 'love') | stats count() as n",
+   "about": "Counts events with 'love' in the post text from 12:00 to 13:00 on 28 November 2024.",
+   "blocks_read": 5478,
+   "lynxdb": {
+    "cold": 3.1675,
+    "hot": 0.5074
+   },
+   "clickhouse": {
+    "cold": 3.541,
+    "hot": 0.071
+   },
+   "victorialogs": {
+    "cold": 0.1419,
+    "hot": 0.0686
+   }
+  },
+  {
+   "id": "top_users",
+   "name": "top 10 accounts",
+   "ppl": "source=bluesky | stats count() as n by did | sort - n | head 10",
+   "about": "The 10 accounts with the most events.",
+   "blocks_read": 61246,
+   "lynxdb": {
+    "cold": 2.7436,
+    "hot": 0.7841
+   },
+   "clickhouse": {
+    "cold": 1.456,
+    "hot": 1.217
+   },
+   "victorialogs": {
+    "cold": 35.4492,
+    "hot": 32.0562
+   }
+  },
+  {
+   "id": "distinct_users",
+   "name": "distinct accounts",
+   "ppl": "source=bluesky | stats distinct_count(did) as users",
+   "about": "Counts the distinct accounts over all events.",
+   "blocks_read": 61246,
+   "lynxdb": {
+    "cold": 2.7241,
+    "hot": 0.4305
+   },
+   "clickhouse": {
+    "cold": 1.124,
+    "hot": 0.88
+   },
+   "victorialogs": {
+    "cold": 21.9815,
+    "hot": 19.7004
+   }
+  },
+  {
+   "id": "text_length",
+   "name": "length of post text",
+   "ppl": "source=bluesky | where commit.collection = 'app.bsky.feed.post' | stats avg(length(commit.record.text)) as avg_len, max(length(commit.record.text)) as max_len",
+   "about": "The average and the longest length of post text.",
+   "blocks_read": 10918,
+   "lynxdb": {
+    "cold": 2.7555,
+    "hot": 1.58
+   },
+   "clickhouse": {
+    "cold": 3.048,
+    "hot": 1.077
+   },
+   "victorialogs": {
+    "cold": 3.7991,
+    "hot": 1.1352
+   }
+  },
+  {
+   "id": "replies_by_hour",
+   "name": "replies per hour",
+   "ppl": "source=bluesky | where isnotnull(commit.record.reply.parent.uri) | eval hour_of_day = hour(_time) | stats count() as n by hour_of_day | sort hour_of_day",
+   "about": "Events that reply to another post, counted per UTC hour of day.",
+   "blocks_read": 61246,
+   "lynxdb": {
+    "cold": 6.7885,
+    "hot": 0.6288
+   },
+   "clickhouse": {
+    "cold": 1.016,
+    "hot": 0.443
+   },
+   "victorialogs": {
+    "cold": 0.4883,
+    "hot": 0.3558
+   }
+  },
+  {
+   "id": "top_reply_roots",
+   "name": "top 10 reply roots",
+   "ppl": "source=bluesky | where isnotnull(commit.record.reply.root.uri) | stats count() as n by commit.record.reply.root.uri | sort - n | head 10",
+   "about": "The 10 threads with the most replies.",
+   "blocks_read": 61246,
+   "lynxdb": {
+    "cold": 7.2414,
+    "hot": 1.1235
+   },
+   "clickhouse": {
+    "cold": 0.985,
+    "hot": 0.564
+   },
+   "victorialogs": {
+    "cold": 2.9977,
+    "hot": 2.3827
+   }
+  },
+  {
+   "id": "langs",
+   "name": "top post languages",
+   "ppl": "source=bluesky | where commit.collection = 'app.bsky.feed.post' | stats count() as n by commit.record.langs | sort - n | head 10",
+   "about": "The 10 most common language lists of posts.",
+   "blocks_read": 10918,
+   "lynxdb": {
+    "cold": 0.1175,
+    "hot": 0.0031
+   },
+   "clickhouse": {
+    "cold": 0.351,
+    "hot": 0.308
+   },
+   "victorialogs": {
+    "cold": 0.3382,
+    "hot": 0.2637
+   }
+  }
+ ]
+}

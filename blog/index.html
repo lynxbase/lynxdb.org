@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-buttons="solid" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LynxDB blog</title>
+<meta name="description" content="Querying logs with LynxDB, how its engine reads them, and what each release changes.">
+<meta name="robots" content="max-image-preview:large">
+<link rel="canonical" href="https://lynxdb.org/blog/">
+<link rel="alternate" type="text/markdown" href="https://lynxdb.org/blog.md">
+<link rel="describedby" href="/llms.txt">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LynxDB">
+<meta property="og:title" content="LynxDB blog">
+<meta property="og:description" content="Querying logs with LynxDB, how its engine reads them, and what each release changes.">
+<meta property="og:url" content="https://lynxdb.org/blog/">
+<meta property="og:image" content="https://lynxdb.org/share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","url":"https://lynxdb.org/blog/","inLanguage":"en","publisher":{"@id":"https://lynxdb.org/#organization"},"@type":"Blog","@id":"https://lynxdb.org/blog/#blog","name":"LynxDB blog","description":"Querying logs with LynxDB, how its engine reads them, and what each release changes.","isPartOf":{"@id":"https://lynxdb.org/#website"}}</script>
+<link rel="icon" href="../img/lynxdb-appicon-moss.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f1f3ef">
+<link rel="alternate" type="application/atom+xml" title="LynxDB blog" href="./feed.xml">
+<link rel="preload" href="../fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/system.css">
+<link rel="stylesheet" href="../assets/motion/motion.css">
+<script>(() => { let t = null; try { t = localStorage.getItem('lynxdb-theme'); } catch (e) {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); })()</script>
+<style>
+:root {
+  --p-bg: #f1f3ef; --p-surface: #fdfefc; --p-ink: #171b17; --p-muted: #616760;
+  --p-accent: #227847; --p-accent-ink: #f1f3ef; --p-action: #227847; --p-action-ink: #f1f3ef;
+  --p-inv-bg: #171b17; --p-inv-surface: #232723; --p-inv-ink: #f1f3ef; --p-inv-muted: #969994;
+  --p-inv-accent: #227847; --p-inv-accent-ink: #f1f3ef; --p-inv-action: #227847; --p-inv-action-ink: #f1f3ef;
+  --font-display: "Geist", system-ui, sans-serif;
+  --font-text: "Geist", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 600;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.045em;
+}
+</style>
+<link rel="stylesheet" href="../site.css">
+<link rel="stylesheet" href="./blog.css">
+</head>
+<body class="blog-page">
+<header class="nav nav--centre">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <a class="nav__logo brand" href="../"><img class="brand__mark" data-mark src="../img/lynxdb-mark-faceted-on-light.svg" alt="" width="22" height="30">LynxDB</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="../#server">Server</a></div>
+      <div class="nav__item"><a class="nav__link" href="../#engine">Engine</a></div>
+      <div class="nav__item"><a class="nav__link" href="../#benchmark">Benchmark</a></div>
+      <div class="nav__item"><a class="nav__link" href="../#ingest">Ingest</a></div>
+      <div class="nav__item">
+        <a class="nav__link" href="https://docs.lynxdb.org/">Docs <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="nav__menu">
+          <div class="wrap grid">
+            <div class="menu-col span-3">
+              <p class="t-label">Start</p>
+              <a href="https://docs.lynxdb.org/docs/getting-started/quickstart">Quick start<span>Run a first query</span></a>
+              <a href="https://docs.lynxdb.org/docs/getting-started/pipe-mode">Pipe mode<span>Query files without a server</span></a>
+              <a href="https://docs.lynxdb.org/docs/getting-started/server-mode">Server mode<span>Keep logs on disk</span></a>
+            </div>
+            <div class="menu-col span-3">
+              <p class="t-label">Reference</p>
+              <a href="https://docs.lynxdb.org/docs/ppl/overview">PPL guide<span>Commands and functions</span></a>
+              <a href="https://docs.lynxdb.org/docs/guides/ingest-data">Ingest data<span>Shippers, API and syslog</span></a>
+              <a href="https://docs.lynxdb.org/docs/api/overview">REST API<span>Query and ingest over HTTP</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav__item"><a class="nav__link" href="./" aria-current="page">Blog</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="nav__link" href="https://github.com/lynxbase/lynxdb">GitHub</a>
+      <a class="btn btn--primary" href="../#install">Install LynxDB</a>
+      <button class="theme-btn" type="button" aria-pressed="false" aria-label="Dark theme"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="theme-btn__moon" d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1Z"/><g class="theme-btn__sun"><circle cx="8" cy="8" r="2.9"/><path d="M8 1.6v1.3M8 13.1v1.3M1.6 8h1.3M13.1 8h1.3M3.5 3.5l.9.9M11.6 11.6l.9.9M3.5 12.5l.9-.9M11.6 4.4l.9-.9"/></g></svg><span class="theme-btn__label" aria-hidden="true"><span class="theme-btn__to-dark">Dark theme</span><span class="theme-btn__to-light">Light theme</span></span></button>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+
+<main id="content" class="blog-main">
+<div class="wrap blog-index">
+  <header class="blog-index__head">
+    <h1>Blog</h1>
+    <p class="blog-index__lede">Querying logs with LynxDB, how its engine reads them, and what each release changes.</p>
+    <a class="feed-link" href="feed.xml"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.75A10.25 10.25 0 0 1 13.25 13M3 7a6 6 0 0 1 6 6"/><circle cx="3.75" cy="12.25" r="1.25"/></svg>Feed</a>
+  </header>
+  <div class="card-grid"><article class="card-post card-post--lead">
+  <div class="card-post__media"><img src="./inside-the-lynxdb-engine/thumb.png" alt="" width="1200" height="630" loading="eager" decoding="async"></div>
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="./inside-the-lynxdb-engine/">Twenty-eight bytes from the end: inside the LynxDB engine</a></h2>
+    <p class="card-post__excerpt">LynxDB opens a part file from its last 28 bytes, which locate a footer that describes every block: its first sort key, its key runs, its rows per hour. This post follows the Bluesky events from JSON lines into that footer, shows which queries end there and what the design costs, and sets each piece beside ClickHouse&#39;s MergeTree.</p>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>16 min read</span></p>
+  </div>
+</article>
+<article class="card-post">
+  <div class="card-post__media"><img src="./lynxdb-on-jsonbench/thumb.png" alt="" width="1200" height="630" loading="lazy" decoding="async"></div>
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="./lynxdb-on-jsonbench/">Fourteen blocks of 61,246: how LynxDB answers JSONBench in 0.18 s</a></h2>
+    <p class="card-post__excerpt">LynxDB answers JSONBench&#39;s five queries over 1 billion Bluesky events in 0.18 s on a warm cache; ClickHouse&#39;s published result is 6.9 s. Most of the answer comes from metadata kept per block: the exact distinct count in Q2 opens 14 of 61,246 blocks. Without its sort key LynxDB takes 10.2 s, and ClickHouse is faster.</p>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>17 min read</span></p>
+  </div>
+</article>
+<article class="card-post">
+  <div class="card-post__media"><img src="./querying-an-access-log/thumb.png" alt="" width="1200" height="630" loading="lazy" decoding="async"></div>
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="./querying-an-access-log/">Five questions for an access log, answered from the shell</a></h2>
+    <p class="card-post__excerpt">lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.</p>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>4 min read</span></p>
+  </div>
+</article>
+
+  </div>
+</div>
+
+</main>
+
+<footer class="footer closing blog-close" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--word">
+      <div class="section-head">
+        <h2 id="close-h">Start with one log file</h2>
+        <p class="t-lead">Install the binary, then pipe a file into <code>lynxdb query</code>.</p>
+        <div class="close__row">
+          <div class="cmd close__cmd"><code>curl -fsSL https://lynxdb.org/install.sh | sh</code><button class="cmd__copy" type="button" data-copy aria-label="Copy the install command"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5"/></svg></button></div>
+          <a class="btn btn--primary" href="../#install">Install LynxDB<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+        </div>
+      </div>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo brand" href="../"><img class="brand__mark" data-mark src="../img/lynxdb-mark-faceted-on-light.svg" alt="" width="22" height="30" loading="lazy">LynxDB</a>
+          <p class="footer__lede">An open-source log database in one binary.<span class="footer__more"> Query a file from the shell, or keep a billion events on one server.</span></p>
+        </div>
+        <div class="span-2 start-7 footer__col footer__col--product"><h3>Product</h3><ul><li><a href="../#server">Server</a></li><li><a href="../#engine">Engine</a></li><li><a href="../#benchmark">Benchmark</a></li><li><a href="../#ingest">Ingest</a></li><li><a href="./">Blog</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Docs</h3><ul><li><a href="https://docs.lynxdb.org/docs/getting-started/quickstart">Quick start</a></li><li><a href="https://docs.lynxdb.org/docs/ppl/overview">PPL guide</a></li><li><a href="https://docs.lynxdb.org/docs/guides/ingest-data">Ingest data</a></li><li class="footer__more"><a href="https://docs.lynxdb.org/docs/api/overview">REST API</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Community</h3><ul><li><a href="https://github.com/lynxbase/lynxdb">GitHub</a></li><li><a href="https://discord.gg/RgggCFdgWK">Discord</a></li><li><a href="https://github.com/lynxbase/lynxdb/releases">Releases</a></li><li><a href="https://github.com/lynxbase/lynxdb/blob/main/CONTRIBUTING.md">Contributing</a></li><li class="footer__more"><a href="https://github.com/lynxbase/lynxdb/blob/main/SECURITY.md">Security</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 LynxDB &nbsp; <a href="https://github.com/lynxbase/lynxdb/blob/main/LICENSE">Apache 2.0</a> &nbsp; Product names and logos are trademarks of their owners.</span>
+        <a class="feed-link" href="./feed.xml">Blog feed</a>
+      </div>
+    </div>
+  </div>
+  <span class="sr-only" role="status" data-copy-status></span>
+</footer>
+
+
+<script type="module" src="../theme.js"></script>
+<script type="module" src="./blog.js"></script>
+</body>
+</html>

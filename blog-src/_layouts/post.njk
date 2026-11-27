@@ -1,0 +1,41 @@
+---
+layout: base
+---
+{%- set toSite = page.url | toSite -%}
+{%- set toBlog = page.url | toBlog -%}
+{%- set contents = content | toc -%}
+{%- set post = { data: { authors: authors } } -%}
+<div class="wrap post">
+  <header class="post__head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ toBlog }}">Blog</a>{% if tags and tags.length %}<span class="crumbs__sep" aria-hidden="true">/</span><span>{{ tags[0] }}</span>{% endif %}</nav>
+    <h1 class="post__title">{{ title }}</h1>
+    <p class="post-meta">{% include "byline.njk" %}<span class="post-meta__sep" aria-hidden="true"></span><time datetime="{{ page.date | isoDate }}">{{ page.date | readableDate }}</time><span class="post-meta__sep" aria-hidden="true"></span><span>{{ readingTime }}</span></p>
+  </header>
+  {%- if excerpt %}
+  <p class="post__lead">{{ excerpt }}</p>
+  {%- endif %}
+  {%- if contents %}
+  <details class="toc toc--inline">
+    <summary>On this page</summary>
+    <nav aria-label="On this page">{{ contents | safe }}</nav>
+  </details>
+  <aside class="post__rail">
+    <nav class="toc toc--rail" aria-labelledby="toc-title"><p class="toc__title" id="toc-title">On this page</p>{{ contents | safe }}</nav>
+  </aside>
+  {%- endif %}
+  <article class="prose">
+{{ content | safe }}
+  </article>
+  <p class="post__end"><a class="back-link" href="{{ toBlog }}"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M11 6H3M6.5 2.5 3 6l3.5 3.5"/></svg>All posts</a></p>
+</div>
+{%- set more = collections.posts | others(page.url) %}
+{%- if more.length %}
+<aside class="more" aria-labelledby="more-h">
+  <div class="wrap">
+    <div class="more__head"><h2 id="more-h">More posts</h2><a class="link" href="{{ toBlog }}">All posts</a></div>
+    <div class="card-grid">
+      {%- for post in more %}{% set lead = false %}{% include "card.njk" %}{% endfor %}
+    </div>
+  </div>
+</aside>
+{%- endif %}

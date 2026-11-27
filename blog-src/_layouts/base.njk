@@ -1,0 +1,66 @@
+{%- set toSite = page.url | toSite -%}
+{%- set toBlog = page.url | toBlog -%}
+{%- set pageUrl = site.url + '/blog' + page.url -%}
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-buttons="solid" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{ title | escape }}{% if page.url != '/' %} · LynxDB blog{% endif %}</title>
+<meta name="description" content="{{ (description or excerpt or site.description) | escape }}">
+<meta name="robots" content="max-image-preview:large">
+<link rel="canonical" href="{{ pageUrl }}">
+<link rel="alternate" type="text/markdown" href="{{ pageUrl | markdownUrl }}">
+<link rel="describedby" href="/llms.txt">
+<meta property="og:type" content="{{ 'article' if page.url != '/' else 'website' }}">
+<meta property="og:site_name" content="LynxDB">
+<meta property="og:title" content="{{ title | escape }}">
+<meta property="og:description" content="{{ (description or excerpt or site.description) | escape }}">
+<meta property="og:url" content="{{ pageUrl }}">
+<meta property="og:image" content="{{ (image or '/share.jpg') | absoluteUrl(pageUrl) | escape }}">
+<meta name="twitter:card" content="summary_large_image">
+{%- if page.url != '/' %}
+<meta property="article:published_time" content="{{ page.date | isoDate }}">
+{%- for tag in tags %}
+<meta property="article:tag" content="{{ tag | escape }}">
+{%- endfor %}
+{%- endif %}
+<script type="application/ld+json">{{ site | blogSchema(page, title, description or excerpt, image, authors, tags) | safe }}</script>
+<link rel="icon" href="{{ toSite }}img/lynxdb-appicon-moss.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f1f3ef">
+<link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ toBlog }}feed.xml">
+<link rel="preload" href="{{ toSite }}fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ toSite }}fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ toSite }}assets/system.css">
+<link rel="stylesheet" href="{{ toSite }}assets/motion/motion.css">
+<script>(() => { let t = null; try { t = localStorage.getItem('lynxdb-theme'); } catch (e) {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); })()</script>
+<style>
+:root {
+  --p-bg: #f1f3ef; --p-surface: #fdfefc; --p-ink: #171b17; --p-muted: #616760;
+  --p-accent: #227847; --p-accent-ink: #f1f3ef; --p-action: #227847; --p-action-ink: #f1f3ef;
+  --p-inv-bg: #171b17; --p-inv-surface: #232723; --p-inv-ink: #f1f3ef; --p-inv-muted: #969994;
+  --p-inv-accent: #227847; --p-inv-accent-ink: #f1f3ef; --p-inv-action: #227847; --p-inv-action-ink: #f1f3ef;
+  --font-display: "Geist", system-ui, sans-serif;
+  --font-text: "Geist", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 600;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.045em;
+}
+</style>
+<link rel="stylesheet" href="{{ toSite }}site.css">
+<link rel="stylesheet" href="{{ toBlog }}blog.css">
+</head>
+<body class="blog-page">
+{% include "nav.njk" %}
+
+<main id="content" class="blog-main">
+{{ content | safe }}
+</main>
+
+{% include "footer.njk" %}
+
+<script type="module" src="{{ toSite }}theme.js"></script>
+<script type="module" src="{{ toBlog }}blog.js"></script>
+</body>
+</html>

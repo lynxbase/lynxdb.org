@@ -1,0 +1,22 @@
+---
+layout: base
+title: LynxDB blog
+image: ../share.jpg
+permalink: index.html
+---
+{%- set toSite = page.url | toSite -%}
+{%- set toBlog = page.url | toBlog -%}
+<div class="wrap blog-index">
+  <header class="blog-index__head">
+    <h1>Blog</h1>
+    <p class="blog-index__lede">{{ site.description }}</p>
+    <a class="feed-link" href="feed.xml"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.75A10.25 10.25 0 0 1 13.25 13M3 7a6 6 0 0 1 6 6"/><circle cx="3.75" cy="12.25" r="1.25"/></svg>Feed</a>
+  </header>
+  {%- if collections.posts.length %}
+  <div class="card-grid">
+    {%- for post in collections.posts %}{% set lead = loop.first %}{% include "card.njk" %}{% endfor %}
+  </div>
+  {%- else %}
+  <p class="blog-index__empty">No posts yet.</p>
+  {%- endif %}
+</div>
