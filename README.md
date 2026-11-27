@@ -14,7 +14,14 @@ mise run hooks    # run that check on every commit this clone pushes (.githooks/
 ```
 
 Run `mise run build` after changing pages or posts and commit the generated files with the source
-changes: the host serves the repository as it is, with no build step. The sitemap covers
+changes: the host serves the repository as it is, with no build step.
+
+Every page has a Markdown copy next to its address, for agents and readers that want the text:
+`/blog/slug/` at `/blog/slug.md`, `/blog/` at `/blog.md` and the home page at `/index.md`. A post's
+copy is its own Markdown source, with its figures turned into text; the home page and the list of
+posts are converted from their HTML. Each page links its copy with
+`<link rel="alternate" type="text/markdown">`, `llms.txt` lists them, and `_headers` has Cloudflare
+serve them as UTF-8 `text/markdown`, as `mise run serve` does. The sitemap covers
 `lynxdb.org`; documentation has its own [sitemap](https://docs.lynxdb.org/sitemap.xml).
 
 `design-system/` is the LynxDB brand system the page follows: tokens, logos, fonts and component

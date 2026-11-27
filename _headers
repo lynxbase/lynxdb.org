@@ -1,0 +1,13 @@
+# Cloudflare static assets: the Markdown copy of every page and the files for language models are
+# UTF-8 text, so a browser or an agent reads them as written.
+/*.md
+  Content-Type: text/markdown; charset=utf-8
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+
+/llms-full.txt
+  Content-Type: text/plain; charset=utf-8
+
+/llmfull.txt
+  Content-Type: text/plain; charset=utf-8

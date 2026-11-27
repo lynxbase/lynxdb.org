@@ -10,7 +10,7 @@
 <meta name="description" content="{{ (description or excerpt or site.description) | escape }}">
 <meta name="robots" content="max-image-preview:large">
 <link rel="canonical" href="{{ pageUrl }}">
-<link rel="alternate" type="text/markdown" href="{{ pageUrl }}index.md">
+<link rel="alternate" type="text/markdown" href="{{ pageUrl | markdownUrl }}">
 <link rel="describedby" href="/llms.txt">
 <meta property="og:type" content="{{ 'article' if page.url != '/' else 'website' }}">
 <meta property="og:site_name" content="LynxDB">
