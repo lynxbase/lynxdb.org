@@ -47,6 +47,11 @@ html[data-theme="dark"] img.ic-mono { filter: invert(.92) hue-rotate(180deg); }
 html[data-theme="dark"] .theme-btn__sun { display: inline; }
 .theme-btn__label, .theme-btn__to-light, html[data-theme="dark"] .theme-btn__to-dark { display: none; }
 html[data-theme="dark"] .theme-btn__to-light { display: inline; }
+/* six links leave the centred bar little slack between 1024 and 1199: the links take the middle track */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .nav--centre .nav__bar { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .nav--centre .nav__links { justify-self: center; }
+}
 /* a tablet's bar has the room: the switch stays beside the Install button */
 @media (min-width: 640px) and (max-width: 1023px) { .nav:not(.is-open) .nav__actions > .theme-btn { display: inline-grid; } }
 /* in the menu sheet the switch says what it does */
