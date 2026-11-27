@@ -428,6 +428,43 @@ html[data-theme="dark"] .fig { --fig-ink: #e4e7e2; --fig-line: #616760; --fig-me
   .fig-frame::before { left: calc(var(--flow-label) + 18px + 2 * var(--fig-gap) - 6px); right: calc(var(--flow-n) + var(--fig-gap) - 6px); width: auto; }
 }
 
+/* more parts, first drawn for the post inside-the-lynxdb-engine.
+   .fig-ladder: boxes in --ladder columns joined by short down arrows; an arrow row holds a
+   .fig-arrow--down (or an empty <span>) in every column, and a .fig-ladder__head names a column.
+   .fig-box.is-none is a level one side lacks, on a dashed hairline; a <small> in a box's title holds a
+   count at its right end, and an <em> closes a box with its numbers. .fig-cols.is-narrow takes
+   columns from --col-min (132px), for small boxes; .fig-cols.is-pair lines up the heads and last
+   rows of two groups side by side. .fig-legend.is-row keeps its items on one baseline in a post.
+   .fig-dash: a dashed hairline round a group, with its label in .fig-dash__label.
+   .fig-file: a file as stacked byte ranges, a .fig-band per range (--h its height; .is-gap for ranges
+   left out, .is-mark for the one the figure is about), each followed by a note on when it is read.
+   .fig-cells: a row of hairline cells, --h tall, that stand for buffers or partitions. */
+.fig-ladder { --ladder: repeat(2, minmax(0, 1fr)); display: grid; grid-template-columns: var(--ladder); align-content: start; gap: 0 16px; min-width: 0; }
+.fig-ladder > .fig-arrow--down { height: 14px; margin: 3px 0 4px; }
+.fig-ladder__head { padding-bottom: 8px; color: var(--lx-950); font: 600 13px/1.3 var(--font-text); }
+.fig-box.is-none { border-style: dashed; }
+.fig-box.is-none > b { color: var(--lx-700); font-weight: 500; }
+.fig-box > b > small { margin-left: auto; color: var(--lx-800); font: 400 12px/1.3 var(--font-mono); white-space: nowrap; }
+.fig-box > em { margin-top: 4px; color: var(--lx-950); font-style: normal; }
+.fig-cols.is-narrow { grid-template-columns: repeat(auto-fit, minmax(var(--col-min, 132px), 1fr)); }
+.fig-cols.is-pair > .fig-group { grid-template-rows: auto 1fr auto; }
+.prose .fig-legend.is-row > li + li { margin-top: 0; }
+.fig-dash { display: grid; gap: 8px; min-width: 0; padding: 8px 12px 12px; border: 1px dashed var(--fig-line); border-radius: var(--r-md); }
+.fig-dash__label { color: var(--lx-600); font: 400 12px/1.35 var(--font-mono); }
+.fig-file { display: grid; grid-template-columns: minmax(0, 1fr) var(--file-note, 176px); gap: 4px var(--fig-gap); }
+.fig-band { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; min-height: var(--h, 26px); padding: 3px 10px;
+            border: 1px solid var(--fig-line); border-radius: var(--r-sm); color: var(--lx-800); font: 400 12px/1.3 var(--font-mono); }
+.fig-band > small { flex: none; color: var(--lx-600); font: inherit; }
+.fig-band.is-gap { min-height: 18px; border-color: transparent; color: var(--lx-600); }
+.fig-band.is-mark { border-color: var(--fig-ink); color: var(--lx-950); }
+.fig-file > em { align-self: center; color: var(--lx-600); font: 400 12px/1.3 var(--font-mono); font-style: normal; }
+.fig-cells { display: flex; align-items: flex-end; gap: 4px; min-width: 0; }
+.fig-cells > i { box-sizing: border-box; flex: 1 1 0; min-width: 0; height: var(--h, 12px); border: 1px solid var(--fig-line); border-radius: 1px; }
+@media (max-width: 639px) {
+  .fig-ladder { gap: 0 8px; }
+  .fig-file { --file-note: 92px; }
+}
+
 /* ---------------------------------------------------------------- figure: LynxDB against the faster of
    ClickHouse and VictoriaLogs on 30 queries (post lynxdb-on-jsonbench). .fig-ratio on a .fig-bars list:
    bars grow left or right from 1x on a log axis, each starting at --x0 and --w long; the 1x line is
