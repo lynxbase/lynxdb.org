@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-buttons="solid">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Page not found · LynxDB</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/img/lynxdb-appicon-moss.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f1f3ef">
+<link rel="preload" href="/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/system.css">
+<script>(() => { let t = null; try { t = localStorage.getItem('lynxdb-theme'); } catch (e) {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); })()</script>
+<style>
+:root {
+  --p-bg: #f1f3ef; --p-surface: #fdfefc; --p-ink: #171b17; --p-muted: #616760;
+  --p-accent: #227847; --p-accent-ink: #f1f3ef; --p-action: #227847; --p-action-ink: #f1f3ef;
+  --p-inv-bg: #171b17; --p-inv-surface: #232723; --p-inv-ink: #f1f3ef; --p-inv-muted: #969994;
+  --p-inv-accent: #227847; --p-inv-accent-ink: #f1f3ef; --p-inv-action: #227847; --p-inv-action-ink: #f1f3ef;
+  --font-display: "Geist", system-ui, sans-serif;
+  --font-text: "Geist", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 600;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.045em;
+}
+</style>
+<link rel="stylesheet" href="/site.css">
+<!-- The host serves this page for any address it has no file for, at that address, so every link
+     here starts at the site root. -->
+<style>
+.lost { min-height: 100svh; display: grid; align-content: center; padding-block: 48px; }
+.lost .wrap { display: grid; gap: 20px; justify-items: start; max-width: 720px; margin-inline: auto; }
+.lost__brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font: 600 17px/1 var(--font-display); text-decoration: none; }
+.lost__code { margin-top: 28px; color: var(--muted); font: 400 14px/1.4 var(--font-mono); }
+.lost h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.05; letter-spacing: var(--display-tracking); }
+.lost p { max-width: 56ch; color: var(--muted); font-size: 17px; line-height: 1.55; }
+.lost .btn-row { margin-top: 8px; }
+</style>
+</head>
+<body>
+<main class="lost">
+  <div class="wrap">
+    <a class="lost__brand" href="/"><img data-mark src="/img/lynxdb-mark-faceted-on-light.svg" alt="" width="22" height="30">LynxDB</a>
+    <p class="lost__code">404</p>
+    <h1>There is no page at this address</h1>
+    <p>It may be mistyped, or the page may have moved. The home page, the blog and the documentation are here:</p>
+    <div class="btn-row"><a class="btn btn--primary" href="/">Home</a><a class="btn btn--secondary" href="/blog/">Blog</a><a class="btn btn--secondary" href="https://docs.lynxdb.org/">Documentation</a></div>
+  </div>
+</main>
+<script type="module" src="/theme.js"></script>
+</body>
+</html>

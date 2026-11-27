@@ -20,3 +20,10 @@ node_modules/
 # The system
 .DS_Store
 *.log
+
+# The deploy stage, mise run dist
+dist/
+# Wrangler's local state, and secrets that must never be committed
+.wrangler/
+.dev.vars*
+.env*

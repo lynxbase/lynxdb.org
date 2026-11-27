@@ -1,0 +1,22 @@
+// lynxdb.org on Cloudflare: a Worker with static assets and no script, serving what mise run dist
+// stages into dist/. .github/workflows/deploy.yml deploys it on every tag; the first deploy creates it.
+{
+  "name": "lynxdb-org",
+  "compatibility_date": "2026-11-23",
+  "assets": {
+    "directory": "./dist",
+    // an address with no file gets 404.html with status 404, never the home page
+    "not_found_handling": "404-page",
+    // pages are folders, served at /blog/slug/; the Markdown copies are files, served as named
+    "html_handling": "auto-trailing-slash"
+  },
+  // the addresses it answers on; a deploy creates their DNS records and certificates. lynxdb.org is
+  // canonical: every page names it in <link rel="canonical">, www.lynxdb.org serves the same files.
+  "routes": [
+    { "pattern": "lynxdb.org", "custom_domain": true },
+    { "pattern": "www.lynxdb.org", "custom_domain": true }
+  ],
+  // no second copy of the site on workers.dev or on preview addresses
+  "workers_dev": false,
+  "preview_urls": false
+}

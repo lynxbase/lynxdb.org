@@ -24,5 +24,24 @@ posts are converted from their HTML. Each page links its copy with
 serve them as UTF-8 `text/markdown`, as `mise run serve` does. The sitemap covers
 `lynxdb.org`; documentation has its own [sitemap](https://docs.lynxdb.org/sitemap.xml).
 
+## Deploy
+
+The site is a Cloudflare Worker with static assets and no script (`wrangler.jsonc`). Pushing a tag
+deploys it: `.github/workflows/deploy.yml` checks that the tagged commit is on `main` and holds the
+site its sources build (`mise run check`), stages the files the host serves into `dist/` (`mise run
+dist`: the pages, `assets/`, the blog, the Markdown copies, `llms*.txt`, `robots.txt`, `sitemap.xml`,
+`_headers` and `404.html`, without `blog-src/`, `design-system/`, the tools or the configuration),
+deploys them with Wrangler, and fetches every page of the new deployment (`mise run smoke <URL>`). The
+Actions tab runs it again for a chosen tag.
+
+```sh
+git tag 2026.11.27 && git push origin 2026.11.27
+```
+
+It needs two repository secrets: `CF_ACCOUNT_ID` and `CF_API_TOKEN`, an API token with Account,
+Workers Scripts: Edit and Zone, Workers Routes: Edit on lynxdb.org. `mise run deploy` deploys `dist/` from a machine where `wrangler login` was
+run, without the checks of a tag. `wrangler.jsonc` names its addresses, `lynxdb.org` and
+`www.lynxdb.org`, and every deploy keeps them attached; the Worker has no `workers.dev` address.
+
 `design-system/` is the LynxDB brand system the page follows: tokens, logos, fonts and component
 notes.

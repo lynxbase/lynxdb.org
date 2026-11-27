@@ -1,5 +1,6 @@
 # Cloudflare static assets: the Markdown copy of every page and the files for language models are
 # UTF-8 text, so a browser or an agent reads them as written.
+# The rule types any .md address, so one with no file answers 404 with the 404 page as text/markdown.
 /*.md
   Content-Type: text/markdown; charset=utf-8
 
