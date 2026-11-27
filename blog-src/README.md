@@ -56,14 +56,14 @@ looks the same in every browser.
 ## Build and preview
 
 ```shell
-npm install
-npm run build:blog                      # blog-src/ -> blog/
-python3 -m http.server 8000             # from the repository root, then open http://localhost:8000/blog/
+mise run build                          # blog-src/ -> blog/, from an empty blog/
+mise run serve                          # the repository root, then open http://127.0.0.1:8765/blog/
 ```
 
-`npm run watch:blog` rebuilds on every save. Serve the repository root, not `blog/`: the pages load
-the landing's `site.css`, `theme.js`, fonts and marks one or two levels up. Build output that a
-source no longer produces is not deleted; remove it from `blog/` by hand.
+`mise run watch` rebuilds on every save. Serve the repository root, not `blog/`: the pages load
+the landing's `site.css`, `theme.js`, fonts and marks one or two levels up. `mise run build` deletes
+`blog/` first, since everything in it is build output, so the pages of a removed post go with it;
+`npm run build:blog` alone writes over `blog/` and leaves them.
 
 ## Files
 

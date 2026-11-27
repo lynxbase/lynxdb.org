@@ -1,0 +1,41 @@
+min_version = "2026.11.0"
+
+[settings]
+lockfile = true
+lockfile_platforms = ["linux-arm64", "linux-x64", "macos-arm64", "macos-x64"]
+
+[tools]
+node = "26"
+
+[env]
+DO_NOT_TRACK = "1"
+
+[tasks.install]
+description = "Install the blog's build tools from package-lock.json"
+run = "npm ci --no-audit --no-fund"
+sources = ["package.json", "package-lock.json"]
+outputs = ["node_modules/.package-lock.json"]
+
+[tasks.build]
+description = "Build the blog into blog/ and refresh sitemap.xml, llms*.txt and the Markdown pages"
+depends = ["install"]
+# blog/ holds only build output, so it is rebuilt from nothing and the pages of removed posts go.
+run = ["rm -rf blog", "npm run build:blog"]
+
+[tasks.watch]
+description = "Rebuild the blog whenever a source changes"
+depends = ["install"]
+run = "npm run watch:blog"
+
+[tasks.serve]
+description = "Serve the site from the repository root on http://127.0.0.1:8765 (PORT changes the port)"
+run = 'python3 -m http.server "${PORT:-8765}" --bind 127.0.0.1'
+
+[tasks.check]
+description = "Build a commit (HEAD by default) in a temporary worktree; fail if its built site is stale"
+depends = ["install"]
+run = "tools/check-site.sh"
+
+[tasks.hooks]
+description = "Run the check on every commit this clone pushes"
+run = "git config core.hooksPath .githooks"
