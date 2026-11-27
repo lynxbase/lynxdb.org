@@ -65,9 +65,15 @@ jobs:
           wranglerVersion: "4.168.0"
           command: deploy
 
-      # the Worker answers only on its domains (wrangler.jsonc), and a deploy switches them at once
+      # the Worker answers only on its domains (wrangler.jsonc); a new version reaches every Cloudflare
+      # location within seconds, so a check that meets the old one is tried again
       - name: Check the site
-        run: mise run smoke https://lynxdb.org
+        run: |
+          for attempt in 1 2 3; do
+            mise run smoke https://lynxdb.org && exit 0
+            [ "$attempt" -lt 3 ] && sleep 10
+          done
+          exit 1
 
       - name: Write the summary
         if: always()
