@@ -1,0 +1,377 @@
+/* LynxDB — generated from tokens.json */
+:root, [data-theme="light"] {
+  --bg-app: var(--stone-100); /* Page ground. The grey the whole product sits on: site body, app canvas, docs background. */
+  --bg-surface: var(--stone-0); /* Panels, cards, sidebars, table bodies, inputs. One step above bg-app. */
+  --bg-raised: var(--stone-0); /* Menus, popovers, tooltips, dialogs. In dark it is one step lighter than bg-surface; in light it is separated by shadow-popover. */
+  --bg-sunken: var(--stone-200); /* Wells below the ground: code blocks, table headers, histogram track, inline code. */
+  --bg-hover: rgba(31, 35, 31, 0.06); /* Hover wash for rows, list items and ghost buttons. Translucent so it works on bg-app, bg-surface and bg-sunken. */
+  --bg-selected: var(--moss-100); /* Selected log row, active nav item, picked field. Carries fg-default or accent-fg text. */
+  --bg-inverse: var(--stone-900); /* Inverse chips and the marketing footer band. Text on it is fg-inverse. */
+  --border-subtle: var(--stone-200); /* Dividers between rows and sections. Decorative; never the only boundary of a control. */
+  --border-default: var(--stone-300); /* Edges of cards, panels, code blocks and tables. */
+  --border-control: var(--stone-500); /* Edges of inputs, selects, checkboxes and secondary buttons. Holds 3:1 on bg-app and bg-surface in both themes. */
+  --fg-default: var(--stone-950); /* Primary text and icons on bg-app, bg-surface, bg-raised, bg-sunken and bg-selected. */
+  --fg-muted: var(--stone-600); /* Secondary text, metadata, timestamps, code comments. Holds 4.5:1 on bg-app, bg-surface, bg-raised and bg-sunken. */
+  --fg-subtle: var(--stone-500); /* Placeholders, disabled labels, decorative glyphs and axis ticks only (3:1). Never for text a person must read. */
+  --fg-inverse: var(--stone-50); /* Text on bg-inverse. */
+  --accent: var(--moss-700); /* The one brand fill: primary button, active toggle, progress, the run button. At most one accent fill per view. On dark grounds it is the loud lime, used the way ClickHouse and DuckDB use yellow. */
+  --accent-hover: var(--moss-800); /* Hover and pressed state of an accent fill. */
+  --on-accent: var(--stone-0); /* Text and icons on accent and accent-hover. Dark text in the dark theme, where the fill is light moss. */
+  --accent-fg: var(--moss-800); /* Moss as text: links, active tab label, keyword in running text. On bg-app, bg-surface, bg-raised, bg-sunken, accent-subtle. */
+  --accent-subtle: var(--moss-100); /* Tinted ground behind accent-fg: badges, highlighted search matches, callouts. */
+  --accent-border: var(--moss-300); /* Hairline around accent-subtle areas. Decorative. */
+  --focus-ring: var(--moss-700); /* Keyboard focus: a solid 2px outline at 2px offset. At least 3:1 on every bg token in both themes. */
+  --success: var(--moss-800); /* Success text and icons, on the bg tokens and success-subtle. Always paired with a word or icon. */
+  --success-subtle: var(--moss-100); /* Tinted ground behind success. */
+  --warning: var(--amber-700); /* Warning text and icons, on the bg tokens and warning-subtle. Always paired with a word or icon. */
+  --warning-subtle: var(--amber-100); /* Tinted ground behind warning. */
+  --danger: var(--ember-700); /* Error text and icons, on the bg tokens and danger-subtle. Vermilion against bluish moss, so it survives red-green colour blindness; still always paired with a word or icon. */
+  --danger-subtle: var(--ember-100); /* Tinted ground behind danger. */
+  --danger-solid: var(--ember-700); /* Fill of a destructive button. Text on it is on-danger. */
+  --on-danger: var(--stone-0); /* Text on danger-solid. */
+  --info: var(--lake-700); /* Neutral notices and hints, on the bg tokens and info-subtle. */
+  --info-subtle: var(--lake-100); /* Tinted ground behind info. */
+  --level-trace: var(--stone-600); /* TRACE label in log rows and CLI output. All level colours are text on bg-app, bg-surface and bg-sunken; the level word is always printed. */
+  --level-debug: var(--lake-700); /* DEBUG label. */
+  --level-info: var(--moss-800); /* INFO label. */
+  --level-warn: var(--amber-700); /* WARN label. */
+  --level-error: var(--ember-700); /* ERROR label. */
+  --level-fatal: var(--plum-700); /* FATAL label. */
+  --syntax-keyword: var(--moss-800); /* LynxFlow stage names and the pipe: from, where, stats, extend, sort, by, as. On bg-sunken and bg-surface. */
+  --syntax-function: var(--lake-700); /* Function and aggregate names: count(), p95(), top_k(). */
+  --syntax-string: var(--amber-700); /* String literals and time ranges such as "timeout" and [-1h]. */
+  --syntax-number: var(--plum-700); /* Numeric literals and durations. */
+  --syntax-comment: var(--stone-600); /* Comments. Fields, operators and punctuation stay fg-default. */
+  --viz-neutral: var(--stone-500); /* Default chart series: an ungrouped histogram is grey. Colour enters a chart only when it encodes a group. */
+  --viz-1: var(--moss-600); /* First grouped series. Series 1 to 5 are close in lightness, so every chart also carries a legend or direct labels and a fixed stacking order. */
+  --viz-2: var(--lake-700); /* Second series. */
+  --viz-3: var(--amber-700); /* Third series. */
+  --viz-4: var(--plum-700); /* Fourth series. */
+  --viz-5: var(--ember-700); /* Fifth series. Past five groups, fold the rest into viz-neutral as "other". */
+  --stone-0: #fdfefc; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-50: #f8faf7; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-100: #f1f3ef; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-200: #e4e7e2; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-300: #d1d6cf; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-400: #aab0a8; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-500: #858b84; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-600: #616760; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-700: #464c46; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-800: #333833; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-850: #282d29; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-900: #1f231f; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-950: #171b17; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --stone-1000: #0f1210; /* Neutral ramp, tinted 135-150 degrees toward moss at very low chroma. Primitive: components use the bg, border and fg tokens. */
+  --moss-50: #f4fce8; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-100: #e7f7d0; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-200: #d2efab; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-300: #b5e280; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-400: #91cb6a; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-500: #67b05b; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-600: #409551; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-700: #227847; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-800: #155e3b; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-900: #0d432a; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --moss-950: #0a2b1c; /* Brand ramp, cut from the lynx mark: lime at the top, emerald at the bottom. Primitive: components use the accent tokens. */
+  --ember-100: #ffe9e4; /* Vermilion signal ramp for errors. Primitive: use the danger and level-error tokens. */
+  --ember-300: #feac9b; /* Vermilion signal ramp for errors. Primitive: use the danger and level-error tokens. */
+  --ember-500: #f3654c; /* Vermilion signal ramp for errors. Primitive: use the danger and level-error tokens. */
+  --ember-700: #ab331f; /* Vermilion signal ramp for errors. Primitive: use the danger and level-error tokens. */
+  --ember-900: #4e1b12; /* Vermilion signal ramp for errors. Primitive: use the danger and level-error tokens. */
+  --amber-100: #fef2cc; /* Signal ramp for warnings. Primitive: use the warning and level-warn tokens. */
+  --amber-300: #fbd26b; /* Signal ramp for warnings. Primitive: use the warning and level-warn tokens. */
+  --amber-500: #ebaa2d; /* Signal ramp for warnings. Primitive: use the warning and level-warn tokens. */
+  --amber-700: #925b0c; /* Signal ramp for warnings. Primitive: use the warning and level-warn tokens. */
+  --amber-900: #46290b; /* Signal ramp for warnings. Primitive: use the warning and level-warn tokens. */
+  --lake-100: #e0f1ff; /* Cool ramp for info, debug and function names. Primitive: use the info, level-debug and syntax-function tokens. */
+  --lake-300: #8dccf9; /* Cool ramp for info, debug and function names. Primitive: use the info, level-debug and syntax-function tokens. */
+  --lake-500: #3ca2e0; /* Cool ramp for info, debug and function names. Primitive: use the info, level-debug and syntax-function tokens. */
+  --lake-700: #026a9d; /* Cool ramp for info, debug and function names. Primitive: use the info, level-debug and syntax-function tokens. */
+  --lake-900: #01314c; /* Cool ramp for info, debug and function names. Primitive: use the info, level-debug and syntax-function tokens. */
+  --plum-100: #fee6f8; /* Rare ramp for FATAL, numbers and a fourth chart series. Primitive: use level-fatal, syntax-number and viz-4. */
+  --plum-300: #edacde; /* Rare ramp for FATAL, numbers and a fourth chart series. Primitive: use level-fatal, syntax-number and viz-4. */
+  --plum-500: #d36ebf; /* Rare ramp for FATAL, numbers and a fourth chart series. Primitive: use level-fatal, syntax-number and viz-4. */
+  --plum-700: #943b84; /* Rare ramp for FATAL, numbers and a fourth chart series. Primitive: use level-fatal, syntax-number and viz-4. */
+  --plum-900: #451c3d; /* Rare ramp for FATAL, numbers and a fourth chart series. Primitive: use level-fatal, syntax-number and viz-4. */
+  --lime-300: #ccfc76; /* The loud end of moss: the accent fill and the one highlighted phrase on dark grounds. Two stops only; never text on a light ground. Primitive: use accent and accent-hover. */
+  --lime-400: #b7f652; /* The loud end of moss: the accent fill and the one highlighted phrase on dark grounds. Two stops only; never text on a light ground. Primitive: use accent and accent-hover. */
+  --cyan-300: #90e1e6; /* Exists only to complete the ANSI terminal palette. */
+  --cyan-500: #48b7c2; /* Exists only to complete the ANSI terminal palette. */
+  --ansi-black: var(--stone-950); /* ANSI slot 0 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-red: var(--ember-500); /* ANSI slot 1 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-green: var(--moss-500); /* ANSI slot 2 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-yellow: var(--amber-500); /* ANSI slot 3 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-blue: var(--lake-500); /* ANSI slot 4 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-magenta: var(--plum-500); /* ANSI slot 5 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-cyan: var(--cyan-500); /* ANSI slot 6 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-white: var(--stone-300); /* ANSI slot 7 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-bright-black: var(--stone-500); /* ANSI slot 8 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-bright-red: var(--ember-300); /* ANSI slot 9 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-bright-green: var(--moss-300); /* ANSI slot 10 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-bright-yellow: var(--amber-300); /* ANSI slot 11 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-bright-blue: var(--lake-300); /* ANSI slot 12 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-bright-magenta: var(--plum-300); /* ANSI slot 13 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-bright-cyan: var(--cyan-300); /* ANSI slot 14 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --ansi-bright-white: var(--stone-50); /* ANSI slot 15 of the Lynx terminal theme (web terminal blocks and the optional theme file). Background stone-1000, foreground stone-200, cursor moss-400. The CLI itself emits slot numbers, never these hex values. */
+  --shadow-popover: 0 0 0 1px rgba(31, 35, 31, 0.08), 0 8px 24px -4px rgba(31, 35, 31, 0.16); /* The only shadow in the system: menus, popovers, dialogs on bg-raised. Everything else is separated by a border or a surface step. */
+}
+[data-theme="dark"] {
+  --bg-app: var(--stone-900);
+  --bg-surface: var(--stone-850);
+  --bg-raised: var(--stone-800);
+  --bg-sunken: var(--stone-950);
+  --bg-hover: rgba(241, 243, 239, 0.07);
+  --bg-selected: var(--moss-950);
+  --bg-inverse: var(--stone-100);
+  --border-subtle: var(--stone-800);
+  --border-default: var(--stone-700);
+  --border-control: var(--stone-500);
+  --fg-default: var(--stone-200);
+  --fg-muted: var(--stone-400);
+  --fg-subtle: var(--stone-500);
+  --fg-inverse: var(--stone-950);
+  --accent: var(--lime-400);
+  --accent-hover: var(--lime-300);
+  --on-accent: var(--stone-1000);
+  --accent-fg: var(--moss-300);
+  --accent-subtle: var(--moss-950);
+  --accent-border: var(--moss-800);
+  --focus-ring: var(--lime-400);
+  --success: var(--moss-300);
+  --success-subtle: var(--moss-950);
+  --warning: var(--amber-300);
+  --warning-subtle: var(--amber-900);
+  --danger: var(--ember-300);
+  --danger-subtle: var(--ember-900);
+  --danger-solid: var(--ember-500);
+  --on-danger: var(--stone-1000);
+  --info: var(--lake-300);
+  --info-subtle: var(--lake-900);
+  --level-trace: var(--stone-400);
+  --level-debug: var(--lake-300);
+  --level-info: var(--moss-300);
+  --level-warn: var(--amber-300);
+  --level-error: var(--ember-300);
+  --level-fatal: var(--plum-300);
+  --syntax-keyword: var(--moss-300);
+  --syntax-function: var(--lake-300);
+  --syntax-string: var(--amber-300);
+  --syntax-number: var(--plum-300);
+  --syntax-comment: var(--stone-400);
+  --viz-neutral: var(--stone-500);
+  --viz-1: var(--moss-500);
+  --viz-2: var(--lake-500);
+  --viz-3: var(--amber-500);
+  --viz-4: var(--plum-500);
+  --viz-5: var(--ember-500);
+  --ansi-black: var(--stone-950);
+  --ansi-red: var(--ember-500);
+  --ansi-green: var(--moss-500);
+  --ansi-yellow: var(--amber-500);
+  --ansi-blue: var(--lake-500);
+  --ansi-magenta: var(--plum-500);
+  --ansi-cyan: var(--cyan-500);
+  --ansi-white: var(--stone-300);
+  --ansi-bright-black: var(--stone-500);
+  --ansi-bright-red: var(--ember-300);
+  --ansi-bright-green: var(--moss-300);
+  --ansi-bright-yellow: var(--amber-300);
+  --ansi-bright-blue: var(--lake-300);
+  --ansi-bright-magenta: var(--plum-300);
+  --ansi-bright-cyan: var(--cyan-300);
+  --ansi-bright-white: var(--stone-50);
+  --shadow-popover: 0 0 0 1px rgba(241, 243, 239, 0.08), 0 12px 32px -4px rgba(0, 0, 0, 0.5);
+}
+:root {
+  --space-px: 1px; /* Hairline offsets. */
+  --space-half: 2px; /* Gap between a level chip and its text; focus-ring offset. */
+  --space-1: 4px; /* Base unit. Icon-to-label gap, chip padding. */
+  --space-2: 8px; /* Control padding, gap between related controls, log row horizontal padding. */
+  --space-3: 12px; /* Padding of compact panels and table cells. */
+  --space-4: 16px; /* Panel and card padding in the app. */
+  --space-6: 24px; /* Gutter between panels; card padding on marketing pages. */
+  --space-8: 32px; /* Gap between groups inside a section. */
+  --space-12: 48px; /* Section padding in docs; hero gaps. */
+  --space-16: 64px; /* Section padding on marketing pages. */
+  --space-24: 96px; /* Space above and below the hero. */
+  --radius-xs: 2px; /* Level chips, inline code, histogram bars, checkbox. */
+  --radius-sm: 4px; /* Buttons, inputs, tabs, menu items. */
+  --radius-md: 6px; /* Cards, panels, code blocks, popovers. */
+  --radius-lg: 10px; /* Dialogs and the large marketing terminal. */
+  --radius-full: 999px; /* Status dots, toggles, avatar. Not for buttons or cards. */
+  --control-sm: 24px; /* Height of dense app controls: toolbar buttons, chips, table filters. */
+  --control-md: 32px; /* Default control height: buttons, inputs, selects. */
+  --control-lg: 40px; /* Marketing buttons and the install command field. */
+  --row-log: 22px; /* Height of one log row. Do not go lower. */
+  --topbar: 48px; /* App and site top bar height. */
+  --sidebar: 264px; /* App sidebar and docs nav width. */
+  --measure: 680px; /* Maximum width of a prose column. */
+  --duration-fast: 100ms; /* Hover, press and tab changes. Anything a person triggers tens of times a day. */
+  --duration-base: 160ms; /* Dropdowns, popovers, toggles, tooltips. */
+  --duration-slow: 240ms; /* Dialogs, drawers, the one hero reveal. */
+  --duration-scramble: 360ms; /* Upper bound of one ScrambleText run. */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1); /* Default for everything entering or responding to input. */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* Elements already on screen that move or resize. */
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --text-display-xl: 600 72px/72px var(--font-sans); /* Homepage hero headline only. One per page. */
+  --text-display-lg: 600 48px/52px var(--font-sans); /* Section openers on marketing pages. */
+  --text-display-md: 600 32px/38px var(--font-sans); /* Docs page title, large card headline. */
+  --text-heading-lg: 600 24px/30px var(--font-sans); /* h2 in docs and app pages. */
+  --text-heading-md: 600 18px/26px var(--font-sans); /* h3, card titles, dialog titles. */
+  --text-heading-sm: 600 15px/22px var(--font-sans); /* Panel titles and table group headers in the app. */
+  --text-body-lg: 400 18px/28px var(--font-sans); /* Lead paragraph under a display headline. */
+  --text-body: 400 15px/24px var(--font-sans); /* Default reading size: docs prose, marketing copy. */
+  --text-body-sm: 400 13px/20px var(--font-sans); /* Default app UI size: controls, menus, table cells that are not data. */
+  --text-caption: 400 12px/16px var(--font-sans); /* Help text, footnotes, chart legends. */
+  --text-label: 500 11px/16px var(--font-mono); /* The interface voice: uppercase eyebrows, nav links, column headers, tab labels. Always uppercase; the only style that may scramble. */
+  --text-code: 400 13px/20px var(--font-mono); /* Code blocks, the query editor, terminal blocks, inline code. */
+  --text-log: 400 12px/20px var(--font-mono); /* Log rows and data tables. Tabular by nature; never below 12px. */
+  --text-stat: 500 28px/32px var(--font-mono); /* A single headline number in the app: hit count, p95, bytes scanned. */
+}
+.display-xl {
+  font-family: var(--font-sans);
+  font-size: 72px;
+  line-height: 72px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+.display-lg {
+  font-family: var(--font-sans);
+  font-size: 48px;
+  line-height: 52px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+.display-md {
+  font-family: var(--font-sans);
+  font-size: 32px;
+  line-height: 38px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.heading-lg {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.heading-md {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+.heading-sm {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  letter-spacing: -0.006em;
+}
+.body-lg {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+  letter-spacing: -0.006em;
+}
+.body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body-sm {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.caption {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.log {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.stat {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  line-height: 32px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/geist-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/geist-latin-ext-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/geist-cyrillic-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/jetbrains-mono-latin-ext-wght-normal.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/jetbrains-mono-cyrillic-wght-normal.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}

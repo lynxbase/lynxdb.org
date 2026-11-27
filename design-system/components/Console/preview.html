@@ -1,0 +1,124 @@
+<!-- @dsCard group="Examples" page="true" width=1440 height=900 subtitle="Web UI query console, dark theme" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Console — LynxDB</title>
+<style>
+  .ui { width: 1440px; height: 900px; display: grid; grid-template-rows: var(--topbar) minmax(0, 1fr); background: var(--bg-app); font-size: 13px; line-height: 20px; overflow: hidden; }
+  .ui-top { display: flex; align-items: center; gap: var(--space-6); padding: 0 var(--space-4); border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface); }
+  .ui-top .lx-tabs { border: 0; align-self: stretch; align-items: stretch; }
+  .ui-top .lx-tab { height: auto; }
+  .ui-top .lx-tab[aria-selected="true"]::after { bottom: 0; }
+  .ui-top .end { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
+  .ui-body { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); min-height: 0; }
+  .ui-side { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-3); border-right: 1px solid var(--border-subtle); background: var(--bg-surface); min-height: 0; }
+  .ui-side h2 { display: flex; justify-content: space-between; margin: var(--space-2) var(--space-1) 0; }
+  .ui-fields { display: grid; margin: 0; padding: 0; list-style: none; }
+  .ui-fields li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); height: 28px; padding: 0 var(--space-2); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 12px; }
+  .ui-fields li:hover { background: var(--bg-hover); }
+  .ui-fields li[aria-selected="true"] { background: var(--bg-selected); color: var(--accent-fg); }
+  .ui-fields li > span:last-child { color: var(--fg-muted); font-size: 11px; }
+  .ui-fields .ty { display: inline-block; width: 2ch; margin-right: var(--space-1); color: var(--fg-subtle); }
+  .ui-main { display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3); min-height: 0; min-width: 0; }
+  .ui-editor { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+  .ui-editor .ln { padding: var(--space-3) var(--space-2) var(--space-3) var(--space-3); color: var(--fg-subtle); font-family: var(--font-mono); font-size: 13px; line-height: 20px; text-align: right; user-select: none; white-space: pre; }
+  .ui-editor .lx-code { border: 0; border-radius: 0; background: transparent; padding-left: var(--space-2); }
+  .ui-qfoot { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border-top: 1px solid var(--border-subtle); }
+  .ui-qfoot .meta { margin-left: auto; margin-right: var(--space-2); color: var(--fg-muted); font-family: var(--font-mono); font-size: 12px; }
+  .ui-qfoot .meta b { color: var(--fg-default); font-weight: 500; }
+  .ui-chart { padding: var(--space-3); }
+  .ui-chart .lx-hist { height: 88px; margin-top: var(--space-2); }
+  .ui-legend { display: flex; gap: var(--space-4); color: var(--fg-muted); font-family: var(--font-mono); font-size: 11px; }
+  .ui-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .ui-legend i { width: 8px; height: 8px; border-radius: var(--radius-xs); }
+  .ui-res { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; overflow: hidden; }
+  .ui-res .lx-tabs { padding: 0 var(--space-1); }
+  .ui-res .lx-tabs .meta { margin-left: auto; align-self: center; padding-right: var(--space-2); color: var(--fg-muted); font-family: var(--font-mono); font-size: 11px; }
+  .ui-res .lx-logs { overflow: hidden; }
+  .ui-res .lx-log { grid-template-columns: 23ch 6ch 16ch minmax(0, 1fr); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="lx-mono" viewBox="0 0 378.4 512"><path fill-rule="evenodd" d="M49.1,13.3 49.6,17.0 51.0,20.2 54.6,25.7 61.1,33.8 66.4,38.3 71.6,43.9 75.1,46.6 83.1,51.7 85.0,53.5 85.0,63.8 85.4,64.5 85.9,78.1 87.7,83.3 88.6,89.1 90.5,94.4 90.9,97.3 91.8,99.0 94.1,106.5 101.0,120.3 108.4,131.3 113.0,137.1 119.8,144.4 119.8,146.3 118.0,147.4 115.5,147.9 113.0,149.2 110.9,149.7 106.5,152.5 87.5,162.1 63.8,180.0 50.1,193.8 39.5,206.2 33.5,214.2 21.1,234.9 12.9,252.8 12.9,253.9 9.2,263.3 9.2,265.0 8.3,266.6 7.8,269.5 6.4,273.0 6.0,276.4 5.1,278.5 4.6,282.4 3.7,284.9 3.2,290.2 1.8,295.9 1.4,303.1 0.9,303.8 0.9,309.0 0.0,309.3 0.0,336.6 0.9,336.8 1.4,344.9 1.8,345.5 1.8,348.5 3.2,354.7 3.2,357.3 6.9,373.3 12.4,389.9 18.4,403.6 27.1,420.2 40.9,439.4 50.1,450.5 63.4,463.6 76.9,474.6 94.4,486.1 108.1,493.4 122.4,499.4 134.3,503.5 143.7,505.8 145.8,506.7 161.9,509.9 174.5,510.9 174.7,511.8 204.3,511.8 204.6,510.9 208.9,510.9 209.6,510.4 216.3,509.9 238.3,505.3 243.1,503.5 250.7,501.7 266.3,495.2 281.0,487.9 295.7,478.7 303.3,473.2 318.5,460.3 326.7,452.1 337.7,439.2 344.2,430.7 352.9,417.9 367.1,388.0 372.2,371.0 372.2,369.4 373.6,365.1 374.5,358.9 375.8,354.0 375.8,351.1 376.8,348.1 377.2,341.4 378.1,341.2 378.1,311.6 376.5,311.6 375.6,317.8 373.8,322.6 372.4,328.3 371.0,330.8 371.0,332.0 365.5,343.0 359.1,352.0 350.6,360.9 341.2,368.7 330.6,376.1 312.3,385.3 298.5,390.3 280.1,394.9 275.7,394.9 274.1,395.8 269.3,395.8 267.7,396.7 261.5,396.7 260.8,397.2 239.0,397.2 238.3,396.7 234.4,396.7 215.6,393.1 205.7,388.9 203.2,388.5 195.4,384.8 190.8,382.0 181.8,375.6 171.5,364.8 165.5,356.3 159.6,343.0 157.3,333.8 157.3,330.4 158.7,326.3 161.9,318.9 165.5,312.5 171.5,304.4 180.0,296.4 188.0,291.4 194.9,288.1 200.0,286.8 209.9,285.8 210.5,285.4 218.1,285.4 218.8,285.8 224.1,286.3 227.3,287.2 235.6,290.9 242.7,295.5 245.7,299.2 247.5,302.8 248.9,308.3 248.9,314.5 248.4,316.8 244.7,326.3 244.7,327.6 246.6,327.6 253.0,324.4 261.5,318.5 267.7,314.8 278.3,305.1 283.6,301.0 300.5,283.6 301.9,281.3 310.2,271.4 315.0,264.5 315.0,263.1 314.3,262.2 312.0,254.2 310.6,251.2 309.3,245.4 305.1,236.0 305.1,234.6 304.2,233.5 304.2,232.1 301.5,225.0 301.5,223.4 300.5,221.8 300.5,220.6 299.6,219.0 297.8,212.4 296.9,210.8 296.9,209.6 295.0,205.7 294.1,201.4 292.3,197.5 290.4,191.9 290.4,190.3 287.7,183.7 285.4,175.6 281.3,165.3 279.0,157.3 277.6,155.2 275.5,153.4 262.4,145.6 250.7,137.3 233.0,127.2 229.4,123.8 189.9,72.8 173.3,52.3 164.2,39.7 155.4,29.4 149.0,20.0 143.0,13.5 136.2,3.9 133.2,0.9 131.8,0.9 131.8,5.5 133.6,13.3 139.1,26.6 146.5,36.5 146.5,39.0 144.2,45.2 140.5,59.9 140.1,65.7 139.1,66.6 137.1,66.6 132.2,63.4 124.7,59.7 116.9,54.6 114.3,52.3 97.6,42.7 85.0,34.0 71.9,26.6 56.0,16.1 51.0,13.3ZM219.7,173.7 268.9,184.8 296.4,210.5 239.0,198.5Z"/></symbol><clipPath id="lx-clip"><path fill-rule="evenodd" clip-rule="evenodd" d="M49.1,13.3 49.6,17.0 51.0,20.2 54.6,25.7 61.1,33.8 66.4,38.3 71.6,43.9 75.1,46.6 83.1,51.7 85.0,53.5 85.0,63.8 85.4,64.5 85.9,78.1 87.7,83.3 88.6,89.1 90.5,94.4 90.9,97.3 91.8,99.0 94.1,106.5 101.0,120.3 108.4,131.3 113.0,137.1 119.8,144.4 119.8,146.3 118.0,147.4 115.5,147.9 113.0,149.2 110.9,149.7 106.5,152.5 87.5,162.1 63.8,180.0 50.1,193.8 39.5,206.2 33.5,214.2 21.1,234.9 12.9,252.8 12.9,253.9 9.2,263.3 9.2,265.0 8.3,266.6 7.8,269.5 6.4,273.0 6.0,276.4 5.1,278.5 4.6,282.4 3.7,284.9 3.2,290.2 1.8,295.9 1.4,303.1 0.9,303.8 0.9,309.0 0.0,309.3 0.0,336.6 0.9,336.8 1.4,344.9 1.8,345.5 1.8,348.5 3.2,354.7 3.2,357.3 6.9,373.3 12.4,389.9 18.4,403.6 27.1,420.2 40.9,439.4 50.1,450.5 63.4,463.6 76.9,474.6 94.4,486.1 108.1,493.4 122.4,499.4 134.3,503.5 143.7,505.8 145.8,506.7 161.9,509.9 174.5,510.9 174.7,511.8 204.3,511.8 204.6,510.9 208.9,510.9 209.6,510.4 216.3,509.9 238.3,505.3 243.1,503.5 250.7,501.7 266.3,495.2 281.0,487.9 295.7,478.7 303.3,473.2 318.5,460.3 326.7,452.1 337.7,439.2 344.2,430.7 352.9,417.9 367.1,388.0 372.2,371.0 372.2,369.4 373.6,365.1 374.5,358.9 375.8,354.0 375.8,351.1 376.8,348.1 377.2,341.4 378.1,341.2 378.1,311.6 376.5,311.6 375.6,317.8 373.8,322.6 372.4,328.3 371.0,330.8 371.0,332.0 365.5,343.0 359.1,352.0 350.6,360.9 341.2,368.7 330.6,376.1 312.3,385.3 298.5,390.3 280.1,394.9 275.7,394.9 274.1,395.8 269.3,395.8 267.7,396.7 261.5,396.7 260.8,397.2 239.0,397.2 238.3,396.7 234.4,396.7 215.6,393.1 205.7,388.9 203.2,388.5 195.4,384.8 190.8,382.0 181.8,375.6 171.5,364.8 165.5,356.3 159.6,343.0 157.3,333.8 157.3,330.4 158.7,326.3 161.9,318.9 165.5,312.5 171.5,304.4 180.0,296.4 188.0,291.4 194.9,288.1 200.0,286.8 209.9,285.8 210.5,285.4 218.1,285.4 218.8,285.8 224.1,286.3 227.3,287.2 235.6,290.9 242.7,295.5 245.7,299.2 247.5,302.8 248.9,308.3 248.9,314.5 248.4,316.8 244.7,326.3 244.7,327.6 246.6,327.6 253.0,324.4 261.5,318.5 267.7,314.8 278.3,305.1 283.6,301.0 300.5,283.6 301.9,281.3 310.2,271.4 315.0,264.5 315.0,263.1 314.3,262.2 312.0,254.2 310.6,251.2 309.3,245.4 305.1,236.0 305.1,234.6 304.2,233.5 304.2,232.1 301.5,225.0 301.5,223.4 300.5,221.8 300.5,220.6 299.6,219.0 297.8,212.4 296.9,210.8 296.9,209.6 295.0,205.7 294.1,201.4 292.3,197.5 290.4,191.9 290.4,190.3 287.7,183.7 285.4,175.6 281.3,165.3 279.0,157.3 277.6,155.2 275.5,153.4 262.4,145.6 250.7,137.3 233.0,127.2 229.4,123.8 189.9,72.8 173.3,52.3 164.2,39.7 155.4,29.4 149.0,20.0 143.0,13.5 136.2,3.9 133.2,0.9 131.8,0.9 131.8,5.5 133.6,13.3 139.1,26.6 146.5,36.5 146.5,39.0 144.2,45.2 140.5,59.9 140.1,65.7 139.1,66.6 137.1,66.6 132.2,63.4 124.7,59.7 116.9,54.6 114.3,52.3 97.6,42.7 85.0,34.0 71.9,26.6 56.0,16.1 51.0,13.3Z"/></clipPath><symbol id="lx-fac" viewBox="0 0 378.4 512"><g clip-path="url(#lx-clip)"><rect class="m-body" width="378.4" height="512"/><polygon class="m-deep" points="117.2,146.2 80.4,294.1 48.3,441.2 0.0,441.2 0.0,146.2"/><polygon class="m-deep" points="155.3,339.2 257.4,512.0 378.3,512.0 378.3,294.1 335.5,294.1 335.5,339.2"/><polygon class="m-head" points="0.0,0.0 378.3,0.0 378.3,294.1 330.9,294.1 330.9,333.2 229.8,333.2 197.6,257.4 80.4,294.1 117.2,146.2 0.0,146.2"/><polygon class="m-ear" points="128.7,0.0 137.9,68.9 280.4,156.3 248.2,128.7 142.5,9.2"/><polygon class="m-eye" points="219.7,173.7 268.9,184.8 296.4,210.5 239.0,198.5"/></g></symbol></defs></svg>
+<div class="ui" data-theme="dark">
+  <header class="ui-top">
+    <a class="lx-lockup" href="#" style="font-size:16px" aria-label="LynxDB"><svg class="lx-mark lx-mark--faceted" viewBox="0 0 378.4 512" aria-hidden="true"><use href="#lx-fac"/></svg><span class="lx-wordmark">LynxDB</span></a>
+    <div class="lx-tabs" role="tablist">
+      <button class="lx-tab" role="tab" aria-selected="true">Query</button>
+      <button class="lx-tab" role="tab" aria-selected="false">Tail</button>
+      <button class="lx-tab" role="tab" aria-selected="false">Views</button>
+      <button class="lx-tab" role="tab" aria-selected="false">Status</button>
+    </div>
+    <div class="end">
+      <span class="lx-badge lx-badge--success"><span class="lx-dot"></span>localhost:3100</span>
+      <button class="lx-btn lx-btn--ghost lx-btn--sm" type="button">Docs</button>
+      <button class="lx-btn lx-btn--ghost lx-btn--sm" type="button"><span class="lx-kbd">⌘</span><span class="lx-kbd">K</span></button>
+    </div>
+  </header>
+
+  <div class="ui-body">
+    <aside class="ui-side" aria-label="Fields">
+      <label class="lx-input lx-input--mono"><span class="lx-affix">/</span><input placeholder="filter fields" aria-label="Filter fields"></label>
+      <h2 class="lx-label"><span>Selected</span><span>3</span></h2>
+      <ul class="ui-fields">
+        <li aria-selected="true"><span><span class="ty">a</span>service</span><span>1.7K</span></li>
+        <li aria-selected="true"><span><span class="ty">a</span>level</span><span>2.5K</span></li>
+        <li aria-selected="true"><span><span class="ty">#</span>status</span><span>912</span></li>
+      </ul>
+      <h2 class="lx-label"><span>Available</span><span>9</span></h2>
+      <ul class="ui-fields">
+        <li><span><span class="ty">a</span>_source</span><span>2.5K</span></li>
+        <li><span><span class="ty">a</span>uri</span><span>912</span></li>
+        <li><span><span class="ty">#</span>duration_ms</span><span>912</span></li>
+        <li><span><span class="ty">a</span>client_ip</span><span>912</span></li>
+        <li><span><span class="ty">a</span>k8s.namespace.name</span><span>1.7K</span></li>
+        <li><span><span class="ty">a</span>k8s.pod.name</span><span>1.7K</span></li>
+        <li><span><span class="ty">a</span>request_id</span><span>912</span></li>
+        <li><span><span class="ty">a</span>user_id</span><span>644</span></li>
+        <li><span><span class="ty">{}</span>attributes</span><span>1.7K</span></li>
+      </ul>
+    </aside>
+
+    <main class="ui-main">
+      <section class="lx-panel" aria-label="Query">
+        <div class="ui-editor">
+<div class="ln">1
+2
+3</div>
+<pre class="lx-code"><span class="k">from</span> main[<span class="s">-5m</span>] status&gt;=<span class="n">500</span>
+<span class="p">|</span> <span class="k">stats</span> <span class="f">count</span>() <span class="k">as</span> errors, <span class="f">p95</span>(duration_ms) <span class="k">as</span> p95_ms <span class="k">by</span> service
+<span class="p">|</span> <span class="k">sort</span> -errors</pre>
+        </div>
+        <div class="ui-qfoot">
+          <button class="lx-btn lx-btn--sm" type="button">Last 5 minutes</button>
+          <button class="lx-btn lx-btn--sm" type="button">Limit 50</button>
+          <button class="lx-btn lx-btn--ghost lx-btn--sm" type="button">Explain</button>
+          <span class="meta"><b>2,585</b> events · <b>15 ms</b></span>
+          <button class="lx-btn lx-btn--primary" type="button">Run <span class="lx-kbd">⌘↵</span></button>
+        </div>
+      </section>
+
+      <section class="lx-panel ui-chart" aria-label="Events over time">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="lx-label">Events / 5s</span>
+          <div class="ui-legend"><span><i style="background:var(--viz-5)"></i>error</span><span><i style="background:var(--viz-3)"></i>warn</span><span><i style="background:var(--viz-neutral)"></i>other</span></div>
+        </div>
+        <div class="lx-hist" role="img" aria-label="Histogram of events per 5 seconds, 11:43 to 11:48"><i style="height:4%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:3%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:100%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:12%"><b style="height:0%"></b><u style="height:6%"></u></i><i style="height:40%"><b style="height:14%"></b><u style="height:0%"></u></i><i style="height:9%"><b style="height:10%"></b><u style="height:0%"></u></i><i style="height:6%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:15%"><b style="height:0%"></b><u style="height:10%"></u></i><i style="height:18%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:5%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:8%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:9%"><b style="height:10%"></b><u style="height:0%"></u></i><i style="height:4%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:12%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:40%"><b style="height:14%"></b><u style="height:10%"></u></i><i style="height:50%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:11%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:11%"><b style="height:0%"></b><u style="height:6%"></u></i><i style="height:48%"><b style="height:8%"></b><u style="height:0%"></u></i><i style="height:9%"><b style="height:10%"></b><u style="height:0%"></u></i><i style="height:5%"><b style="height:10%"></b><u style="height:6%"></u></i><i style="height:8%"><b style="height:10%"></b><u style="height:0%"></u></i><i style="height:27%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:11%"><b style="height:10%"></b><u style="height:0%"></u></i><i style="height:5%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:10%"><b style="height:10%"></b><u style="height:0%"></u></i><i style="height:68%"><b style="height:14%"></b><u style="height:0%"></u></i><i style="height:13%"><b style="height:10%"></b><u style="height:0%"></u></i><i style="height:14%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:32%"><b style="height:8%"></b><u style="height:6%"></u></i><i style="height:31%"><b style="height:8%"></b><u style="height:16%"></u></i><i style="height:10%"><b style="height:0%"></b><u style="height:6%"></u></i><i style="height:38%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:12%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:5%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:46%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:50%"><b style="height:8%"></b><u style="height:6%"></u></i><i style="height:31%"><b style="height:22%"></b><u style="height:10%"></u></i><i style="height:66%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:15%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:9%"><b style="height:10%"></b><u style="height:10%"></u></i><i style="height:7%"><b style="height:0%"></b><u style="height:6%"></u></i><i style="height:16%"><b style="height:0%"></b><u style="height:10%"></u></i><i style="height:8%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:11%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:11%"><b style="height:10%"></b><u style="height:6%"></u></i><i style="height:12%"><b style="height:0%"></b><u style="height:6%"></u></i><i style="height:40%"><b style="height:14%"></b><u style="height:10%"></u></i><i style="height:5%"><b style="height:10%"></b><u style="height:10%"></u></i><i style="height:7%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:48%"><b style="height:0%"></b><u style="height:10%"></u></i><i style="height:24%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:17%"><b style="height:0%"></b><u style="height:16%"></u></i><i style="height:10%"><b style="height:0%"></b><u style="height:6%"></u></i><i style="height:16%"><b style="height:0%"></b><u style="height:6%"></u></i><i style="height:11%"><b style="height:0%"></b><u style="height:10%"></u></i><i style="height:10%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:11%"><b style="height:10%"></b><u style="height:0%"></u></i><i style="height:7%"><b style="height:0%"></b><u style="height:0%"></u></i><i style="height:3%"><b style="height:0%"></b><u style="height:6%"></u></i></div>
+        <div class="lx-axis"><span>11:43:30</span><span>11:44:30</span><span>11:45:30</span><span>11:46:30</span><span>11:47:30</span><span>11:48:15</span></div>
+      </section>
+
+      <section class="lx-panel ui-res" aria-label="Results">
+        <div class="lx-tabs" role="tablist">
+          <button class="lx-tab" role="tab" aria-selected="true">Events</button>
+          <button class="lx-tab" role="tab" aria-selected="false">Table</button>
+          <button class="lx-tab" role="tab" aria-selected="false">JSON</button>
+          <span class="meta">50 of 2,585</span>
+        </div>
+        <div class="lx-logs"><div class="lx-log"><span class="t">2026-11-21 11:48:17.517</span><span class="lx-level lx-level--info">INFO</span><span class="src">cart</span><span class="msg">GetCartAsync called <span class=kv>userId=</span>0f37f7fe-e599 <span class=kv>items=</span>3</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:17.395</span><span class="lx-level lx-level--info">INFO</span><span class="src">cart</span><span class="msg">AddItemAsync <span class=kv>productId=</span>LS4PSXUNUM <span class=kv>quantity=</span>2</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:14.892</span><span class="lx-level lx-level--debug">DEBUG</span><span class="src">product-catalog</span><span class="msg">cache hit <span class=kv>key=</span>product:9SIQT8TOJO <span class=kv>ttl_s=</span>41</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:14.889</span><span class="lx-level lx-level--warn">WARN</span><span class="src">frontend-proxy</span><span class="msg">GET /api/products/9SIQT8TOJO 200 <span class=kv>upstream_ms=</span>782 slow upstream</span></div><div class="lx-log" aria-selected=true><span class="t">2026-11-21 11:48:12.697</span><span class="lx-level lx-level--error">ERROR</span><span class="src">checkout</span><span class="msg">POST /api/checkout <span class=hl>502</span> upstream timeout <span class=kv>duration_ms=</span>1840</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:12.695</span><span class="lx-level lx-level--error">ERROR</span><span class="src">payment</span><span class="msg">charge failed: connection reset by peer <span class=kv>attempt=</span>3 <span class=kv>status=</span><span class=hl>503</span></span></div><div class="lx-log"><span class="t">2026-11-21 11:48:12.314</span><span class="lx-level lx-level--info">INFO</span><span class="src">product-catalog</span><span class="msg">Product found <span class=kv>id=</span>OLJCESPC7Z</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:09.193</span><span class="lx-level lx-level--info">INFO</span><span class="src">product-catalog</span><span class="msg">Reloading product catalog, loaded 10 products</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:08.892</span><span class="lx-level lx-level--trace">TRACE</span><span class="src">frontend</span><span class="msg">render /cart <span class=kv>ms=</span>4</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:08.888</span><span class="lx-level lx-level--info">INFO</span><span class="src">frontend-proxy</span><span class="msg">GET /api/products/HQTGWGPNH4 200 <span class=kv>upstream_ms=</span>4</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:08.594</span><span class="lx-level lx-level--error">ERROR</span><span class="src">checkout</span><span class="msg">POST /api/checkout <span class=hl>500</span> inventory lock not acquired <span class=kv>duration_ms=</span>612</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:08.194</span><span class="lx-level lx-level--info">INFO</span><span class="src">cart</span><span class="msg">GetCartAsync called <span class=kv>userId=</span></span></div><div class="lx-log"><span class="t">2026-11-21 11:48:08.190</span><span class="lx-level lx-level--info">INFO</span><span class="src">frontend-proxy</span><span class="msg">GET /api/cart 200 <span class=kv>upstream_ms=</span>5</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:06.428</span><span class="lx-level lx-level--info">INFO</span><span class="src">kafka</span><span class="msg">SnapshotEmitter id=1 wrote snapshot 00000000000000222097-0000000001</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:06.423</span><span class="lx-level lx-level--debug">DEBUG</span><span class="src">kafka</span><span class="msg">SnapshotGenerator id=1 creating new KRaft snapshot, replayed 2800 bytes</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:04.423</span><span class="lx-level lx-level--fatal">FATAL</span><span class="src">shipping</span><span class="msg">panic: quote service unreachable, exiting <span class=kv>code=</span>2</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:04.401</span><span class="lx-level lx-level--warn">WARN</span><span class="src">shipping</span><span class="msg">retrying quote request <span class=kv>attempt=</span>2 <span class=kv>backoff_ms=</span>400</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:03.977</span><span class="lx-level lx-level--info">INFO</span><span class="src">frontend</span><span class="msg">User viewing cart</span></div><div class="lx-log"><span class="t">2026-11-21 11:48:03.120</span><span class="lx-level lx-level--info">INFO</span><span class="src">recommendation</span><span class="msg">served 4 recommendations <span class=kv>ms=</span>12</span></div></div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

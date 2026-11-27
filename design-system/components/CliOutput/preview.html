@@ -1,0 +1,99 @@
+<!-- @dsCard group="Examples" page="true" width=1200 height=1070 subtitle="CLI output conventions" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CLI output — LynxDB</title>
+<style>
+  .cli { width: 1200px; padding: var(--space-8); display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); align-items: start; }
+  .cli figure { margin: 0; display: grid; gap: var(--space-2); }
+  .cli figcaption { display: flex; justify-content: space-between; gap: var(--space-4); }
+  .cli figcaption span:last-child { text-transform: none; letter-spacing: 0; font-family: var(--font-sans); font-size: 12px; color: var(--fg-muted); text-align: right; }
+  .cli .lx-term__body { font-size: 12px; line-height: 19px; }
+  .cli .wide { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<div class="cli">
+  <figure>
+    <figcaption class="lx-label"><span class="lx-label--pipe">Result</span><span>Dim headers, plain rows, one summary line on stderr.</span></figcaption>
+    <div class="lx-term" data-theme="dark"><pre class="lx-term__body"><span class="pr">$</span> lynxdb query '<span class="a-green">from</span> main[-1h] status&gt;=<span class="a-magenta">500</span>
+    <span class="a-green b">|</span> <span class="a-green">stats</span> <span class="a-blue">count</span>() <span class="a-green">as</span> errors <span class="a-green">by</span> service
+    <span class="a-green b">|</span> <span class="a-green">sort</span> -errors'
+
+<span class="dim">SERVICE            ERRORS</span>
+checkout              412
+payment               187
+frontend-proxy         64
+
+<span class="dim">3 rows  ·  scanned 2,585 events  ·  15 ms</span></pre></div>
+  </figure>
+
+  <figure>
+    <figcaption class="lx-label"><span class="lx-label--pipe">Error</span><span>Word first, then where, then what to type instead.</span></figcaption>
+    <div class="lx-term" data-theme="dark"><pre class="lx-term__body"><span class="pr">$</span> lynxdb query 'from main | eval rate = errors / total'
+<span class="a-red b">error:</span> <span class="b">unknown stage `eval`</span>
+  <span class="dim">--&gt;</span> query:1:13
+   <span class="dim">|</span>
+ <span class="dim">1 |</span> from main | <span class="a-red">eval</span> rate = errors / total
+   <span class="dim">|</span>             <span class="a-red">^^^^</span> not a LynxFlow v2 stage
+   <span class="dim">|</span>
+   <span class="a-cyan b">hint:</span> use `extend rate = errors / total`
+   <span class="a-cyan b">help:</span> run `lynxdb grammar` for the cookbook</pre></div>
+  </figure>
+
+  <figure>
+    <figcaption class="lx-label"><span class="lx-label--pipe">Status</span><span>Aligned keys; state is a word, colour only repeats it.</span></figcaption>
+    <div class="lx-term" data-theme="dark"><pre class="lx-term__body"><span class="pr">$</span> lynxdb status
+<span class="dim">server</span>     http://localhost:3100   <span class="a-green b">ok</span>
+<span class="dim">data dir</span>   /var/lib/lynxdb
+<span class="dim">ingest</span>     otlp, hec, syslog       <span class="a-green b">ok</span>
+<span class="dim">views</span>      4 materialized          <span class="a-yellow b">warn</span>  1 rebuilding
+<span class="dim">tiering</span>    s3://logs-cold          <span class="a-red b">fail</span>  access denied
+
+<span class="a-yellow b">warning:</span> 1 view is rebuilding; queries fall back to raw segments
+<span class="a-red b">error:</span> cold tier is unreachable
+   <span class="a-cyan b">hint:</span> check credentials with `lynxdb config`</pre></div>
+  </figure>
+
+  <figure>
+    <figcaption class="lx-label"><span class="lx-label--pipe">NO_COLOR, or a pipe</span><span>Nothing is lost when colour is off.</span></figcaption>
+    <div class="lx-term" data-theme="dark"><pre class="lx-term__body"><span class="pr" style="color:inherit">$</span> NO_COLOR=1 lynxdb status
+server     http://localhost:3100   ok
+data dir   /var/lib/lynxdb
+ingest     otlp, hec, syslog       ok
+views      4 materialized          warn  1 rebuilding
+tiering    s3://logs-cold          fail  access denied
+
+warning: 1 view is rebuilding; queries fall back to raw segments
+error: cold tier is unreachable
+   hint: check credentials with `lynxdb config`</pre></div>
+  </figure>
+
+  <figure class="wide">
+    <figcaption class="lx-label"><span class="lx-label--pipe">Help</span><span>Commands left, one-line purpose right, no decoration.</span></figcaption>
+    <div class="lx-term" data-theme="dark"><pre class="lx-term__body"><span class="pr">$</span> lynxdb --help
+<span class="b">lynxdb</span> <span class="dim">· log analytics in a single binary</span>
+
+<span class="dim">USAGE</span>
+  lynxdb &lt;command&gt; [flags]
+
+<span class="dim">COMMANDS</span>
+  <span class="a-green">query</span> &lt;query&gt;         run a LynxFlow query
+  <span class="a-green">server</span>                start the HTTP server and Web UI
+  <span class="a-green">ingest</span> &lt;file&gt;         ingest local files into a server
+  <span class="a-green">tail</span> &lt;query&gt;          live tail query results
+  <span class="a-green">shell</span>                 interactive REPL
+  <span class="a-green">explain</span> &lt;query&gt;       show the logical/physical query plan
+  <span class="a-green">fields</span> &lt;query&gt;        inspect fields for matching events
+  <span class="a-green">mv</span> create/list        manage materialized views
+  <span class="a-green">config</span>                inspect and edit configuration
+  <span class="a-green">status</span>                show server status
+  <span class="a-green">demo</span>                  generate sample data
+  <span class="a-green">grammar</span>               print the LynxFlow grammar/cookbook
+
+<span class="dim">Run `lynxdb &lt;command&gt; --help` for flags.</span></pre></div>
+  </figure>
+</div>
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!-- @dsCard group="Examples" page="true" width=1280 height=3720 subtitle="Variant A: benchmark-led, dark" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Homepage — LynxDB</title>
+<style>
+  body { background: var(--stone-1000); }
+  .hp { width: 1280px; margin: 0 auto; background: var(--stone-1000); color: var(--stone-300); font-size: 15px; line-height: 24px; }
+  .hp a:not(.lx-btn) { color: inherit; }
+  .hp h1, .hp h2, .hp h3 { margin: 0; color: var(--stone-50); font-weight: 600; }
+  .hp h2 { font-size: 36px; line-height: 42px; letter-spacing: -0.03em; }
+  .hp h3 { font-size: 16px; line-height: 24px; letter-spacing: -0.01em; }
+  .hp p { margin: 0; }
+  .hp .lime { color: var(--lime-400); }
+  .hp-in { padding-left: var(--space-12); padding-right: var(--space-12); }
+  .hp-card { border: 1px solid var(--stone-800); border-radius: var(--radius-lg); background: var(--stone-950); }
+  .hp-sec { padding-top: var(--space-16); padding-bottom: var(--space-16); }
+  .hp-head { display: grid; gap: var(--space-3); max-width: 620px; }
+  .hp-head p { font-size: 17px; line-height: 26px; color: var(--stone-400); }
+  .hp-more { color: var(--stone-200); font-size: 14px; font-weight: 500; text-decoration: none; }
+  .hp-more:hover { color: var(--lime-400); }
+  .hp-mono { font-family: var(--font-mono); font-variant-ligatures: none; }
+
+  /* announcement + nav */
+  .hp-bar { display: flex; justify-content: center; gap: var(--space-2); height: 36px; align-items: center; background: var(--lime-400); color: var(--stone-1000); font-size: 13px; font-weight: 500; }
+  .hp-bar a { text-decoration: underline; text-underline-offset: 3px; }
+  .hp-nav { display: flex; align-items: center; gap: var(--space-8); height: 64px; border-bottom: 1px solid var(--stone-900); }
+  .hp-nav nav { display: flex; gap: var(--space-6); }
+  .hp-nav nav a { font-size: 14px; font-weight: 500; color: var(--stone-300); text-decoration: none; }
+  .hp-nav nav a:hover { color: var(--stone-50); }
+  .hp-nav .end { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
+  .hp .lx-lockup { color: var(--stone-50); font-size: 19px; }
+
+  /* hero */
+  .hp-hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--stone-900); }
+  .hp-hero__in { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 452px; gap: var(--space-12); align-items: center; padding-top: 88px; padding-bottom: 120px; }
+  .hp-hero h1 { font-size: 76px; line-height: 76px; letter-spacing: -0.045em; }
+  .hp-hero .lead { margin-top: var(--space-6); max-width: 540px; font-size: 20px; line-height: 30px; color: var(--stone-300); }
+  .hp-cta { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-8); }
+  .hp .hp-meta { margin-top: var(--space-6); font-size: 12px; line-height: 16px; color: var(--stone-500); }
+  .hp-meta a { text-decoration: none; }
+  .hp-meta a:hover { color: var(--stone-200); }
+  .hp-skyline { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; display: flex; align-items: flex-end; gap: 3px; padding: 0 var(--space-12); opacity: 0.9; pointer-events: none; }
+  .hp-skyline i { flex: 1; background: var(--stone-900); border-radius: var(--radius-xs) var(--radius-xs) 0 0; }
+  .hp-skyline i.hit { background: var(--moss-800); }
+
+  /* benchmark card in the hero */
+  .hp-bench { padding: var(--space-6); }
+  .hp-bench__top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }
+  .hp-bench__top b { color: var(--stone-50); font-size: 15px; font-weight: 600; }
+  .hp-bench__top span { font-size: 12px; color: var(--stone-400); }
+  .hp-bench p { margin-top: var(--space-1); font-size: 13px; line-height: 20px; color: var(--stone-400); }
+  .hp-bars { display: grid; gap: 10px; margin-top: var(--space-6); }
+  .hp-bars > div { display: grid; grid-template-columns: 104px minmax(0, 1fr) 62px; align-items: center; gap: var(--space-3); font-size: 13px; line-height: 20px; }
+  .hp-bars .track { height: 12px; }
+  .hp-bars .fill { display: block; height: 12px; border-radius: var(--radius-xs); background: var(--stone-700); }
+  .hp-bars .v { font-family: var(--font-mono); font-size: 12px; text-align: right; color: var(--stone-300); font-variant-numeric: tabular-nums; }
+  .hp-bars .me { color: var(--stone-50); font-weight: 600; }
+  .hp-bars .me .fill { background: var(--lime-400); }
+  .hp-bars .me .v { color: var(--lime-400); font-weight: 600; }
+  .hp-bench__foot { display: flex; justify-content: space-between; margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--stone-800); font-size: 12px; line-height: 16px; color: var(--stone-500); }
+
+  /* numbers strip */
+  .hp-nums { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--stone-900); }
+  .hp-nums > div { padding: var(--space-8) var(--space-6) var(--space-8) 0; }
+  .hp-nums > div + div { padding-left: var(--space-6); border-left: 1px solid var(--stone-900); }
+  .hp-nums b { display: block; font-family: var(--font-mono); font-size: 32px; line-height: 36px; font-weight: 500; letter-spacing: -0.03em; color: var(--stone-50); font-variant-numeric: tabular-nums; }
+  .hp-nums b small { font-size: 16px; font-weight: 400; letter-spacing: 0; color: var(--stone-400); }
+  .hp-nums > div > span { display: block; margin-top: var(--space-2); max-width: 240px; font-size: 13px; line-height: 20px; color: var(--stone-400); }
+
+  /* search demo */
+  .hp-demo__top { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-8); }
+  .hp-demo .lx-seg { padding: var(--space-1); border: 1px solid var(--stone-800); border-radius: var(--radius-full); }
+  .hp-demo .lx-seg__item[aria-selected="true"] { background: var(--stone-800); color: var(--stone-50); }
+  .hp-pane { display: grid; grid-template-columns: 1fr 1fr; margin-top: var(--space-8); overflow: hidden; min-height: 288px; }
+  .hp-pane[hidden] { display: none; }
+  .hp-pane > div { padding: var(--space-6); min-width: 0; }
+  .hp-pane > div + div { border-left: 1px solid var(--stone-800); background: var(--stone-1000); }
+  .hp-pane .cap { margin-bottom: var(--space-3); font-family: var(--font-mono); font-size: 11px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--stone-500); }
+  .hp-pane .lx-code { padding: 0; border: 0; background: transparent; font-size: 14px; line-height: 24px; color: var(--stone-200); }
+  .hp-pane .note { margin-top: var(--space-6); max-width: 440px; font-size: 14px; line-height: 22px; color: var(--stone-400); }
+  .hp-out { margin: 0; font-family: var(--font-mono); font-size: 12.5px; line-height: 22px; color: var(--stone-300); white-space: pre; overflow: hidden; font-variant-ligatures: none; }
+  .hp-out .h { color: var(--stone-500); }
+  .hp-out mark { padding: 1px 2px; border-radius: var(--radius-xs); background: var(--moss-900); color: var(--lime-400); }
+  .hp-out .e { color: var(--ember-300); }
+  .hp-chart { display: flex; align-items: flex-end; gap: 3px; height: 150px; border-bottom: 1px solid var(--stone-800); }
+  .hp-chart i { flex: 1; display: flex; flex-direction: column-reverse; }
+  .hp-chart i b { display: block; background: var(--ember-500); border-radius: 0; }
+  .hp-chart i u { display: block; background: var(--amber-500); border-radius: var(--radius-xs) var(--radius-xs) 0 0; }
+  .hp-legend { display: flex; gap: var(--space-4); margin-top: var(--space-3); font-family: var(--font-mono); font-size: 11px; line-height: 16px; color: var(--stone-400); }
+  .hp-legend i { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: var(--radius-xs); }
+
+  /* why fast */
+  .hp-why { display: grid; grid-template-columns: 560px minmax(0, 1fr); gap: var(--space-12); align-items: start; margin-top: var(--space-12); }
+  .hp-blocks { padding: var(--space-6); }
+  .hp-grid { display: grid; grid-template-columns: repeat(24, 1fr); gap: 4px; }
+  .hp-grid i { aspect-ratio: 1; border-radius: var(--radius-xs); background: var(--stone-900); }
+  .hp-grid i.in { background: var(--stone-700); }
+  .hp-grid i.hit { background: var(--lime-400); }
+  .hp-range { display: grid; grid-template-columns: repeat(24, 1fr); gap: 4px; margin-bottom: var(--space-2); font-family: var(--font-mono); font-size: 11px; line-height: 16px; color: var(--stone-400); }
+  .hp-range span { grid-column: 9 / span 10; padding-bottom: 6px; border-bottom: 1px solid var(--stone-500); text-align: center; }
+  .hp-keys { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-4); font-size: 12px; line-height: 16px; color: var(--stone-400); }
+  .hp-keys i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: var(--radius-xs); vertical-align: -1px; }
+  .hp-steps { display: grid; gap: var(--space-6); margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  .hp-steps li { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: var(--space-3); counter-increment: s; }
+  .hp-steps li::before { content: counter(s); grid-row: span 2; width: 24px; height: 24px; margin-top: 1px; border: 1px solid var(--stone-700); border-radius: var(--radius-full); font-family: var(--font-mono); font-size: 12px; line-height: 22px; text-align: center; color: var(--stone-200); }
+  .hp-steps p { margin-top: var(--space-1); font-size: 14px; line-height: 22px; color: var(--stone-400); }
+  .hp-steps code { font-family: var(--font-mono); font-size: 12.5px; color: var(--stone-200); font-variant-ligatures: none; }
+
+  /* benchmark table */
+  .hp-tbl { margin-top: var(--space-8); overflow: hidden; }
+  .hp-tbl table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 20px; }
+  .hp-tbl th, .hp-tbl td { padding: 11px var(--space-4); border-bottom: 1px solid var(--stone-800); text-align: right; white-space: nowrap; }
+  .hp-tbl tr:last-child td { border-bottom: 0; }
+  .hp-tbl th { font-size: 13px; font-weight: 500; color: var(--stone-300); background: var(--stone-900); }
+  .hp-tbl th:first-child, .hp-tbl td:first-child { text-align: left; color: var(--stone-400); }
+  .hp-tbl td { font-family: var(--font-mono); font-size: 13px; color: var(--stone-300); font-variant-numeric: tabular-nums; }
+  .hp-tbl td:first-child { font-family: var(--font-sans); }
+  .hp-tbl td small { margin-left: 6px; font-size: 11px; color: var(--stone-500); }
+  .hp-tbl th:nth-child(2) { color: var(--lime-400); font-weight: 600; background: var(--moss-950); }
+  .hp-tbl td:nth-child(2) { color: var(--stone-50); font-weight: 600; background: var(--moss-950); }
+  .hp .hp-fine { margin-top: var(--space-4); max-width: 760px; font-size: 12px; line-height: 18px; color: var(--stone-500); }
+  .hp-fine a { color: var(--stone-300); }
+
+  /* bento */
+  .hp-bento { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-top: var(--space-8); }
+  .hp-bento > div { padding: var(--space-6); min-width: 0; }
+  .hp-bento .w2 { grid-column: span 2; }
+  .hp-bento p { margin-top: var(--space-2); font-size: 14px; line-height: 22px; color: var(--stone-400); }
+  .hp-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-4); }
+  .hp-chips span { padding: 2px var(--space-2); border: 1px solid var(--stone-800); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 11.5px; line-height: 18px; color: var(--stone-300); white-space: nowrap; }
+  .hp-chips span b { color: var(--stone-500); font-weight: 400; }
+  .hp-raw { margin: var(--space-4) 0 0; padding: var(--space-3); border-radius: var(--radius-md); background: var(--stone-1000); font-family: var(--font-mono); font-size: 11.5px; line-height: 18px; color: var(--stone-400); white-space: pre-wrap; overflow-wrap: break-word; font-variant-ligatures: none; }
+  .hp-raw b { color: var(--lime-400); font-weight: 700; }
+  .hp-raw em { font-style: normal; color: var(--stone-200); }
+
+  /* install */
+  .hp-inst { display: grid; grid-template-columns: minmax(0, 1fr) 640px; gap: var(--space-12); align-items: start; }
+  .hp-inst__box { padding: var(--space-4); }
+  .hp-inst .lx-seg__item[aria-selected="true"] { background: var(--stone-800); color: var(--stone-50); }
+  .hp-cmd { display: flex; align-items: flex-start; gap: var(--space-3); margin-top: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); border: 1px solid var(--stone-800); border-radius: var(--radius-md); background: var(--stone-1000); }
+  .hp-cmd[hidden] { display: none; }
+  .hp-cmd pre { flex: 1; min-width: 0; margin: 0; padding: 4px 0; font-family: var(--font-mono); font-size: 13.5px; line-height: 22px; color: var(--stone-200); white-space: pre; overflow: hidden; font-variant-ligatures: none; }
+  .hp-cmd pre b { color: var(--lime-400); font-weight: 500; }
+  .hp .hp-inst__note { margin-top: var(--space-3); padding: 0 var(--space-1); font-size: 12px; line-height: 18px; color: var(--stone-500); }
+
+  /* closing */
+  .hp-end { margin-bottom: var(--space-16); padding: var(--space-12); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-8); align-items: center; background: var(--stone-950); }
+  .hp-end h2 { font-size: 36px; line-height: 42px; }
+  .hp-end pre { margin: var(--space-4) 0 0; font-family: var(--font-mono); font-size: 14px; line-height: 22px; color: var(--stone-300); white-space: pre; font-variant-ligatures: none; }
+  .hp-end pre b { color: var(--lime-400); font-weight: 500; }
+  .hp-end .hp-cta { margin: 0; }
+  .hp-foot { display: flex; align-items: center; gap: var(--space-6); padding-top: var(--space-6); padding-bottom: var(--space-8); border-top: 1px solid var(--stone-900); }
+  .hp-foot .end { margin-left: auto; display: flex; gap: var(--space-6); }
+  .hp-foot a.lx-label { text-decoration: none; color: var(--stone-400); }
+  .hp-foot a.lx-label:hover { color: var(--stone-50); }
+  .hp-foot .lx-label { color: var(--stone-500); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="lx-mono" viewBox="0 0 378.4 512"><path fill-rule="evenodd" d="M49.1,13.3 49.6,17.0 51.0,20.2 54.6,25.7 61.1,33.8 66.4,38.3 71.6,43.9 75.1,46.6 83.1,51.7 85.0,53.5 85.0,63.8 85.4,64.5 85.9,78.1 87.7,83.3 88.6,89.1 90.5,94.4 90.9,97.3 91.8,99.0 94.1,106.5 101.0,120.3 108.4,131.3 113.0,137.1 119.8,144.4 119.8,146.3 118.0,147.4 115.5,147.9 113.0,149.2 110.9,149.7 106.5,152.5 87.5,162.1 63.8,180.0 50.1,193.8 39.5,206.2 33.5,214.2 21.1,234.9 12.9,252.8 12.9,253.9 9.2,263.3 9.2,265.0 8.3,266.6 7.8,269.5 6.4,273.0 6.0,276.4 5.1,278.5 4.6,282.4 3.7,284.9 3.2,290.2 1.8,295.9 1.4,303.1 0.9,303.8 0.9,309.0 0.0,309.3 0.0,336.6 0.9,336.8 1.4,344.9 1.8,345.5 1.8,348.5 3.2,354.7 3.2,357.3 6.9,373.3 12.4,389.9 18.4,403.6 27.1,420.2 40.9,439.4 50.1,450.5 63.4,463.6 76.9,474.6 94.4,486.1 108.1,493.4 122.4,499.4 134.3,503.5 143.7,505.8 145.8,506.7 161.9,509.9 174.5,510.9 174.7,511.8 204.3,511.8 204.6,510.9 208.9,510.9 209.6,510.4 216.3,509.9 238.3,505.3 243.1,503.5 250.7,501.7 266.3,495.2 281.0,487.9 295.7,478.7 303.3,473.2 318.5,460.3 326.7,452.1 337.7,439.2 344.2,430.7 352.9,417.9 367.1,388.0 372.2,371.0 372.2,369.4 373.6,365.1 374.5,358.9 375.8,354.0 375.8,351.1 376.8,348.1 377.2,341.4 378.1,341.2 378.1,311.6 376.5,311.6 375.6,317.8 373.8,322.6 372.4,328.3 371.0,330.8 371.0,332.0 365.5,343.0 359.1,352.0 350.6,360.9 341.2,368.7 330.6,376.1 312.3,385.3 298.5,390.3 280.1,394.9 275.7,394.9 274.1,395.8 269.3,395.8 267.7,396.7 261.5,396.7 260.8,397.2 239.0,397.2 238.3,396.7 234.4,396.7 215.6,393.1 205.7,388.9 203.2,388.5 195.4,384.8 190.8,382.0 181.8,375.6 171.5,364.8 165.5,356.3 159.6,343.0 157.3,333.8 157.3,330.4 158.7,326.3 161.9,318.9 165.5,312.5 171.5,304.4 180.0,296.4 188.0,291.4 194.9,288.1 200.0,286.8 209.9,285.8 210.5,285.4 218.1,285.4 218.8,285.8 224.1,286.3 227.3,287.2 235.6,290.9 242.7,295.5 245.7,299.2 247.5,302.8 248.9,308.3 248.9,314.5 248.4,316.8 244.7,326.3 244.7,327.6 246.6,327.6 253.0,324.4 261.5,318.5 267.7,314.8 278.3,305.1 283.6,301.0 300.5,283.6 301.9,281.3 310.2,271.4 315.0,264.5 315.0,263.1 314.3,262.2 312.0,254.2 310.6,251.2 309.3,245.4 305.1,236.0 305.1,234.6 304.2,233.5 304.2,232.1 301.5,225.0 301.5,223.4 300.5,221.8 300.5,220.6 299.6,219.0 297.8,212.4 296.9,210.8 296.9,209.6 295.0,205.7 294.1,201.4 292.3,197.5 290.4,191.9 290.4,190.3 287.7,183.7 285.4,175.6 281.3,165.3 279.0,157.3 277.6,155.2 275.5,153.4 262.4,145.6 250.7,137.3 233.0,127.2 229.4,123.8 189.9,72.8 173.3,52.3 164.2,39.7 155.4,29.4 149.0,20.0 143.0,13.5 136.2,3.9 133.2,0.9 131.8,0.9 131.8,5.5 133.6,13.3 139.1,26.6 146.5,36.5 146.5,39.0 144.2,45.2 140.5,59.9 140.1,65.7 139.1,66.6 137.1,66.6 132.2,63.4 124.7,59.7 116.9,54.6 114.3,52.3 97.6,42.7 85.0,34.0 71.9,26.6 56.0,16.1 51.0,13.3ZM219.7,173.7 268.9,184.8 296.4,210.5 239.0,198.5Z"/></symbol><clipPath id="lx-clip"><path fill-rule="evenodd" clip-rule="evenodd" d="M49.1,13.3 49.6,17.0 51.0,20.2 54.6,25.7 61.1,33.8 66.4,38.3 71.6,43.9 75.1,46.6 83.1,51.7 85.0,53.5 85.0,63.8 85.4,64.5 85.9,78.1 87.7,83.3 88.6,89.1 90.5,94.4 90.9,97.3 91.8,99.0 94.1,106.5 101.0,120.3 108.4,131.3 113.0,137.1 119.8,144.4 119.8,146.3 118.0,147.4 115.5,147.9 113.0,149.2 110.9,149.7 106.5,152.5 87.5,162.1 63.8,180.0 50.1,193.8 39.5,206.2 33.5,214.2 21.1,234.9 12.9,252.8 12.9,253.9 9.2,263.3 9.2,265.0 8.3,266.6 7.8,269.5 6.4,273.0 6.0,276.4 5.1,278.5 4.6,282.4 3.7,284.9 3.2,290.2 1.8,295.9 1.4,303.1 0.9,303.8 0.9,309.0 0.0,309.3 0.0,336.6 0.9,336.8 1.4,344.9 1.8,345.5 1.8,348.5 3.2,354.7 3.2,357.3 6.9,373.3 12.4,389.9 18.4,403.6 27.1,420.2 40.9,439.4 50.1,450.5 63.4,463.6 76.9,474.6 94.4,486.1 108.1,493.4 122.4,499.4 134.3,503.5 143.7,505.8 145.8,506.7 161.9,509.9 174.5,510.9 174.7,511.8 204.3,511.8 204.6,510.9 208.9,510.9 209.6,510.4 216.3,509.9 238.3,505.3 243.1,503.5 250.7,501.7 266.3,495.2 281.0,487.9 295.7,478.7 303.3,473.2 318.5,460.3 326.7,452.1 337.7,439.2 344.2,430.7 352.9,417.9 367.1,388.0 372.2,371.0 372.2,369.4 373.6,365.1 374.5,358.9 375.8,354.0 375.8,351.1 376.8,348.1 377.2,341.4 378.1,341.2 378.1,311.6 376.5,311.6 375.6,317.8 373.8,322.6 372.4,328.3 371.0,330.8 371.0,332.0 365.5,343.0 359.1,352.0 350.6,360.9 341.2,368.7 330.6,376.1 312.3,385.3 298.5,390.3 280.1,394.9 275.7,394.9 274.1,395.8 269.3,395.8 267.7,396.7 261.5,396.7 260.8,397.2 239.0,397.2 238.3,396.7 234.4,396.7 215.6,393.1 205.7,388.9 203.2,388.5 195.4,384.8 190.8,382.0 181.8,375.6 171.5,364.8 165.5,356.3 159.6,343.0 157.3,333.8 157.3,330.4 158.7,326.3 161.9,318.9 165.5,312.5 171.5,304.4 180.0,296.4 188.0,291.4 194.9,288.1 200.0,286.8 209.9,285.8 210.5,285.4 218.1,285.4 218.8,285.8 224.1,286.3 227.3,287.2 235.6,290.9 242.7,295.5 245.7,299.2 247.5,302.8 248.9,308.3 248.9,314.5 248.4,316.8 244.7,326.3 244.7,327.6 246.6,327.6 253.0,324.4 261.5,318.5 267.7,314.8 278.3,305.1 283.6,301.0 300.5,283.6 301.9,281.3 310.2,271.4 315.0,264.5 315.0,263.1 314.3,262.2 312.0,254.2 310.6,251.2 309.3,245.4 305.1,236.0 305.1,234.6 304.2,233.5 304.2,232.1 301.5,225.0 301.5,223.4 300.5,221.8 300.5,220.6 299.6,219.0 297.8,212.4 296.9,210.8 296.9,209.6 295.0,205.7 294.1,201.4 292.3,197.5 290.4,191.9 290.4,190.3 287.7,183.7 285.4,175.6 281.3,165.3 279.0,157.3 277.6,155.2 275.5,153.4 262.4,145.6 250.7,137.3 233.0,127.2 229.4,123.8 189.9,72.8 173.3,52.3 164.2,39.7 155.4,29.4 149.0,20.0 143.0,13.5 136.2,3.9 133.2,0.9 131.8,0.9 131.8,5.5 133.6,13.3 139.1,26.6 146.5,36.5 146.5,39.0 144.2,45.2 140.5,59.9 140.1,65.7 139.1,66.6 137.1,66.6 132.2,63.4 124.7,59.7 116.9,54.6 114.3,52.3 97.6,42.7 85.0,34.0 71.9,26.6 56.0,16.1 51.0,13.3Z"/></clipPath><symbol id="lx-fac" viewBox="0 0 378.4 512"><g clip-path="url(#lx-clip)"><rect class="m-body" width="378.4" height="512"/><polygon class="m-deep" points="117.2,146.2 80.4,294.1 48.3,441.2 0.0,441.2 0.0,146.2"/><polygon class="m-deep" points="155.3,339.2 257.4,512.0 378.3,512.0 378.3,294.1 335.5,294.1 335.5,339.2"/><polygon class="m-head" points="0.0,0.0 378.3,0.0 378.3,294.1 330.9,294.1 330.9,333.2 229.8,333.2 197.6,257.4 80.4,294.1 117.2,146.2 0.0,146.2"/><polygon class="m-ear" points="128.7,0.0 137.9,68.9 280.4,156.3 248.2,128.7 142.5,9.2"/><polygon class="m-eye" points="219.7,173.7 268.9,184.8 296.4,210.5 239.0,198.5"/></g></symbol></defs></svg>
+<div class="hp" data-theme="dark">
+
+<div class="hp-bar"><span>JSONBench at 1 billion events: load time, storage and five queries, side by side.</span><a href="#bench">See the results</a></div>
+
+<header class="hp-nav hp-in">
+  <a class="lx-lockup" href="#" aria-label="LynxDB home"><svg class="lx-mark lx-mark--faceted lx-mark--on-dark" viewBox="0 0 378.4 512" aria-hidden="true"><use href="#lx-fac"/></svg><span class="lx-wordmark" style="color:inherit">LynxDB</span></a>
+  <nav aria-label="Primary">
+    <a href="#">Docs</a>
+    <a href="#">PPL guide</a>
+    <a href="#bench">Benchmarks</a>
+    <a href="#">Blog</a>
+    <a href="#">Discord</a>
+  </nav>
+  <div class="end">
+    <a class="lx-btn lx-btn--ghost" href="https://github.com/lynxbase/lynxdb">GitHub</a>
+    <a class="lx-btn lx-btn--primary" href="#install">Get started</a>
+  </div>
+</header>
+
+<section class="hp-hero">
+  <div class="hp-skyline" aria-hidden="true"><i style="height:52%"></i><i style="height:44%"></i><i style="height:18%"></i><i style="height:64%"></i><i style="height:26%"></i><i style="height:100%"></i><i style="height:36%"></i><i style="height:64%"></i><i class=hit style="height:52%"></i><i style="height:22%"></i><i style="height:30%"></i><i style="height:52%"></i><i style="height:10%"></i><i style="height:26%"></i><i style="height:14%"></i><i style="height:22%"></i><i style="height:64%"></i><i style="height:26%"></i><i style="height:60%"></i><i style="height:63%"></i><i style="height:85%"></i><i style="height:22%"></i><i style="height:14%"></i><i style="height:36%"></i><i style="height:22%"></i><i style="height:44%"></i><i style="height:52%"></i><i style="height:100%"></i><i style="height:36%"></i><i class=hit style="height:22%"></i><i style="height:97%"></i><i style="height:73%"></i><i style="height:98%"></i><i style="height:18%"></i><i style="height:64%"></i><i style="height:14%"></i><i style="height:80%"></i><i style="height:30%"></i><i style="height:64%"></i><i style="height:36%"></i><i style="height:22%"></i><i style="height:22%"></i><i style="height:52%"></i><i style="height:90%"></i><i style="height:14%"></i><i style="height:26%"></i><i style="height:26%"></i><i style="height:91%"></i><i style="height:100%"></i><i style="height:44%"></i><i style="height:99%"></i><i style="height:22%"></i><i style="height:36%"></i><i style="height:18%"></i><i style="height:18%"></i><i style="height:44%"></i><i style="height:100%"></i><i class=hit style="height:97%"></i><i style="height:30%"></i><i style="height:61%"></i><i style="height:14%"></i><i style="height:14%"></i><i class=hit style="height:100%"></i><i style="height:68%"></i><i style="height:82%"></i><i style="height:14%"></i><i style="height:10%"></i><i style="height:64%"></i><i style="height:10%"></i><i style="height:80%"></i><i style="height:36%"></i><i style="height:100%"></i><i style="height:44%"></i><i class=hit style="height:52%"></i><i class=hit style="height:44%"></i><i style="height:67%"></i><i style="height:44%"></i><i style="height:26%"></i><i style="height:52%"></i><i style="height:88%"></i><i style="height:36%"></i><i style="height:36%"></i><i style="height:22%"></i><i style="height:64%"></i><i style="height:18%"></i><i style="height:10%"></i><i style="height:77%"></i><i style="height:44%"></i><i style="height:36%"></i><i style="height:80%"></i><i style="height:64%"></i><i style="height:10%"></i><i style="height:80%"></i><i style="height:26%"></i><i style="height:80%"></i><i style="height:10%"></i></div>
+  <div class="hp-hero__in hp-in">
+    <div>
+      <h1>Search your logs.<br><span class="lime">In milliseconds.</span></h1>
+      <p class="lead">LynxDB is an open-source database for log search and analytics. Find a word, an ID or a pattern in a billion events, then count, group and chart what matched in the same query.</p>
+      <div class="hp-cta">
+        <a class="lx-btn lx-btn--primary lx-btn--lg" href="#install">Get started</a>
+        <a class="lx-btn lx-btn--lg" href="#bench">See the benchmark</a>
+      </div>
+      <p class="hp-meta hp-mono">Apache 2.0 · <a href="https://github.com/lynxbase/lynxdb">github.com/lynxbase/lynxdb</a></p>
+    </div>
+
+    <aside class="hp-card hp-bench" aria-label="JSONBench summary">
+      <div class="hp-bench__top"><b>JSONBench · 1 billion events</b><span>lower is better</span></div>
+      <p>Query time, load time and storage combined, relative to the best system.</p>
+      <div class="hp-bars">
+        <div class="me" data-scramble-host><span>LynxDB</span><span class="track"><span class="fill" style="width:12%"></span></span><span class="v" data-scramble>×1.00</span></div>
+        <div data-scramble-host><span>ClickHouse</span><span class="track"><span class="fill" style="width:55%"></span></span><span class="v" data-scramble>×19.03</span></div>
+        <div data-scramble-host><span>VictoriaLogs</span><span class="track"><span class="fill" style="width:62%"></span></span><span class="v" data-scramble>×29.55</span></div>
+        <div data-scramble-host><span>Elasticsearch</span><span class="track"><span class="fill" style="width:73%"></span></span><span class="v" data-scramble>×65.22</span></div>
+        <div data-scramble-host><span>OpenSearch</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="v" data-scramble>×399.68</span></div>
+      </div>
+      <div class="hp-bench__foot"><span>AWS m6i.8xlarge · bars on a log scale</span><a class="hp-more" style="font-size:12px" href="#bench">Full table</a></div>
+    </aside>
+  </div>
+</section>
+
+<section class="hp-nums hp-in" aria-label="Benchmark figures">
+  <div data-scramble-host><b><span data-scramble>0.127</span> <small>s</small></b><span>The slowest of the five benchmark queries over 1 billion events.</span></div>
+  <div data-scramble-host><b><span data-scramble>86</span> <small>GiB</small></b><span>1 billion JSON events on disk. ClickHouse needs 182 GiB, Elasticsearch 358 GiB.</span></div>
+  <div data-scramble-host><b><span data-scramble>1.2</span> <small>M events/s</small></b><span>Ingest speed: the full billion loads in 824 seconds.</span></div>
+  <div data-scramble-host><b><span data-scramble>5</span> <small>ingest protocols</small></b><span>NDJSON, Elasticsearch bulk, OpenTelemetry, Splunk HEC and syslog.</span></div>
+</section>
+
+<section class="hp-sec hp-in hp-demo" id="search">
+  <div class="hp-demo__top">
+    <div class="hp-head">
+      <h2>Search is the first step</h2>
+      <p>You find the error, then you ask how often, where and since when. LynxDB runs the search and the analytics in one engine, with one pipe language: OpenSearch PPL.</p>
+    </div>
+    <div class="lx-seg" role="tablist" aria-label="Examples" data-tabs="demo">
+      <button class="lx-seg__item" role="tab" aria-selected="true" data-tab="find">Find a phrase</button>
+      <button class="lx-seg__item" role="tab" aria-selected="false" data-tab="field">Follow a field</button>
+      <button class="lx-seg__item" role="tab" aria-selected="false" data-tab="group">Count and group</button>
+      <button class="lx-seg__item" role="tab" aria-selected="false" data-tab="chart">Chart over time</button>
+    </div>
+  </div>
+
+  <div class="hp-card hp-pane" data-pane="demo:find">
+    <div>
+      <div class="cap">Query</div>
+<pre class="lx-code"><span class="k">source</span>=main <span class="s">"connection refused"</span> earliest=<span class="n">-1h</span>
+<span class="p">|</span> <span class="k">fields</span> _time, host, msg
+<span class="p">|</span> <span class="k">head</span> <span class="n">5</span></pre>
+      <p class="note">Words and quoted phrases match in every field of an event, in any case. Blocks that cannot hold the phrase are skipped before they are read.</p>
+    </div>
+    <div>
+      <div class="cap">Result</div>
+<pre class="hp-out"><span class="h">_time         host     msg</span>
+08:59:41.220  api-02   dial tcp 10.0.4.17:5432: <mark>connection refused</mark>
+08:59:40.871  api-02   pool: <mark>connection refused</mark>, retry 3 of 5
+08:58:12.004  web-01   upstream api-02: <mark>connection refused</mark>
+08:57:55.613  api-01   redis 10.0.2.8:6379: <mark>connection refused</mark>
+08:57:55.102  web-03   upstream api-01: <mark>connection refused</mark></pre>
+    </div>
+  </div>
+
+  <div class="hp-card hp-pane" data-pane="demo:field" hidden>
+    <div>
+      <div class="cap">Query</div>
+<pre class="lx-code"><span class="k">source</span>=main user=grace status&gt;=<span class="n">500</span>
+<span class="p">|</span> <span class="k">fields</span> _time, host, path, status, response_time
+<span class="p">|</span> <span class="k">sort</span> - _time</pre>
+      <p class="note">An exact field match uses that field's own token filter, so a user, a trace ID or an IP is as cheap to follow as a log level. There is no schema to declare first.</p>
+    </div>
+    <div>
+      <div class="cap">Result</div>
+<pre class="hp-out"><span class="h">_time         host    path              status  response_time</span>
+08:00:00.105  web-03  /api/v1/users     <span class="e">502</span>     786
+07:58:31.440  web-03  /api/v1/orders    <span class="e">503</span>     1204
+07:58:30.992  api-02  /api/v1/orders    <span class="e">500</span>     941
+07:41:07.318  web-01  /api/v1/search    <span class="e">502</span>     655</pre>
+    </div>
+  </div>
+
+  <div class="hp-card hp-pane" data-pane="demo:group" hidden>
+    <div>
+      <div class="cap">Query</div>
+<pre class="lx-code"><span class="k">source</span>=main
+<span class="p">|</span> <span class="k">stats</span> <span class="f">count</span>() <span class="k">as</span> total,
+        <span class="f">count</span>(<span class="f">eval</span>(status &gt;= <span class="n">500</span>)) <span class="k">as</span> errors <span class="k">by</span> host
+<span class="p">|</span> <span class="k">eval</span> error_rate = <span class="f">round</span>(errors * <span class="n">100.0</span> / total, <span class="n">1</span>)
+<span class="p">|</span> <span class="k">sort</span> - error_rate</pre>
+      <p class="note">Aggregations run on the columnar engine and decode only the columns the query names.</p>
+    </div>
+    <div>
+      <div class="cap">Result</div>
+<pre class="hp-out"><span class="h">host    error_rate  errors  total</span>
+api-02  22.6        48      212
+web-02  22.3        43      193
+web-03  21.1        41      194
+web-01  19.7        38      193
+api-01  16.3        34      208</pre>
+    </div>
+  </div>
+
+  <div class="hp-card hp-pane" data-pane="demo:chart" hidden>
+    <div>
+      <div class="cap">Query</div>
+<pre class="lx-code"><span class="k">source</span>=main level=ERROR <span class="k">OR</span> level=WARN earliest=<span class="n">-1h</span>
+<span class="p">|</span> <span class="k">timechart</span> span=<span class="n">1m</span> <span class="f">count</span>() <span class="k">by</span> level</pre>
+      <p class="note">Each block stores its row counts by minute, hour and day, so many time charts add up stored buckets instead of reading rows.</p>
+    </div>
+    <div>
+      <div class="cap">Result</div>
+      <div class="hp-chart" role="img" aria-label="Errors and warnings per minute over the last hour"><i><b style="height:10px"></b><u style="height:24px"></u></i><i><b style="height:11px"></b><u style="height:26px"></u></i><i><b style="height:16px"></b><u style="height:6px"></u></i><i><b style="height:14px"></b><u style="height:26px"></u></i><i><b style="height:8px"></b><u style="height:22px"></u></i><i><b style="height:3px"></b><u style="height:10px"></u></i><i><b style="height:5px"></b><u style="height:14px"></u></i><i><b style="height:14px"></b><u style="height:11px"></u></i><i><b style="height:13px"></b><u style="height:19px"></u></i><i><b style="height:5px"></b><u style="height:21px"></u></i><i><b style="height:8px"></b><u style="height:6px"></u></i><i><b style="height:8px"></b><u style="height:16px"></u></i><i><b style="height:10px"></b><u style="height:10px"></u></i><i><b style="height:13px"></b><u style="height:10px"></u></i><i><b style="height:5px"></b><u style="height:10px"></u></i><i><b style="height:14px"></b><u style="height:10px"></u></i><i><b style="height:6px"></b><u style="height:6px"></u></i><i><b style="height:3px"></b><u style="height:11px"></u></i><i><b style="height:8px"></b><u style="height:10px"></u></i><i><b style="height:6px"></b><u style="height:13px"></u></i><i><b style="height:11px"></b><u style="height:11px"></u></i><i><b style="height:16px"></b><u style="height:22px"></u></i><i><b style="height:8px"></b><u style="height:10px"></u></i><i><b style="height:8px"></b><u style="height:16px"></u></i><i><b style="height:10px"></b><u style="height:6px"></u></i><i><b style="height:11px"></b><u style="height:16px"></u></i><i><b style="height:6px"></b><u style="height:10px"></u></i><i><b style="height:10px"></b><u style="height:8px"></u></i><i><b style="height:11px"></b><u style="height:13px"></u></i><i><b style="height:3px"></b><u style="height:40px"></u></i><i><b style="height:34px"></b><u style="height:27px"></u></i><i><b style="height:70px"></b><u style="height:34px"></u></i><i><b style="height:70px"></b><u style="height:37px"></u></i><i><b style="height:72px"></b><u style="height:29px"></u></i><i><b style="height:75px"></b><u style="height:37px"></u></i><i><b style="height:67px"></b><u style="height:26px"></u></i><i><b style="height:70px"></b><u style="height:26px"></u></i><i><b style="height:34px"></b><u style="height:35px"></u></i><i><b style="height:26px"></b><u style="height:38px"></u></i><i><b style="height:13px"></b><u style="height:34px"></u></i><i><b style="height:13px"></b><u style="height:40px"></u></i><i><b style="height:3px"></b><u style="height:18px"></u></i><i><b style="height:3px"></b><u style="height:24px"></u></i><i><b style="height:6px"></b><u style="height:21px"></u></i><i><b style="height:8px"></b><u style="height:8px"></u></i><i><b style="height:8px"></b><u style="height:18px"></u></i><i><b style="height:11px"></b><u style="height:19px"></u></i><i><b style="height:11px"></b><u style="height:19px"></u></i><i><b style="height:10px"></b><u style="height:26px"></u></i><i><b style="height:14px"></b><u style="height:8px"></u></i><i><b style="height:11px"></b><u style="height:13px"></u></i><i><b style="height:3px"></b><u style="height:16px"></u></i><i><b style="height:5px"></b><u style="height:11px"></u></i><i><b style="height:11px"></b><u style="height:19px"></u></i><i><b style="height:11px"></b><u style="height:10px"></u></i><i><b style="height:11px"></b><u style="height:13px"></u></i><i><b style="height:16px"></b><u style="height:8px"></u></i><i><b style="height:10px"></b><u style="height:22px"></u></i><i><b style="height:11px"></b><u style="height:13px"></u></i><i><b style="height:6px"></b><u style="height:26px"></u></i></div>
+      <div class="hp-legend"><span><i style="background:var(--ember-500)"></i>ERROR</span><span><i style="background:var(--amber-500)"></i>WARN</span><span style="margin-left:auto">last 60 minutes · 1m buckets</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="hp-sec hp-in" style="padding-top:0">
+  <div class="hp-head">
+    <h2>Why search is fast</h2>
+    <p>A search reads only the blocks that can match. There is no global posting list to maintain, so ingest stays cheap and the index stays small.</p>
+  </div>
+  <div class="hp-why">
+    <div class="hp-card hp-blocks" aria-hidden="true">
+      <div class="hp-range hp-mono"><span>earliest=-1h</span></div>
+      <div class="hp-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="hit"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="in"></i><i class="hit"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="hit"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="hit"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="hit"></i><i class="in"></i><i class="in"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i class="in"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="hp-keys"><span><i style="background:var(--stone-900);outline:1px solid var(--stone-800)"></i>Outside the time range</span><span><i style="background:var(--stone-700)"></i>Skipped by token filter</span><span><i style="background:var(--lime-400)"></i>Read and verified</span></div>
+    </div>
+    <ol class="hp-steps">
+      <li><h3>Time first</h3><p>Events are stored in time partitions. A query with a time range never opens the partitions and blocks outside it.</p></li>
+      <li><h3>Token filters</h3><p>Every block carries compact fingerprints of the tokens inside it. If a block cannot hold your word or your field value, it is skipped without being read.</p></li>
+      <li><h3>Only the columns you ask for</h3><p>Storage is columnar. A query decodes the columns it names, and settles filters such as <code>status &gt;= 500</code> from block metadata when it can.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="hp-sec hp-in" id="bench" style="padding-top:0">
+  <div class="hp-head">
+    <h2>Measured on a billion events</h2>
+    <p>JSONBench loads Bluesky events as JSON and times five queries over them. Every system runs on the same machine, an AWS m6i.8xlarge.</p>
+  </div>
+  <div class="hp-card hp-tbl">
+    <table>
+      <thead><tr><th></th><th>LynxDB</th><th>ClickHouse</th><th>VictoriaLogs</th><th>Elasticsearch</th><th>OpenSearch</th></tr></thead>
+      <tbody>
+        <tr><td>Load time</td><td>824 s</td><td>6,042 s<small>×7.3</small></td><td>1,078 s<small>×1.3</small></td><td>22,255 s<small>×27</small></td><td>64,360 s<small>×78</small></td></tr>
+        <tr><td>Storage size</td><td>86.36 GiB</td><td>182.34 GiB<small>×2.1</small></td><td>113.02 GiB<small>×1.3</small></td><td>358.32 GiB<small>×4.2</small></td><td>265.51 GiB<small>×3.1</small></td></tr>
+        <tr><td>Query 1</td><td>0.001 s</td><td>0.249 s</td><td>0.049 s</td><td>1.002 s</td><td>19.754 s</td></tr>
+        <tr><td>Query 2</td><td>0.049 s</td><td>2.879 s</td><td>19.694 s</td><td>5.568 s</td><td>60.076 s</td></tr>
+        <tr><td>Query 3</td><td>0.072 s</td><td>2.600 s</td><td>1.559 s</td><td>12.129 s</td><td>331.837 s</td></tr>
+        <tr><td>Query 4</td><td>0.004 s</td><td>0.845 s</td><td>6.208 s</td><td>3.974 s</td><td>7.378 s</td></tr>
+        <tr><td>Query 5</td><td>0.127 s</td><td>0.888 s</td><td>8.551 s</td><td>4.482 s</td><td>19.223 s</td></tr>
+        <tr><td>Combined</td><td>×1.00</td><td>×19.03</td><td>×29.55</td><td>×65.22</td><td>×399.68</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="hp-fine">The LynxDB row was measured on 2026-11-20 at commit ad9d7e3b. The other rows are the results published in ClickBench. Combined weighs the hot run at 60%, the cold run at 20%, storage at 10% and load time at 10%. <a href="https://github.com/lynxbase/ClickBench/tree/main/json/lynxdb">Entry and raw results</a></p>
+</section>
+
+<section class="hp-sec hp-in" style="padding-top:0">
+  <div class="hp-head"><h2>Built for logs</h2></div>
+  <div class="hp-bento">
+    <div class="hp-card w2">
+      <h3>Any log, no schema</h3>
+      <p>JSON keeps its fields. Plain text gets its timestamp, key=value pairs and common formats such as access logs and syslog extracted on the way in.</p>
+<pre class="hp-raw"><em>2025-01-15T08:00:00.105Z</em> <b>host</b>=web-03 <b>level</b>=ERROR <b>method</b>=GET <b>path</b>=/api/v1/users <b>status</b>=502 <b>user</b>=grace <b>response_time</b>=786</pre>
+    </div>
+    <div class="hp-card">
+      <h3>OpenSearch PPL</h3>
+      <p>One pipe language for search, filters, stats, time charts and joins. Nothing proprietary to learn.</p>
+    </div>
+    <div class="hp-card">
+      <h3>Compact storage</h3>
+      <p>Columnar parts with dictionary encoding, Zstandard and LZ4. Retention drops whole time partitions.</p>
+    </div>
+    <div class="hp-card">
+      <h3>Keep your collector</h3>
+      <p>Point the agent you already run at a new address.</p>
+      <div class="hp-chips"><span>NDJSON</span><span>_bulk</span><span>OTLP</span><span>Splunk HEC</span><span>syslog</span></div>
+    </div>
+    <div class="hp-card">
+      <h3>Open source</h3>
+      <p>Apache 2.0. One static binary with no runtime dependencies.</p>
+    </div>
+    <div class="hp-card w2">
+      <h3>A file, a pipe or a server</h3>
+      <p>The same engine answers over a local file, the output of another command, or a server that stores logs on disk.</p>
+<pre class="hp-raw"><b>$</b> <em>kubectl logs deploy/api | lynxdb query 'source=main status&gt;=500 | top 10 uri'</em></pre>
+    </div>
+  </div>
+</section>
+
+<section class="hp-sec hp-in hp-inst" id="install" style="padding-top:0">
+  <div class="hp-head">
+    <h2>Install LynxDB</h2>
+    <p>The script detects your architecture, downloads the matching release, checks it against the published SHA-256 sums and installs the binary to /usr/local/bin.</p>
+    <a class="hp-more" href="#">All installation options <span class="hp-mono">-&gt;</span></a>
+  </div>
+  <div class="hp-card hp-inst__box">
+    <div class="lx-seg" role="tablist" aria-label="Install method" data-tabs="inst">
+      <button class="lx-seg__item" role="tab" aria-selected="true" data-tab="sh">Linux and macOS</button>
+      <button class="lx-seg__item" role="tab" aria-selected="false" data-tab="brew">Homebrew</button>
+      <button class="lx-seg__item" role="tab" aria-selected="false" data-tab="docker">Docker</button>
+      <button class="lx-seg__item" role="tab" aria-selected="false" data-tab="go">Go</button>
+    </div>
+    <div class="hp-cmd" data-pane="inst:sh"><pre><b>curl</b> -fsSL https://lynxdb.org/install.sh | <b>sh</b></pre><button class="lx-btn lx-btn--sm" type="button" data-copy>Copy</button></div>
+    <div class="hp-cmd" data-pane="inst:brew" hidden><pre><b>brew</b> install lynxbase/tap/lynxdb</pre><button class="lx-btn lx-btn--sm" type="button" data-copy>Copy</button></div>
+    <div class="hp-cmd" data-pane="inst:docker" hidden><pre><b>docker</b> run -d --name lynxdb -p 3100:3100 \
+  -v lynxdb-data:/data ghcr.io/lynxbase/lynxdb \
+  server --addr 0.0.0.0:3100 --data-dir /data</pre><button class="lx-btn lx-btn--sm" type="button" data-copy>Copy</button></div>
+    <div class="hp-cmd" data-pane="inst:go" hidden><pre><b>go</b> install github.com/lynxbase/lynxdb/cmd/lynxdb@main</pre><button class="lx-btn lx-btn--sm" type="button" data-copy>Copy</button></div>
+    <p class="hp-inst__note">Static binary for amd64, arm64 and armv7. Runs on glibc and musl.</p>
+  </div>
+</section>
+
+<section class="hp-in">
+  <div class="hp-card hp-end">
+    <div>
+      <h2>Start with a log file you already have</h2>
+<pre><b>$</b> lynxdb query --file access.log 'source=main status&gt;=500 | top 10 uri'</pre>
+    </div>
+    <div class="hp-cta">
+      <a class="lx-btn lx-btn--primary lx-btn--lg" href="#">Quick start</a>
+      <a class="lx-btn lx-btn--lg" href="#">Read the docs</a>
+    </div>
+  </div>
+</section>
+
+<footer class="hp-foot hp-in">
+  <a class="lx-lockup" href="#" style="font-size:15px" aria-label="LynxDB"><svg class="lx-mark lx-mark--faceted lx-mark--on-dark" viewBox="0 0 378.4 512" aria-hidden="true"><use href="#lx-fac"/></svg><span class="lx-wordmark" style="color:inherit">LynxDB</span></a>
+  <span class="lx-label">Apache 2.0</span>
+  <div class="end">
+    <a class="lx-label" href="#"><span data-scramble>Docs</span></a>
+    <a class="lx-label" href="#"><span data-scramble>GitHub</span></a>
+    <a class="lx-label" href="#"><span data-scramble>Discord</span></a>
+    <a class="lx-label" href="#"><span data-scramble>Releases</span></a>
+    <a class="lx-label" href="#"><span data-scramble>Benchmarks</span></a>
+  </div>
+</footer>
+
+</div>
+<script>
+  // Tabs: instant, no animation.
+  document.querySelectorAll('[data-tabs]').forEach(function (list) {
+    var group = list.getAttribute('data-tabs');
+    list.addEventListener('click', function (event) {
+      var tab = event.target.closest('[data-tab]');
+      if (!tab) return;
+      list.querySelectorAll('[data-tab]').forEach(function (t) { t.setAttribute('aria-selected', String(t === tab)); });
+      document.querySelectorAll('[data-pane^="' + group + ':"]').forEach(function (pane) {
+        pane.hidden = pane.getAttribute('data-pane') !== group + ':' + tab.getAttribute('data-tab');
+      });
+    });
+  });
+  // Copy the command next to the button.
+  document.querySelectorAll('[data-copy]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var text = button.parentElement.querySelector('pre').textContent;
+      var done = function () { button.textContent = 'Copied'; setTimeout(function () { button.textContent = 'Copy'; }, 1200); };
+      try { navigator.clipboard.writeText(text).then(done, done); } catch (error) { done(); }
+    });
+  });
+</script>
+</body>
+</html>

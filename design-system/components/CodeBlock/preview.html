@@ -1,0 +1,15 @@
+<!-- @dsCard group="Content" height=200 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>CodeBlock — LynxDB</title></head>
+<body>
+<div class="lx-stack">
+<pre class="lx-code"><span class="c">// Errors per endpoint in the last hour</span>
+<span class="k">from</span> main[<span class="s">-1h</span>] <span class="s">"timeout"</span> status&gt;=<span class="n">500</span>
+<span class="p">|</span> <span class="k">stats</span> <span class="f">count</span>() <span class="k">as</span> errors, <span class="f">p95</span>(duration_ms) <span class="k">as</span> p95_ms <span class="k">by</span> endpoint
+<span class="p">|</span> <span class="k">sort</span> -errors
+<span class="p">|</span> <span class="k">head</span> <span class="n">10</span></pre>
+<p style="margin:0;font-size:15px;line-height:24px">Inline code such as <span class="lx-ic">lynxdb query --file access.log</span> sits on <span class="lx-ic">bg-sunken</span> at 87% of the surrounding size.</p>
+</div>
+</body>
+</html>

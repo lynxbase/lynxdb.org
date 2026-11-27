@@ -1,0 +1,96 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LynxDB</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg-app); color: var(--fg-default); font-family: var(--font-sans); overflow: hidden; }
+  .cover { position: relative; width: 960px; height: 288px; overflow: hidden; }
+  .art { position: absolute; top: 0; left: 480px; width: 480px; height: 288px; overflow: hidden; }
+  .art svg { display: block; width: 480px; height: 288px; }
+  .slab { fill: var(--accent); rx: var(--radius-md); }
+  .lime { fill: var(--moss-300); rx: var(--radius-md); }
+  .deep { fill: var(--bg-inverse); rx: var(--radius-md); }
+  .chip-e { fill: var(--danger-solid); rx: var(--radius-xs); }
+  .chip-a { fill: var(--viz-3); rx: var(--radius-xs); }
+  .dot { fill: var(--fg-inverse); opacity: 0.28; }
+  .dot.on { fill: var(--moss-400); opacity: 1; }
+  .words { position: absolute; left: var(--space-6); bottom: var(--space-6); max-width: 440px; }
+  .name { margin: 0; font-size: 112px; line-height: 0.92; font-weight: 600; letter-spacing: -0.045em; color: var(--fg-default); }
+  .tag { margin: var(--space-2) 0 0 5px; font-size: 14px; line-height: 20px; color: var(--fg-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      accent 144x280 bled off the top (the brand, largest) · moss-300 144x144 (the lime of the mark's head) · bg-inverse 176x216 bleeding off the right edge (the dark ground of the console) · danger-solid 48x16 and viz-3 24x16 once each (they only ever mean a log level)
+  arrangement one tall moss slab with satellites, bottoms on one line space-6 above the edge, space-4 gutters
+  pattern     dot grid, from "mono interface voice on a 4px grid": space-1 dots at a space-6 pitch over the dark block, read as events in a log stream, seven of them lit in moss-400
+  scales      sides in space-2 multiples; gutters space-4; pitch space-6; dot diameter space-1; corners radius-md, chips radius-xs
+-->
+<rect class="slab" x="0" y="-16" width="144" height="280" rx="6"/>
+<rect class="chip-e" x="160" y="88" width="48" height="16" rx="2"/>
+<rect class="chip-a" x="216" y="88" width="24" height="16" rx="2"/>
+<rect class="lime" x="160" y="120" width="144" height="144" rx="6"/>
+<rect class="deep" x="320" y="48" width="176" height="216" rx="6"/>
+<circle class="dot" cx="344" cy="72" r="2"/>
+<circle class="dot" cx="368" cy="72" r="2"/>
+<circle class="dot" cx="392" cy="72" r="2"/>
+<circle class="dot" cx="416" cy="72" r="2"/>
+<circle class="dot" cx="440" cy="72" r="2"/>
+<circle class="dot" cx="464" cy="72" r="2"/>
+<circle class="dot" cx="344" cy="96" r="2"/>
+<circle class="dot on" cx="368" cy="96" r="2"/>
+<circle class="dot" cx="392" cy="96" r="2"/>
+<circle class="dot" cx="416" cy="96" r="2"/>
+<circle class="dot" cx="440" cy="96" r="2"/>
+<circle class="dot" cx="464" cy="96" r="2"/>
+<circle class="dot" cx="344" cy="120" r="2"/>
+<circle class="dot" cx="368" cy="120" r="2"/>
+<circle class="dot" cx="392" cy="120" r="2"/>
+<circle class="dot" cx="416" cy="120" r="2"/>
+<circle class="dot on" cx="440" cy="120" r="2"/>
+<circle class="dot" cx="464" cy="120" r="2"/>
+<circle class="dot" cx="344" cy="144" r="2"/>
+<circle class="dot" cx="368" cy="144" r="2"/>
+<circle class="dot on" cx="392" cy="144" r="2"/>
+<circle class="dot" cx="416" cy="144" r="2"/>
+<circle class="dot" cx="440" cy="144" r="2"/>
+<circle class="dot" cx="464" cy="144" r="2"/>
+<circle class="dot" cx="344" cy="168" r="2"/>
+<circle class="dot" cx="368" cy="168" r="2"/>
+<circle class="dot" cx="392" cy="168" r="2"/>
+<circle class="dot" cx="416" cy="168" r="2"/>
+<circle class="dot" cx="440" cy="168" r="2"/>
+<circle class="dot on" cx="464" cy="168" r="2"/>
+<circle class="dot on" cx="344" cy="192" r="2"/>
+<circle class="dot" cx="368" cy="192" r="2"/>
+<circle class="dot" cx="392" cy="192" r="2"/>
+<circle class="dot" cx="416" cy="192" r="2"/>
+<circle class="dot" cx="440" cy="192" r="2"/>
+<circle class="dot" cx="464" cy="192" r="2"/>
+<circle class="dot" cx="344" cy="216" r="2"/>
+<circle class="dot" cx="368" cy="216" r="2"/>
+<circle class="dot" cx="392" cy="216" r="2"/>
+<circle class="dot on" cx="416" cy="216" r="2"/>
+<circle class="dot" cx="440" cy="216" r="2"/>
+<circle class="dot" cx="464" cy="216" r="2"/>
+<circle class="dot" cx="344" cy="240" r="2"/>
+<circle class="dot" cx="368" cy="240" r="2"/>
+<circle class="dot" cx="392" cy="240" r="2"/>
+<circle class="dot" cx="416" cy="240" r="2"/>
+<circle class="dot on" cx="440" cy="240" r="2"/>
+<circle class="dot" cx="464" cy="240" r="2"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">LynxDB</h1>
+<p class="tag">Log analytics in a single binary.</p>
+</div>
+</div>
+</body>
+</html>
