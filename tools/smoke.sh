@@ -6,7 +6,11 @@ set -eu
 
 base=${1%/}
 failed=0
-fetch() { curl -sS -o /dev/null --retry 5 --retry-all-errors --retry-delay 3 -w '%{http_code} %{content_type}' "$base$1"; }
+fetch() { # path, then curl options such as a header
+	path=$1
+	shift
+	curl -sS -o /dev/null --retry 5 --retry-all-errors --retry-delay 3 -w '%{http_code} %{content_type}' "$@" "$base$path"
+}
 expect() { # path, status, content type prefix, another accepted prefix
 	got=$(fetch "$1") || got="error"
 	case $got in
@@ -31,5 +35,24 @@ for path in $pages; do
 	case $path in /) ;; */) expect "${path%/}.md" 200 'text/markdown; charset=utf-8' ;; esac
 done
 
+# a blog page answers AI agents in Markdown at its own address, and browsers and search engines in HTML
+post=$(printf '%s\n' "$pages" | grep -m1 '^/blog/.' || true)
+as() { # label, expected content type prefix, curl options
+	label=$1 type=$2
+	shift 2
+	got=$(fetch "$post" "$@") || got="error"
+	case $got in
+	"200 $type"*) echo "ok   $post as $label  $got" ;;
+	*) echo "FAIL $post as $label  $got, expected 200 $type" >&2; failed=1 ;;
+	esac
+}
+if [ -n "$post" ]; then
+	as GPTBot 'text/markdown; charset=utf-8' -A 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; GPTBot/1.2; +https://openai.com/gptbot)'
+	as Claude-User 'text/markdown; charset=utf-8' -A 'Claude-User (claude-code; +https://support.anthropic.com/)'
+	as 'Accept: text/markdown' 'text/markdown; charset=utf-8' -H 'Accept: text/markdown'
+	as Chrome text/html -A 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36'
+	as Googlebot text/html -A 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+fi
+
 [ "$failed" -eq 0 ] || { echo "smoke: $base does not serve the site as built" >&2; exit 1; }
-echo "smoke: $base serves every page, Markdown copy and file for crawlers"
+echo "smoke: $base serves every page, Markdown copy and file for crawlers, and Markdown to AI agents"

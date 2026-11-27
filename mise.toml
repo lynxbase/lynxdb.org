@@ -41,6 +41,10 @@ description = "Build a commit (HEAD by default) in a temporary worktree; fail if
 depends = ["install"]
 run = "tools/check-site.sh"
 
+[tasks.test]
+description = "Test the Worker: which requests get Markdown and what it answers them"
+run = "node --test worker/"
+
 [tasks.dist]
 description = "Stage the files the host serves into dist/, from a commit (HEAD by default)"
 run = "tools/dist.sh"

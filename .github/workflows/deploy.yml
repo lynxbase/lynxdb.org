@@ -52,6 +52,8 @@ jobs:
 
       - name: Build the site again and compare it with the commit
         run: mise run check
+      - name: Test the Worker
+        run: mise run test
       - name: Stage the files the host serves
         run: mise run dist
 
