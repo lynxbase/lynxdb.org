@@ -6,9 +6,10 @@ name: Deploy
 #
 # The commit must be on main and hold the site its sources build: the job builds it again rather
 # than trusting the push hook (mise run check), stages the files the host serves into dist/
-# (mise run dist), deploys them with Wrangler, and then fetches every page of the new deployment,
-# its Markdown copy, the files for crawlers and agents, and addresses that must answer 404
-# (mise run smoke). It needs the secrets CF_ACCOUNT_ID and CF_API_TOKEN (Workers Scripts: Edit).
+# (mise run dist), deploys them with Wrangler, and then fetches every page of lynxdb.org, its
+# Markdown copy, the files for crawlers and agents, and addresses that must answer 404 (mise run
+# smoke). It needs the secrets CF_ACCOUNT_ID and CF_API_TOKEN, a token with Account, Workers
+# Scripts: Edit and Zone, Workers Routes: Edit on lynxdb.org.
 on:
   push:
     tags:
@@ -55,7 +56,6 @@ jobs:
         run: mise run dist
 
       - name: Deploy to Cloudflare
-        id: deploy
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
@@ -63,15 +63,13 @@ jobs:
           wranglerVersion: "4.168.0"
           command: deploy
 
-      - name: Check the new deployment
-        env:
-          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
-        run: mise run smoke "$DEPLOYMENT_URL"
+      # the Worker answers only on its domains (wrangler.jsonc), and a deploy switches them at once
+      - name: Check the site
+        run: mise run smoke https://lynxdb.org
 
       - name: Write the summary
         if: always()
         env:
-          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
           OUTCOME: ${{ job.status }}
         run: |
           {
@@ -79,6 +77,5 @@ jobs:
             echo
             echo "$GITHUB_REF_NAME at \`${GITHUB_SHA:0:12}\`, Cloudflare Worker \`lynxdb-org\`."
             echo
-            if [ -n "$DEPLOYMENT_URL" ]; then echo "- This deployment: $DEPLOYMENT_URL"; fi
-            echo "- Production: https://lynxdb.org/"
+            echo "- https://lynxdb.org/ and https://www.lynxdb.org/"
           } >> "$GITHUB_STEP_SUMMARY"

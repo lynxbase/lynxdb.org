@@ -39,9 +39,9 @@ git tag 2026.11.27 && git push origin 2026.11.27
 ```
 
 It needs two repository secrets: `CF_ACCOUNT_ID` and `CF_API_TOKEN`, an API token with Account,
-Workers Scripts: Edit. `mise run deploy` deploys `dist/` from a machine where `wrangler login` was
-run, without the checks of a tag. The address is attached once, in the dashboard (the Worker's
-Settings, Domains & Routes, Custom domain: `lynxdb.org`).
+Workers Scripts: Edit and Zone, Workers Routes: Edit on lynxdb.org. `mise run deploy` deploys `dist/` from a machine where `wrangler login` was
+run, without the checks of a tag. `wrangler.jsonc` names its addresses, `lynxdb.org` and
+`www.lynxdb.org`, and every deploy keeps them attached; the Worker has no `workers.dev` address.
 
 `design-system/` is the LynxDB brand system the page follows: tokens, logos, fonts and component
 notes.
