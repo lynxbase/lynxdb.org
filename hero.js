@@ -29,13 +29,15 @@ function init() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   // the creates sit between the few account and identity events, in the sort key's order: profile,
-  // like, post, repost, block, follow, then the small collections; a scan reads the blocks where one
-  // collection meets the next and counts the rest from the index
+  // like, post, repost, block, follow, then the small collections. Q2 reads only the blocks where one
+  // collection meets the next (14 of 61,246) and counts the rest from the index; Q4 reads 32 blocks of
+  // post creates, the earliest in time, and skips the rest. A square is lit when it holds a read block.
   const edges = [25, 470, 557, 614, 628, 966, 972, 976];
+  const firstPosts = [471, 489, 503, 518, 534, 549];
   const MODES = {
     index: () => 'index',
-    post: i => (i >= 452 && i < 572 ? 'read' : 'skipped'),
-    creates: i => (i < 20 || i >= 980 ? 'skipped' : edges.some(e => Math.abs(i - e) < 6) ? 'read' : 'index'),
+    post: i => (firstPosts.includes(i) ? 'read' : 'skipped'),
+    creates: i => (i < 20 || i >= 980 ? 'skipped' : edges.includes(i) ? 'read' : 'index'),
   };
   let mode = MODES.index, from = null, sweep = 1, fill = null;
   function draw() {

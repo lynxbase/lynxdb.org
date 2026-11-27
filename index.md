@@ -60,27 +60,27 @@ AWS m6i.8xlarge. LynxDB measured on 20 November 2026 at commit ad9d7e3b; the oth
 4.  Elasticsearch**22,255 s**
 5.  OpenSearch**64,360 s**
 
-**Size on disk**GiB
+**Size on disk**GB
 
-1.  LynxDB**86.36**
-2.  ClickHouse**182.34**
-3.  VictoriaLogs**113.02**
-4.  Elasticsearch**358.32**
-5.  OpenSearch**265.51**
+1.  LynxDB**92.7**
+2.  ClickHouse**195.8**
+3.  VictoriaLogs**121.4**
+4.  Elasticsearch**384.7**
+5.  OpenSearch**285.1**
 
-| Query time | LynxDB | ClickHouse | VictoriaLogs | Elasticsearch | OpenSearch |
+| Hot query time | LynxDB | ClickHouse | VictoriaLogs | Elasticsearch | OpenSearch |
 | --- | --- | --- | --- | --- | --- |
-| **Q1** count by collection | 0.001 s | 0.249 s | 0.049 s | 1.002 s | 19.754 s |
-| **Q2** creates and users | 0.049 s | 2.879 s | 19.694 s | 5.568 s | 60.076 s |
-| **Q3** creates by hour | 0.072 s | 2.600 s | 1.559 s | 12.129 s | 331.837 s |
-| **Q4** first posters | 0.004 s | 0.845 s | 6.208 s | 3.974 s | 7.378 s |
-| **Q5** longest activity | 0.127 s | 0.888 s | 8.551 s | 4.482 s | 19.223 s |
+| **Q1** count by collection | 0.0012 s | 0.239 s | 0.033 s | 0.618 s | 19.922 s |
+| **Q2** creates and users | 0.049 s | 2.767 s | 19.155 s | 4.930 s | 59.570 s |
+| **Q3** creates by hour | 0.062 s | 2.302 s | 1.521 s | 14.213 s | 412.161 s |
+| **Q4** first posters | 0.0028 s | 0.757 s | 5.914 s | 3.443 s | 6.960 s |
+| **Q5** longest activity | 0.063 s | 0.805 s | 8.053 s | 3.887 s | 18.367 s |
 
 ## Takes logs from the shippers you run
 
 An existing shipper only needs LynxDB's address. Elasticsearch bulk, OTLP, Splunk HEC, Loki push and syslog arrive on their usual endpoints.
 
-Kubernetes through Fluent Bit, Docker through its syslog driver, the OpenTelemetry Collector, Vector, Fluent Bit, Filebeat, Logstash, Splunk HEC senders, syslog daemons and files send logs to lynxdb server, which stores the 480 GB of JSON in JSONBench in 92.7 GB and answers PPL queries over them
+Kubernetes through Fluent Bit, Docker through its syslog driver, the OpenTelemetry Collector, Vector, Fluent Bit, Filebeat, Logstash, Splunk HEC senders, syslog daemons and files send logs to lynxdb server, which stores the 482 GB of JSON in JSONBench in 92.7 GB and answers PPL queries over them
 
 *   Kubernetes Fluent Bit
 *   Docker syslog driver

@@ -147,36 +147,36 @@
         <div class="btn-row"><a class="btn btn--primary" href="#install">Install LynxDB<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a><a class="btn btn--secondary" href="https://docs.lynxdb.org/">Read the docs</a></div>
       </div>
       <div class="hero__window" data-ui-pause-host>
-        <div class="bx" data-ui="" role="img" aria-label="A terminal on the JSONBench machine, an AWS m6i.8xlarge: LynxDB loads 1,000,000,000 Bluesky events from 1,000 files in 6 minutes 34 seconds, merges them in 7 minutes 10 seconds into 92.7 GB on disk, and answers the benchmark's five queries in 1 to 127 milliseconds, skipping the blocks a query cannot match">
+        <div class="bx" data-ui="" role="img" aria-label="A terminal on the JSONBench machine, an AWS m6i.8xlarge: LynxDB loads 1,000,000,000 Bluesky events from 1,000 files in 6 minutes 34 seconds, merges them in 7 minutes 10 seconds into 92.7 GB on disk, and answers the benchmark's five queries in 1 to 63 milliseconds, skipping the blocks a query cannot match">
           <div class="bx__bar"><svg class="bx__dots" viewBox="0 0 46 10" aria-hidden="true"><circle cx="5" cy="5" r="5"/><circle cx="23" cy="5" r="5"/><circle cx="41" cy="5" r="5"/></svg><span>JSONBench · AWS m6i.8xlarge<span class="bx__commit"> · commit ad9d7e3b</span></span><span class="bx__facts">bluesky · 1,000,000,000 events · 92.7 GB</span></div>
           <div class="bx__body">
 <pre class="bx__screen"><span class="t-p">$</span> <span class="t-c">lynxdb</span> <span class="t-k">shell</span>
 <span class="t-d">  LynxDB shell · bench:3100 · 1 index · 1,000,000,000 events · .help for commands</span>
 <span class="t-p">bluesky ›</span> <span class="t-k">stats</span> <span class="t-f">count</span>() <span class="t-k">as</span> count <span class="t-k">by</span> commit.collection | <span class="t-k">sort</span> - count
   <span class="t-d">commit.collection         </span><span class="t-d">        count</span>
-  app.bsky.feed.like        <span class="t-n">  448,944,000</span>  <span class="bx__hb" style="--n: 24.00"></span>
-  app.bsky.graph.follow     <span class="t-n">  360,374,000</span>  <span class="bx__hb" style="--n: 19.27"></span>
-  app.bsky.feed.post        <span class="t-n">   90,816,000</span>  <span class="bx__hb" style="--n: 4.85"></span>
-  app.bsky.feed.repost      <span class="t-n">   58,540,000</span>  <span class="bx__hb" style="--n: 3.13"></span>
-  app.bsky.graph.block      <span class="t-n">   14,040,000</span>  <span class="bx__hb" style="--n: 0.75"></span>
-  app.bsky.actor.profile    <span class="t-n">   11,762,000</span>  <span class="bx__hb" style="--n: 0.63"></span>
-  <span class="t-d">… 9 more rows</span>
+  app.bsky.feed.like        <span class="t-n">  473,243,192</span>  <span class="bx__hb" style="--n: 24.00"></span>
+  app.bsky.graph.follow     <span class="t-n">  332,659,015</span>  <span class="bx__hb" style="--n: 16.87"></span>
+  app.bsky.feed.post        <span class="t-n">   94,474,144</span>  <span class="bx__hb" style="--n: 4.79"></span>
+  app.bsky.feed.repost      <span class="t-n">   59,136,018</span>  <span class="bx__hb" style="--n: 3.00"></span>
+  app.bsky.graph.block      <span class="t-n">   16,299,949</span>  <span class="bx__hb" style="--n: 0.83"></span>
+  app.bsky.actor.profile    <span class="t-n">    8,075,073</span>  <span class="bx__hb" style="--n: 0.41"></span>
+  <span class="t-d">… 39 more rows</span>
 
-  <span class="t-ok">●</span> <b>15 rows</b>  <b class="t-ms">1 ms</b>  <span class="t-d">1,000,000,000 events counted from the index, 0 blocks read</span></pre>
+  <span class="t-ok">●</span> <b>45 rows</b>  <b class="t-ms">1 ms</b>  <span class="t-d">1,000,000,000 events counted from the index, 0 blocks read</span></pre>
             <div class="bx__side">
               <div class="bx__tile">
-                <div class="bx__head"><b>bluesky</b><span class="bx__note">75,000 blocks from the index · 0 read</span></div>
+                <div class="bx__head"><b>bluesky</b><span class="bx__note">61,246 blocks from the index · 0 read</span></div>
                 <div class="bx__grid"><canvas width="348" height="138"></canvas></div>
                 <div class="bx__foot"><span class="bx__legend"><span class="s-read">read</span><span class="s-index">from index</span><span class="s-empty">skipped</span></span><span class="bx__key">= 1M events</span></div>
               </div>
               <div class="bx__tile">
                 <div class="bx__head"><b>Query time</b><span>1B events, JSONBench</span></div>
                 <ol class="bx__bars">
-                  <li data-q="1" class="is-on" style="--w: 0.8%"><span>Q1 count by collection</span><i></i><b>1 ms</b></li>
-                  <li data-q="2" style="--w: 38.6%"><span>Q2 creates and users</span><i></i><b>49 ms</b></li>
-                  <li data-q="3" style="--w: 56.7%"><span>Q3 creates by hour</span><i></i><b>72 ms</b></li>
-                  <li data-q="4" style="--w: 3.1%"><span>Q4 first posters</span><i></i><b>4 ms</b></li>
-                  <li data-q="5" style="--w: 100%"><span>Q5 longest activity</span><i></i><b>127 ms</b></li>
+                  <li data-q="1" class="is-on" style="--w: 1.9%"><span>Q1 count by collection</span><i></i><b>1 ms</b></li>
+                  <li data-q="2" style="--w: 77.5%"><span>Q2 creates and users</span><i></i><b>49 ms</b></li>
+                  <li data-q="3" style="--w: 97.9%"><span>Q3 creates by hour</span><i></i><b>62 ms</b></li>
+                  <li data-q="4" style="--w: 4.4%"><span>Q4 first posters</span><i></i><b>3 ms</b></li>
+                  <li data-q="5" style="--w: 100%"><span>Q5 longest activity</span><i></i><b>63 ms</b></li>
                 </ol>
               </div>
             </div>
@@ -396,24 +396,24 @@
           </ol>
         </div>
         <div class="bench__set span-4" data-ui="">
-          <div class="bench__head"><b>Size on disk</b><span>GiB</span></div>
+          <div class="bench__head"><b>Size on disk</b><span>GB</span></div>
           <ol class="bench__rows">
-              <li class="is-lx"><span>LynxDB</span><i style="--w: 24.1%"></i><b>86.36</b></li>
-              <li><span>ClickHouse</span><i style="--w: 50.9%"></i><b>182.34</b></li>
-              <li><span>VictoriaLogs</span><i style="--w: 31.5%"></i><b>113.02</b></li>
-              <li><span>Elasticsearch</span><i style="--w: 100.0%"></i><b>358.32</b></li>
-              <li><span>OpenSearch</span><i style="--w: 74.1%"></i><b>265.51</b></li>
+              <li class="is-lx"><span>LynxDB</span><i style="--w: 24.1%"></i><b>92.7</b></li>
+              <li><span>ClickHouse</span><i style="--w: 50.9%"></i><b>195.8</b></li>
+              <li><span>VictoriaLogs</span><i style="--w: 31.6%"></i><b>121.4</b></li>
+              <li><span>Elasticsearch</span><i style="--w: 100.0%"></i><b>384.7</b></li>
+              <li><span>OpenSearch</span><i style="--w: 74.1%"></i><b>285.1</b></li>
           </ol>
         </div>
       </div>
       <table class="bench__q">
-        <thead><tr><th scope="col">Query time</th><th scope="col">LynxDB</th><th scope="col">ClickHouse</th><th scope="col">VictoriaLogs</th><th scope="col">Elasticsearch</th><th scope="col">OpenSearch</th></tr></thead>
+        <thead><tr><th scope="col">Hot query time</th><th scope="col">LynxDB</th><th scope="col">ClickHouse</th><th scope="col">VictoriaLogs</th><th scope="col">Elasticsearch</th><th scope="col">OpenSearch</th></tr></thead>
         <tbody>
-            <tr><th scope="row"><b>Q1</b> count by collection</th><td>0.001 s</td><td>0.249 s</td><td>0.049 s</td><td>1.002 s</td><td>19.754 s</td></tr>
-            <tr><th scope="row"><b>Q2</b> creates and users</th><td>0.049 s</td><td>2.879 s</td><td>19.694 s</td><td>5.568 s</td><td>60.076 s</td></tr>
-            <tr><th scope="row"><b>Q3</b> creates by hour</th><td>0.072 s</td><td>2.600 s</td><td>1.559 s</td><td>12.129 s</td><td>331.837 s</td></tr>
-            <tr><th scope="row"><b>Q4</b> first posters</th><td>0.004 s</td><td>0.845 s</td><td>6.208 s</td><td>3.974 s</td><td>7.378 s</td></tr>
-            <tr><th scope="row"><b>Q5</b> longest activity</th><td>0.127 s</td><td>0.888 s</td><td>8.551 s</td><td>4.482 s</td><td>19.223 s</td></tr>
+            <tr><th scope="row"><b>Q1</b> count by collection</th><td>0.0012 s</td><td>0.239 s</td><td>0.033 s</td><td>0.618 s</td><td>19.922 s</td></tr>
+            <tr><th scope="row"><b>Q2</b> creates and users</th><td>0.049 s</td><td>2.767 s</td><td>19.155 s</td><td>4.930 s</td><td>59.570 s</td></tr>
+            <tr><th scope="row"><b>Q3</b> creates by hour</th><td>0.062 s</td><td>2.302 s</td><td>1.521 s</td><td>14.213 s</td><td>412.161 s</td></tr>
+            <tr><th scope="row"><b>Q4</b> first posters</th><td>0.0028 s</td><td>0.757 s</td><td>5.914 s</td><td>3.443 s</td><td>6.960 s</td></tr>
+            <tr><th scope="row"><b>Q5</b> longest activity</th><td>0.063 s</td><td>0.805 s</td><td>8.053 s</td><td>3.887 s</td><td>18.367 s</td></tr>
         </tbody>
       </table>
     </div>
@@ -426,7 +426,7 @@
         <p>An existing shipper only needs LynxDB's address. Elasticsearch bulk, OTLP, Splunk HEC, Loki push and syslog arrive on their usual endpoints.</p>
       </div>
       <div class="panel ingest__dg">
-        <div class="ig" data-ui="" role="img" aria-label="Kubernetes through Fluent Bit, Docker through its syslog driver, the OpenTelemetry Collector, Vector, Fluent Bit, Filebeat, Logstash, Splunk HEC senders, syslog daemons and files send logs to lynxdb server, which stores the 480 GB of JSON in JSONBench in 92.7 GB and answers PPL queries over them">
+        <div class="ig" data-ui="" role="img" aria-label="Kubernetes through Fluent Bit, Docker through its syslog driver, the OpenTelemetry Collector, Vector, Fluent Bit, Filebeat, Logstash, Splunk HEC senders, syslog daemons and files send logs to lynxdb server, which stores the 482 GB of JSON in JSONBench in 92.7 GB and answers PPL queries over them">
           <svg class="ig__wires" aria-hidden="true"></svg>
           <ul class="ig__src">
             <li data-at="POST /_bulk"><img src="assets/icons/kubernetes.svg" alt="" width="20" height="20" loading="lazy"><b>Kubernetes</b><span>Fluent Bit DaemonSet</span></li>
@@ -444,9 +444,9 @@
             <div class="ig__node"><img src="img/lynxdb-mark-faceted-on-dark.svg" alt="" width="22" height="30" loading="lazy"><b>lynxdb server</b><span class="ig__at">HTTP :3100 · OTLP :4318 · syslog :5514</span></div>
             <div class="ig__disk">
               <div class="ig__dhead"><b>On disk</b><span>JSONBench, 1B events</span></div>
-              <div class="ig__size"><span>JSON</span><i style="--w: 100%"></i><b>≈480 GB</b></div>
-              <div class="ig__size"><span>gzip</span><i style="--w: 26%"></i><b>125 GB</b></div>
-              <div class="ig__size is-lx"><span>LynxDB</span><i style="--w: 19.3%"></i><b>92.7 GB</b></div>
+              <div class="ig__size"><span>JSON</span><i style="--w: 100%"></i><b>482 GB</b></div>
+              <div class="ig__size"><span>gzip</span><i style="--w: 27.8%"></i><b>134 GB</b></div>
+              <div class="ig__size is-lx"><span>LynxDB</span><i style="--w: 19.2%"></i><b>92.7 GB</b></div>
             </div>
           </div>
           <div class="ig__q" data-ui-pause-host>
