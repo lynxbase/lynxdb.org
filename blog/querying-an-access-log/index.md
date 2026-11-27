@@ -2,15 +2,15 @@ Source: https://lynxdb.org/blog/querying-an-access-log/
 
 # Five questions for an access log, answered from the shell
 
-LynxDB team · 27 November 2026 · 4 min read
+Evgenii Orlov · 27 November 2026 · 4 min read
 
 lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.
 
 Something breaks, and the evidence is a log file on a host. This post asks such a file five questions with `lynxdb query`, the pipe mode of [LynxDB](https://github.com/lynxbase/lynxdb): it loads the file, runs one [PPL](https://docs.lynxdb.org/docs/ppl/overview) query over it and prints the result. Every command below was run with LynxDB 26.11.1.896, and every output is what it printed.
 
-## [The file](https://lynxdb.org/blog/querying-an-access-log/#the-file)
+## The file
 
-`access.log` is test data from the LynxDB repository[1](https://lynxdb.org/blog/querying-an-access-log/#fn1): 1,000 requests to five hosts, one per line, a timestamp followed by `key=value` pairs.
+`access.log` is test data from the LynxDB repository[^data]: 1,000 requests to five hosts, one per line, a timestamp followed by `key=value` pairs.
 
 ```console
 $ head -n 2 access.log
@@ -20,7 +20,7 @@ $ head -n 2 access.log
 
 There is no schema to declare. LynxDB reads the timestamp into `_time` and each `key=value` pair into a field when the query runs, so `status` and `response_time` compare as numbers.
 
-## [How many events, over what time](https://lynxdb.org/blog/querying-an-access-log/#how-many-events-over-what-time)
+## How many events, over what time
 
 ```console
 $ lynxdb query --file access.log --no-stats \
@@ -35,11 +35,9 @@ $ lynxdb query --file access.log --no-stats \
 
 A thousand events in eight minutes and twenty seconds, from 08:00:00 to 08:08:19 UTC on 15 January 2025.
 
-Note
+> **Note:** With `--file`, `lynxdb query` needs no server. It loads the file into a temporary index named `main`, runs the query and exits. A query that names no `source` reads `main`, so the queries in this post start straight with a command.
 
-With `--file`, `lynxdb query` needs no server. It loads the file into a temporary index named `main`, runs the query and exits. A query that names no `source` reads `main`, so the queries in this post start straight with a command.
-
-## [Which levels](https://lynxdb.org/blog/querying-an-access-log/#which-levels)
+## Which levels
 
 Without `--no-stats`, the CLI prints a footer under the table: the rows returned, the time the query took and the events it scanned.
 
@@ -61,11 +59,11 @@ $ lynxdb query --file access.log 'stats count() by level'
 
 The time is from an Apple M4 Pro laptop. The rest of this post passes `--no-stats` to keep the outputs short.
 
-## [Where the server errors are](https://lynxdb.org/blog/querying-an-access-log/#where-the-server-errors-are)
+## Where the server errors are
 
 204 of the 1,000 requests ended with a status of 500 or more. Three queries narrow them down.
 
-### [By host](https://lynxdb.org/blog/querying-an-access-log/#by-host)
+### By host
 
 `eval` adds a field to every event. Here `error` is 1 for a server error and 0 otherwise, so one `stats` counts the requests and the errors of each host together. A query this long reads better kept in a file, `errors-by-host.ppl`:
 
@@ -92,7 +90,7 @@ $ lynxdb query --file access.log --no-stats "$(cat errors-by-host.ppl)"
 
 No host stands out: api-02 fails 22.6% of its requests and api-01, the best, 16.3%.
 
-### [Which paths](https://lynxdb.org/blog/querying-an-access-log/#which-paths)
+### Which paths
 
 ```console
 $ lynxdb query --file access.log --no-stats 'where status >= 500 | top 3 path'
@@ -108,7 +106,7 @@ $ lynxdb query --file access.log --no-stats 'where status >= 500 | top 3 path'
 
 `top` counts the values of a field and keeps the most common. The users, orders and health endpoints lead with 25 to 28 errors each, close together again.
 
-### [When](https://lynxdb.org/blog/querying-an-access-log/#when)
+### When
 
 ```console
 $ lynxdb query --file access.log --no-stats \
@@ -132,10 +130,9 @@ $ lynxdb query --file access.log --no-stats \
 Set against all requests per minute (`timechart span=1m count()` without the `where`), the errors hold steady: 20 to 28 of the 120 requests in every full minute. Nothing spikes, so the cause is not one bad minute.
 
 ![Requests per minute in access.log, split into server errors and other statuses](https://lynxdb.org/blog/querying-an-access-log/errors-per-minute.svg)
+*Requests per minute in access.log: server errors on the baseline, the other statuses above them. The file ends at 08:08:19, so the last minute holds 40 requests.*
 
-Requests per minute in access.log: server errors on the baseline, the other statuses above them. The file ends at 08:08:19, so the last minute holds 40 requests.
-
-## [From standard input](https://lynxdb.org/blog/querying-an-access-log/#from-standard-input)
+## From standard input
 
 `--file -` reads standard input, so the log can come out of another command: `kubectl logs`, `journalctl` or `ssh` to the host. A result of one value prints as the bare value, ready for a shell variable.
 
@@ -148,14 +145,12 @@ $ cat access.log | lynxdb query --file - --no-stats \
 The help text puts the whole of pipe mode in three sentences:
 
 > Run a PPL query against a LynxDB server, or with --file against local files. --file - reads standard input. Local input is loaded into the index main, and a local query that names no source reads main.
+>
+> — `lynxdb query --help`
 
-`lynxdb query --help`
+> **Tip:** When its output goes to a pipe instead of a terminal, `lynxdb query` writes one JSON object per line, ready for `jq`. `--format` (`-F`) picks another format: `table`, `csv`, `tsv`, `markdown`, `json` or `raw`.
 
-Tip
-
-When its output goes to a pipe instead of a terminal, `lynxdb query` writes one JSON object per line, ready for `jq`. `--format` (`-F`) picks another format: `table`, `csv`, `tsv`, `markdown`, `json` or `raw`.
-
-## [The commands in this post](https://lynxdb.org/blog/querying-an-access-log/#the-commands-in-this-post)
+## The commands in this post
 
 | PPL command | What it did here |
 | --- | --- |
@@ -168,7 +163,7 @@ When its output goes to a pipe instead of a terminal, `lynxdb query` writes one 
 
 The [PPL guide](https://docs.lynxdb.org/docs/ppl/overview) covers the other commands and every function.
 
-## [Keeping the log on a server](https://lynxdb.org/blog/querying-an-access-log/#keeping-the-log-on-a-server)
+## Keeping the log on a server
 
 Pipe mode reads the file again for every query. To search the same events later, or logs from many hosts, load them into `lynxdb server` and run the same PPL against the stored index:
 
@@ -181,11 +176,8 @@ lynxdb query 'source=web | where status >= 500 | top 3 path'
 ```
 
 ![The search page of lynxdb server with the query source=web, where status >= 500 and a histogram of the matches](https://lynxdb.org/blog/querying-an-access-log/web-ui.png)
-
-The Web UI section of lynxdb.org draws the search page of `lynxdb server` on this file: 169 of the 840 events from 08:00 to 08:07 have a status of 500 or more.
+*The Web UI section of lynxdb.org draws the search page of `lynxdb server` on this file: 169 of the 840 events from 08:00 to 08:07 have a status of 500 or more.*
 
 More in the [server mode guide](https://docs.lynxdb.org/docs/getting-started/server-mode).
 
-## Notes
-
-1.  The file is [`testdata/logs/access.log`](https://github.com/lynxbase/lynxdb/blob/main/testdata/logs/access.log) in the LynxDB repository. Clone the repository to run the commands as they are, or point them at a log of your own.[](https://lynxdb.org/blog/querying-an-access-log/#fnref1)
+[^data]: The file is [`testdata/logs/access.log`](https://github.com/lynxbase/lynxdb/blob/main/testdata/logs/access.log) in the LynxDB repository. Clone the repository to run the commands as they are, or point them at a log of your own.

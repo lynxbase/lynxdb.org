@@ -7,7 +7,7 @@
 <meta name="description" content="lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.">
 <meta name="robots" content="max-image-preview:large">
 <link rel="canonical" href="https://lynxdb.org/blog/querying-an-access-log/">
-<link rel="alternate" type="text/markdown" href="https://lynxdb.org/blog/querying-an-access-log/index.md">
+<link rel="alternate" type="text/markdown" href="https://lynxdb.org/blog/querying-an-access-log.md">
 <link rel="describedby" href="/llms.txt">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="LynxDB">
@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-27">
 <meta property="article:tag" content="Using LynxDB">
-<script type="application/ld+json">{"@context":"https://schema.org","url":"https://lynxdb.org/blog/querying-an-access-log/","inLanguage":"en","publisher":{"@id":"https://lynxdb.org/#organization"},"@type":"BlogPosting","@id":"https://lynxdb.org/blog/querying-an-access-log/#article","mainEntityOfPage":"https://lynxdb.org/blog/querying-an-access-log/","headline":"Five questions for an access log, answered from the shell","description":"lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.","datePublished":"2026-11-27","author":[{"@type":"Organization","name":"LynxDB team"}],"keywords":["Using LynxDB"],"isPartOf":{"@id":"https://lynxdb.org/blog/#blog"},"image":"https://lynxdb.org/blog/querying-an-access-log/thumb.png"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","url":"https://lynxdb.org/blog/querying-an-access-log/","inLanguage":"en","publisher":{"@id":"https://lynxdb.org/#organization"},"@type":"BlogPosting","@id":"https://lynxdb.org/blog/querying-an-access-log/#article","mainEntityOfPage":"https://lynxdb.org/blog/querying-an-access-log/","headline":"Five questions for an access log, answered from the shell","description":"lynxdb query loads a log file, runs one PPL query over it and exits, with no server to start. We ask a 1,000-line access log where its server errors come from and when they happened.","datePublished":"2026-11-27","author":[{"@type":"Person","name":"Evgenii Orlov"}],"keywords":["Using LynxDB"],"isPartOf":{"@id":"https://lynxdb.org/blog/#blog"},"image":"https://lynxdb.org/blog/querying-an-access-log/thumb.png"}</script>
 <link rel="icon" href="../../img/lynxdb-appicon-moss.svg" type="image/svg+xml">
 <meta name="theme-color" content="#f1f3ef">
 <link rel="alternate" type="application/atom+xml" title="LynxDB blog" href="../feed.xml">
@@ -93,7 +93,7 @@
     <nav class="crumbs" aria-label="Breadcrumb"><a href="../">Blog</a><span class="crumbs__sep" aria-hidden="true">/</span><span>Using LynxDB</span></nav>
     <h1 class="post__title">Five questions for an access log, answered from the shell</h1>
     <p class="post-meta"><span class="byline">
-  <span class="byline__author"><img class="avatar" src="../../img/lynxdb-appicon-moss.svg" alt="" width="24" height="24">LynxDB team</span>
+  <span class="byline__author"><img class="avatar" src="../../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
 </span>
 <span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>4 min read</span></p>
   </header>
@@ -262,6 +262,35 @@ lynxdb query <span class="token string">'source=web | where status >= 500 | top 
   </article>
   <p class="post__end"><a class="back-link" href="../"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M11 6H3M6.5 2.5 3 6l3.5 3.5"/></svg>All posts</a></p>
 </div>
+<aside class="more" aria-labelledby="more-h">
+  <div class="wrap">
+    <div class="more__head"><h2 id="more-h">More posts</h2><a class="link" href="../">All posts</a></div>
+    <div class="card-grid"><article class="card-post">
+  <div class="card-post__media"><img src="../inside-the-lynxdb-engine/thumb.png" alt="" width="1200" height="630" loading="lazy" decoding="async"></div>
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="../inside-the-lynxdb-engine/">Twenty-eight bytes from the end: inside the LynxDB engine</a></h2>
+    <p class="card-post__excerpt">LynxDB opens a part file from its last 28 bytes, which locate a footer that describes every block: its first sort key, its key runs, its rows per hour. This post follows the Bluesky events from JSON lines into that footer, shows which queries end there and what the design costs, and sets each piece beside ClickHouse&#39;s MergeTree.</p>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>16 min read</span></p>
+  </div>
+</article>
+<article class="card-post">
+  <div class="card-post__media"><img src="../lynxdb-on-jsonbench/thumb.png" alt="" width="1200" height="630" loading="lazy" decoding="async"></div>
+  <div class="card-post__text">
+    <h2 class="card-post__title"><a href="../lynxdb-on-jsonbench/">Fourteen blocks of 61,246: how LynxDB answers JSONBench in 0.18 s</a></h2>
+    <p class="card-post__excerpt">LynxDB answers JSONBench&#39;s five queries over 1 billion Bluesky events in 0.18 s on a warm cache; ClickHouse&#39;s published result is 6.9 s. Most of the answer comes from metadata kept per block: the exact distinct count in Q2 opens 14 of 61,246 blocks. Without its sort key LynxDB takes 10.2 s, and ClickHouse is faster.</p>
+    <p class="post-meta"><span class="byline">
+  <span class="byline__author"><img class="avatar" src="../../img/eorlov.jpg" alt="" width="24" height="24">Evgenii Orlov</span>
+</span>
+<span class="post-meta__sep" aria-hidden="true"></span><time datetime="2026-11-27">27 November 2026</time><span class="post-meta__sep" aria-hidden="true"></span><span>17 min read</span></p>
+  </div>
+</article>
+
+    </div>
+  </div>
+</aside>
 
 </main>
 

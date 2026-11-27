@@ -3,4 +3,6 @@
   <url><loc>https://lynxdb.org/</loc></url>
   <url><loc>https://lynxdb.org/blog/</loc></url>
   <url><loc>https://lynxdb.org/blog/querying-an-access-log/</loc></url>
+  <url><loc>https://lynxdb.org/blog/lynxdb-on-jsonbench/</loc></url>
+  <url><loc>https://lynxdb.org/blog/inside-the-lynxdb-engine/</loc></url>
 </urlset>

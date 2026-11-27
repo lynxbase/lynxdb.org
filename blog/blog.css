@@ -298,3 +298,225 @@ html:not([data-theme="dark"]) img[data-theme-image="dark"], html[data-theme="dar
 .more > .wrap { padding-top: 48px; border-top: 1px solid var(--lx-300); }
 .more__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
 .more__head h2 { font-size: 28px; line-height: 1.2; letter-spacing: -0.025em; }
+
+/* ---------------------------------------------------------------- figures drawn in the page (.fig-*)
+   A figure written as HTML in a post: <figure class="fig"> holding a .fig-panel and a figcaption.
+   Technical drawings in grey: hairline boxes, hairline arrows, labels and numbers. Nothing is tinted,
+   nothing glows and nothing moves. Parts: a head, bar rows on a linear or log axis, a flow of rows from
+   a query to its source inside dashed frames, a strip of blocks, a share bar, a legend and plain boxes.
+   Block states, everywhere: .is-skip (an outlined square), .is-meta (a grey fill, answered from
+   metadata) and .is-read (an ink fill, rows read). Text is 12px or larger. */
+.fig { --fig-ink: #1f231f; --fig-line: #aab0a8; --fig-meta: var(--lx-300); --fig-bar: var(--lx-300); --fig-grid: var(--lx-200);
+       --fig-label: 112px; --fig-value: 76px; --fig-note: 172px; --fig-gap: 12px; }
+html[data-theme="dark"] .fig { --fig-ink: #e4e7e2; --fig-line: #616760; --fig-meta: #464c46; --fig-bar: #464c46; }
+.prose > .fig { margin-top: 36px; margin-bottom: 12px; }
+.fig-panel { display: grid; gap: 22px; padding: 20px 20px 18px; border: 1px solid var(--lx-300); border-radius: var(--r-lg); background: var(--lx-0); }
+.fig > figcaption { margin-top: 12px; max-width: 62ch; color: var(--lx-700); font-size: var(--t-small); line-height: 1.5; text-wrap: pretty; }
+.fig, .fig * { font-variant-ligatures: none; font-variant-numeric: tabular-nums; }
+
+/* a group inside the panel: a head over its rows; groups after the first stand under a hairline */
+.fig-group { display: grid; gap: 10px; min-width: 0; }
+.fig-group + .fig-group, .fig-group + .fig-cols { padding-top: 18px; border-top: 1px solid var(--lx-200); }
+.fig-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; color: var(--lx-600); font: 400 12px/1.4 var(--font-mono); }
+.fig-head b { color: var(--lx-950); font: 600 14px/1.3 var(--font-text); letter-spacing: -.005em; }
+
+/* bar rows: a label, a track, a value. The track draws the axis's grid in --ticks equal steps (set it
+   on .fig-bars); a bar's length is --w. .is-lx is LynxDB's row (an ink bar), .is-alt a row drawn in
+   outline (a run that is not on the published page) */
+.fig-bars { --ticks: 4; display: grid; margin: 0; padding: 0; list-style: none; }
+.fig-bar { display: grid; grid-template-columns: var(--fig-label) minmax(0, 1fr) var(--fig-value); align-items: center; column-gap: var(--fig-gap);
+           min-height: 24px; color: var(--lx-700); font: 400 13px/1.3 var(--font-text); }
+.fig-bar > span:first-child { min-width: 0; }
+.fig-track { display: flex; align-items: center; align-self: stretch; min-height: 24px;
+             background: linear-gradient(to right, var(--fig-grid) 1px, transparent 1px) 0 0 / calc(100% / var(--ticks)) 100% repeat-x;
+             border-right: 1px solid var(--fig-grid); }
+.fig-track > i { display: block; box-sizing: border-box; width: max(3px, var(--w)); height: 8px; border-radius: 1px; background: var(--fig-bar); }
+.fig-bar > b { text-align: right; color: var(--lx-800); font: 400 12px/1.3 var(--font-mono); white-space: nowrap; }
+.fig-bar.is-lx { color: var(--lx-950); font-weight: 600; }
+.fig-bar.is-lx .fig-track > i { background: var(--fig-ink); }
+.fig-bar.is-lx > b { color: var(--lx-950); font-weight: 600; }
+.fig-bar.is-alt .fig-track > i { background: transparent; border: 1px solid var(--lx-500); }
+/* a note after the value (blocks, a time): its own column on a wide panel, a line under the bar on a
+   phone. Give the list .has-notes */
+.fig-bar > small { color: var(--lx-600); font: 400 12px/1.4 var(--font-mono); white-space: nowrap; }
+.fig-bars.has-notes > .fig-bar, .fig-bars.has-notes + .fig-axis { grid-template-columns: var(--fig-label) minmax(0, 1fr) var(--fig-value) var(--fig-note); }
+/* a dashed hairline that opens a set of rows inside one list, with its own small label */
+.fig-sub { padding: 8px 0 2px; margin-top: 6px; border-top: 1px dashed var(--lx-300); color: var(--lx-600); font: 400 12px/1.4 var(--font-mono); }
+.fig-sub:first-child { padding-top: 0; margin-top: 0; border-top: 0; }
+.fig-sub b { color: var(--lx-950); font-weight: 500; }
+/* the axis under a list of bars: ticks at --x along the track's column */
+.fig-axis { display: grid; grid-template-columns: var(--fig-label) minmax(0, 1fr) var(--fig-value); column-gap: var(--fig-gap); }
+.fig-axis > span { grid-column: 2; position: relative; height: 16px; }
+.fig-axis i { position: absolute; top: 2px; left: var(--x); transform: translateX(var(--t, -50%)); color: var(--lx-600); font: 400 12px/1 var(--font-mono); font-style: normal; white-space: nowrap; }
+.fig-axis i:first-child { --t: 0%; }
+.fig-axis i:last-child { --t: -100%; }
+
+/* columns of boxes or groups that wrap to one column on a phone; groups in columns take shorter labels */
+.fig-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.fig-cols:has(> .fig-group) { gap: 22px 28px; }
+.fig-cols > .fig-group { --fig-label: 96px; --fig-value: 74px; --fig-gap: 8px; padding-top: 0; border-top: 0; }
+
+/* a plain box: a title in sans over lines of mono, on a hairline; a block glyph may lead the title */
+.fig-box { display: grid; align-content: start; gap: 2px; min-width: 0; padding: 8px 12px; border: 1px solid var(--fig-line); border-radius: var(--r-sm);
+           color: var(--lx-700); font: 400 12px/1.45 var(--font-mono); overflow-wrap: anywhere; }
+.fig-box > b { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; color: var(--lx-950); font: 600 13px/1.3 var(--font-text); }
+.fig-box > b > i { flex: none; width: 10px; height: 10px; border-radius: 1px; }
+
+/* arrows: a hairline with a small head, pointing right; .fig-arrow--down points down */
+.fig-arrow { position: relative; align-self: center; height: 1px; margin-right: 1px; background: var(--fig-line); }
+.fig-arrow::after { content: ""; position: absolute; right: -1px; top: -3px; width: 6px; height: 7px; background: var(--fig-line); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.fig-arrow--down { justify-self: center; width: 1px; height: 16px; margin: 0; }
+.fig-arrow--down::after { right: auto; top: auto; bottom: -1px; left: -3px; width: 7px; height: 6px; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+
+/* a flow: rows of [label] -> [box] [number], on --flow-label, an arrow, --flow-box and --flow-n. Rows
+   that share a source sit in a .fig-frame, a dashed hairline drawn round the box column with its
+   label at the top; a .fig-flow__head names the number column */
+.fig-flow { --flow-label: 160px; --flow-box: 260px; --flow-n: 88px; display: grid; gap: 10px; }
+.fig-flow__row, .fig-frame__label, .fig-flow__head { display: grid; grid-template-columns: var(--flow-label) minmax(28px, 1fr) var(--flow-box) var(--flow-n); column-gap: var(--fig-gap); align-items: center; }
+.fig-flow__row > span:first-child { color: var(--lx-700); font: 400 13px/1.35 var(--font-text); }
+.fig-flow__row > span:first-child code { margin-right: 8px; color: var(--lx-950); font: 600 12px/1 var(--font-mono); background: none; padding: 0; }
+.fig-flow__row > .fig-arrow { margin-left: 2px; }
+.fig-flow__row > .fig-box { grid-column: 3; padding: 7px 10px; }
+.fig-flow__row > em { grid-column: 4; color: var(--lx-950); font: 400 12px/1.3 var(--font-mono); font-style: normal; text-align: right; white-space: nowrap; }
+.fig-flow__head > span, .fig-frame__label > span { color: var(--lx-600); font: 400 12px/1.35 var(--font-mono); }
+.fig-flow__head > span { grid-column: 4; text-align: right; }
+.fig-frame { position: relative; display: grid; gap: 8px; padding: 8px 0 10px; }
+.fig-frame::before { content: ""; position: absolute; top: 0; bottom: 0; right: calc(var(--flow-n) + var(--fig-gap) - 9px); width: calc(var(--flow-box) + 18px);
+                     border: 1px dashed var(--fig-line); border-radius: var(--r-md); pointer-events: none; }
+.fig-frame__label > span { grid-column: 3; }
+.fig-flow > hr { margin: 4px 0 0; border: 0; border-top: 1px solid var(--lx-200); }
+
+/* a strip of blocks in key order: one square per block (or per run of blocks in a schematic), on
+   --cols equal columns. Ranges label spans of columns (--c the first, --n how many) over the squares
+   (.is-over, a bracket) and under them (.is-under, a rule) */
+.fig-strip { display: grid; gap: 6px; min-width: 0; }
+.fig-strip > div { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); column-gap: 3px; }
+.fig-ranges > span { grid-column: var(--c) / span var(--n); min-width: 0; overflow: hidden; color: var(--lx-700); font: 400 12px/1.3 var(--font-mono);
+                     white-space: nowrap; text-align: center; border: 0 solid var(--fig-line); }
+.fig-ranges.is-over > span { padding: 0 2px 5px; border-width: 0 1px 1px; }
+.fig-ranges.is-under > span { padding: 4px 0 0; border-width: 1px 0 0; }
+.fig-blocks > i { box-sizing: border-box; aspect-ratio: 1; min-width: 0; border-radius: 1px; }
+.fig .is-skip { border: 1px solid var(--fig-line); background: transparent; }
+.fig .is-meta { background: var(--fig-meta); }
+.fig .is-read { background: var(--fig-ink); }
+
+/* a share bar: the parts of a whole at scale, each growing by its count --g, with a floor of 2px so a
+   sliver still shows */
+.fig-share { display: flex; gap: 2px; height: 10px; }
+.fig-share > i { box-sizing: border-box; flex: var(--g) 1 0; min-width: 2px; border-radius: 1px; }
+
+/* the legend: a glyph in a block state and its words; a <b> inside holds the count */
+.fig-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; padding: 0; list-style: none; color: var(--lx-700); font: 400 12px/1.4 var(--font-mono); }
+.fig-legend > li { display: inline-flex; align-items: center; gap: 8px; }
+.fig-legend i { box-sizing: border-box; flex: none; width: 10px; height: 10px; border-radius: 1px; }
+.fig-legend b { color: var(--lx-950); font-weight: 500; }
+
+/* a phone: shorter label and value columns, notes under their bars, the flow's labels down to the
+   query's name, and range labels that would not fit (.fig-wide) hidden */
+@media (max-width: 639px) {
+  .fig { --fig-label: 86px; --fig-value: 70px; --fig-gap: 8px; }
+  .fig-panel { gap: 18px; padding: 14px 14px 12px; }
+  .fig-cols > .fig-group { --fig-label: 86px; --fig-value: 70px; }
+  .fig-bars.has-notes > .fig-bar, .fig-bars.has-notes + .fig-axis { grid-template-columns: var(--fig-label) minmax(0, 1fr) var(--fig-value); }
+  .fig-bars.has-notes > .fig-bar > small { grid-column: 2 / -1; margin: -3px 0 6px; }
+  .fig-strip > div { column-gap: 2px; }
+  .fig-wide { visibility: hidden; }
+  .fig-flow { --flow-label: 30px; --flow-box: minmax(0, 1fr); --flow-n: 52px; }
+  .fig-flow__row, .fig-frame__label, .fig-flow__head { grid-template-columns: var(--flow-label) 18px var(--flow-box) var(--flow-n); }
+  .fig-flow__row > span:first-child > span { display: none; }
+  .fig-flow__row > span:first-child code { margin: 0; }
+  .fig-frame::before { left: calc(var(--flow-label) + 18px + 2 * var(--fig-gap) - 6px); right: calc(var(--flow-n) + var(--fig-gap) - 6px); width: auto; }
+}
+
+/* more parts, first drawn for the post inside-the-lynxdb-engine.
+   .fig-ladder: boxes in --ladder columns joined by short down arrows; an arrow row holds a
+   .fig-arrow--down (or an empty <span>) in every column, and a .fig-ladder__head names a column.
+   .fig-box.is-none is a level one side lacks, on a dashed hairline; a <small> in a box's title holds a
+   count at its right end, and an <em> closes a box with its numbers. .fig-cols.is-narrow takes
+   columns from --col-min (132px), for small boxes; .fig-cols.is-pair lines up the heads and last
+   rows of two groups side by side. .fig-legend.is-row keeps its items on one baseline in a post.
+   .fig-dash: a dashed hairline round a group, with its label in .fig-dash__label.
+   .fig-file: a file as stacked byte ranges, a .fig-band per range (--h its height; .is-gap for ranges
+   left out, .is-mark for the one the figure is about), each followed by a note on when it is read.
+   .fig-cells: a row of hairline cells, --h tall, that stand for buffers or partitions. */
+.fig-ladder { --ladder: repeat(2, minmax(0, 1fr)); display: grid; grid-template-columns: var(--ladder); align-content: start; gap: 0 16px; min-width: 0; }
+.fig-ladder > .fig-arrow--down { height: 14px; margin: 3px 0 4px; }
+.fig-ladder__head { padding-bottom: 8px; color: var(--lx-950); font: 600 13px/1.3 var(--font-text); }
+.fig-box.is-none { border-style: dashed; }
+.fig-box.is-none > b { color: var(--lx-700); font-weight: 500; }
+.fig-box > b > small { margin-left: auto; color: var(--lx-800); font: 400 12px/1.3 var(--font-mono); white-space: nowrap; }
+.fig-box > em { margin-top: 4px; color: var(--lx-950); font-style: normal; }
+.fig-cols.is-narrow { grid-template-columns: repeat(auto-fit, minmax(var(--col-min, 132px), 1fr)); }
+.fig-cols.is-pair > .fig-group { grid-template-rows: auto 1fr auto; }
+.prose .fig-legend.is-row > li + li { margin-top: 0; }
+.fig-dash { display: grid; gap: 8px; min-width: 0; padding: 8px 12px 12px; border: 1px dashed var(--fig-line); border-radius: var(--r-md); }
+.fig-dash__label { color: var(--lx-600); font: 400 12px/1.35 var(--font-mono); }
+.fig-file { display: grid; grid-template-columns: minmax(0, 1fr) var(--file-note, 176px); gap: 4px var(--fig-gap); }
+.fig-band { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; min-height: var(--h, 26px); padding: 3px 10px;
+            border: 1px solid var(--fig-line); border-radius: var(--r-sm); color: var(--lx-800); font: 400 12px/1.3 var(--font-mono); }
+.fig-band > small { flex: none; color: var(--lx-600); font: inherit; }
+.fig-band.is-gap { min-height: 18px; border-color: transparent; color: var(--lx-600); }
+.fig-band.is-mark { border-color: var(--fig-ink); color: var(--lx-950); }
+.fig-file > em { align-self: center; color: var(--lx-600); font: 400 12px/1.3 var(--font-mono); font-style: normal; }
+.fig-cells { display: flex; align-items: flex-end; gap: 4px; min-width: 0; }
+.fig-cells > i { box-sizing: border-box; flex: 1 1 0; min-width: 0; height: var(--h, 12px); border: 1px solid var(--fig-line); border-radius: 1px; }
+@media (max-width: 639px) {
+  .fig-ladder { gap: 0 8px; }
+  .fig-file { --file-note: 92px; }
+}
+
+/* ---------------------------------------------------------------- figure: LynxDB against the faster of
+   ClickHouse and VictoriaLogs on 30 queries (post lynxdb-on-jsonbench). .fig-ratio on a .fig-bars list:
+   bars grow left or right from 1x on a log axis, each starting at --x0 and --w long; the 1x line is
+   drawn in --fig-line over the grid. */
+.fig-ratio { --fig-label: 212px; --fig-value: 64px; }
+.fig-ratio .fig-bar, .fig-ratio .fig-track { min-height: 22px; }
+.prose .fig-ratio .fig-bars > li + li { margin-top: 0; }
+.fig-ratio .fig-track { background: linear-gradient(var(--fig-line), var(--fig-line)) 50% 0 / 1px 100% no-repeat,
+                                    linear-gradient(to right, var(--fig-grid) 1px, transparent 1px) 0 0 / calc(100% / var(--ticks)) 100% repeat-x; }
+.fig-ratio .fig-track > i { margin-left: var(--x0); background: var(--fig-ink); }
+.fig-ratio .fig-axis > span { height: 18px; }
+@media (max-width: 639px) {
+  .fig-ratio { --fig-label: 118px; --fig-value: 56px; }
+  .fig-ratio .fig-bar { line-height: 1.25; }
+}
+
+/* the controls above it: which system and which run, pills on a hairline, the pressed one in ink;
+   fig-ratio.js shows them, so a page without script keeps the built view */
+.fig-controls { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.fig-controls[hidden] { display: none; }
+.fig-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.fig-seg > button { height: 32px; padding: 0 14px; border: 1px solid var(--lx-300); border-radius: 999px; background: transparent; color: var(--lx-700);
+                    font: 500 13px/1 var(--font-text); cursor: pointer; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.fig-seg > button:hover { border-color: var(--lx-600); color: var(--lx-950); }
+.fig-seg > button[aria-pressed="true"] { border-color: var(--lx-950); background: var(--lx-950); color: var(--lx-0); }
+@media (pointer: coarse) { .fig-seg > button { height: 40px; } }
+.fig-count { margin: 0; color: var(--lx-700); font: 400 13px/1.45 var(--font-text); }
+.fig-count b { color: var(--lx-950); font-weight: 600; }
+/* a row opens (details/summary): the summary is the bar row with a chevron before the name, the body
+   holds a sentence, the PPL as LynxDB ran it and the times of the three systems */
+.fig-qrow > details > summary { cursor: pointer; list-style: none; }
+.fig-qrow > details > summary::-webkit-details-marker { display: none; }
+.fig-qrow summary > span:first-child { display: flex; align-items: center; gap: 9px; }
+.fig-qrow summary > span:first-child::before { content: ""; flex: none; width: 5px; height: 5px; border: solid var(--lx-600); border-width: 0 1.5px 1.5px 0; transform: rotate(-45deg); }
+.fig-qrow details[open] > summary > span:first-child::before { transform: rotate(45deg); }
+.fig-qrow summary:hover > span:first-child, .fig-qrow details[open] > summary > span:first-child { color: var(--lx-950); }
+.fig-qrow summary:hover > span:first-child { text-decoration: underline 1px var(--lx-500); text-underline-offset: 3px; }
+.fig-qrow__body { display: grid; gap: 10px; padding: 6px 0 14px 16px; border-bottom: 1px solid var(--lx-200); }
+.fig-qrow__body p { margin: 0; color: var(--lx-700); font: 400 13px/1.5 var(--font-text); }
+.fig-qrow__body pre { margin: 0; padding: 8px 10px; border: 1px solid var(--lx-300); border-radius: var(--r-sm); color: var(--lx-950); font: 400 12px/1.5 var(--font-mono);
+                      white-space: pre-wrap; overflow-wrap: anywhere; }
+.prose .fig-qrow__body pre code { padding: 0; border-radius: 0; background: none; font: inherit; }
+.prose .fig-ratio .fig-times { width: auto; font: 400 12px/1.4 var(--font-mono); }
+.prose .fig-ratio .fig-times :is(th, td) { padding: 4px 28px 4px 0; border-bottom: 1px solid var(--lx-200); color: var(--lx-700); font: inherit; text-align: right; white-space: nowrap; }
+.prose .fig-ratio .fig-times :is(th, td):first-child { color: var(--lx-950); text-align: left; }
+.prose .fig-ratio .fig-times th { color: var(--lx-600); }
+@keyframes fig-open { from { opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) .fig-ratio .fig-track > i { transition: width 180ms var(--ease), margin-left 180ms var(--ease); }
+  html:not([data-motion="off"]) .fig-qrow details[open] > .fig-qrow__body { animation: fig-open 160ms var(--ease); }
+}
+@media (max-width: 639px) {
+  .fig-qrow__body { padding-left: 0; }
+  .prose .fig-ratio .fig-times :is(th, td) { padding-right: 18px; }
+}
