@@ -1,5 +1,5 @@
 // lynxdb.org on Cloudflare: a Worker serving what mise run dist stages into dist/, with a script for
-// the blog only (worker/index.js: AI agents read its pages as Markdown). .github/workflows/deploy.yml
+// the home page and the blog (worker/index.js: AI agents read them as Markdown). .github/workflows/deploy.yml
 // deploys it on every tag.
 {
   "name": "lynxdb-org",
@@ -8,8 +8,8 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    // the script runs for the blog's addresses; the rest are served from the assets without it
-    "run_worker_first": ["/blog", "/blog/*"],
+    // the script runs for the pages with a Markdown copy; the rest are served from the assets without it
+    "run_worker_first": ["/", "/blog", "/blog/*"],
     // an address with no file gets 404.html with status 404, never the home page
     "not_found_handling": "404-page",
     // pages are folders, served at /blog/slug/; the Markdown copies are files, served as named

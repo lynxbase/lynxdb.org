@@ -21,6 +21,7 @@ expect() { # path, status, content type prefix, another accepted prefix
 
 for path in / /blog/; do expect "$path" 200 text/html; done
 expect /robots.txt 200 text/plain
+expect /.well-known/security.txt 200 text/plain
 for path in /sitemap.xml /blog/feed.xml; do expect "$path" 200 application/xml text/xml; done
 for path in /llms.txt /llms-full.txt /llmfull.txt; do expect "$path" 200 'text/plain; charset=utf-8'; done
 expect /index.md 200 'text/markdown; charset=utf-8'
@@ -53,6 +54,17 @@ if [ -n "$post" ]; then
 	as Chrome text/html -A 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36'
 	as Googlebot text/html -A 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 fi
+post=/
+as 'Accept: text/markdown' 'text/markdown; charset=utf-8' -H 'Accept: text/markdown'
+
+# the HTML of a page names its Markdown copy in a Link header, for agents that read only the headers
+for path in / /blog/; do
+	link=$(curl -sS -o /dev/null -D - --retry 5 --retry-all-errors --retry-delay 3 "$base$path" | tr -d '\r' | grep -i '^link:' || true)
+	case $link in
+	*'rel="alternate"; type="text/markdown"'*) echo "ok   $path names its Markdown copy" ;;
+	*) echo "FAIL $path has no Link to its Markdown copy: ${link:-none}" >&2; failed=1 ;;
+	esac
+done
 
 [ "$failed" -eq 0 ] || { echo "smoke: $base does not serve the site as built" >&2; exit 1; }
 echo "smoke: $base serves every page, Markdown copy and file for crawlers, and Markdown to AI agents"

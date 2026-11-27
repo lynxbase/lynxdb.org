@@ -24,13 +24,14 @@ posts are converted from their HTML. Each page links its copy with
 serve them as UTF-8 `text/markdown`, as `mise run serve` does. The sitemap covers
 `lynxdb.org`; documentation has its own [sitemap](https://docs.lynxdb.org/sitemap.xml).
 
-## AI agents read the blog as Markdown
+## AI agents read the pages as Markdown
 
-A blog page asked for by an AI agent is answered with its Markdown copy at the page's own address:
-`/blog/` with `/blog.md`, `/blog/slug/` with `/blog/slug.md`. A browser, a search engine (Googlebot,
-Bingbot, Applebot) and a link preview get the HTML, as before. The Worker's script
-(`worker/index.js`) runs for `/blog` and `/blog/*` only; every other address is served from the
-assets without it.
+A page asked for by an AI agent is answered with its Markdown copy at the page's own address: `/`
+with `/index.md`, `/blog/` with `/blog.md`, `/blog/slug/` with `/blog/slug.md`. A browser, a search
+engine (Googlebot, Bingbot, Applebot) and a link preview get the HTML, whose `Link` header names the
+Markdown copy (`rel="alternate"; type="text/markdown"`) and `llms.txt` (`rel="describedby"`). The
+Worker's script (`worker/index.js`) runs for `/`, `/blog` and `/blog/*` only; every other address is
+served from the assets without it.
 
 A request gets Markdown when any of these holds (`worker/agents.js`):
 
@@ -53,7 +54,12 @@ curl -H 'Accept: text/markdown' https://lynxdb.org/blog/lynxdb-on-jsonbench/
 ```
 
 `mise run test` tests the matching and the answers; a deploy runs it, and `mise run smoke` asks a
-blog page as GPTBot, Claude-User, Chrome and Googlebot.
+blog page as GPTBot, Claude-User, Chrome and Googlebot and the home page for Markdown.
+
+The sitemap dates the blog's pages (`lastmod`: a post's date, or `updated:` in its front matter; the
+list of posts takes the newest); the home page has no date of its own and goes without.
+`/.well-known/security.txt` points vulnerability reports to LynxDB's security advisories; its
+`Expires` date must be moved forward before 27 November 2027.
 
 ## Deploy
 
