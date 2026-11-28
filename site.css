@@ -180,7 +180,6 @@ html[data-buttons] { --r-btn: 999px; --btn-h: 40px; }
 .cx__tabs span { display: flex; align-items: center; color: var(--lx-600); font-weight: 500; position: relative; }
 .cx__tabs .is-on { color: var(--lx-950); }
 .cx__tabs .is-on::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--action); }
-.cx__host { margin-left: auto; color: var(--lx-600); font: 400 12px/1 var(--font-mono); }
 .cx__body { display: flex; flex: 1 1 auto; flex-direction: column; gap: 12px; min-height: 0; padding: 12px; background: var(--lx-100);
             transition: opacity 160ms cubic-bezier(.4, 0, .2, 1); }
 .cx.is-dim .cx__body { opacity: .35; }
@@ -668,7 +667,7 @@ html[data-buttons] { --r-btn: 999px; --btn-h: 40px; }
   .bx__screen { padding: 12px 14px; font-size: 11px; line-height: 17px; }
   .bx__facts, .bx__commit, .bx__hb { display: none; }
   /* a phone: the window grows with its events (ten a page) instead of scrolling inside itself */
-  .cx__tabs span:nth-child(n+3), .cx__brand, .cx__host, .cx__count, .cx__step { display: none; }
+  .cx__tabs span:nth-child(n+3), .cx__brand, .cx__count, .cx__step { display: none; }
   .cx__code { min-height: 0; font-size: 12px; white-space: pre-wrap; }
   .cx__run { flex-wrap: wrap; row-gap: 10px; }
   .cx__meta { flex: 1 0 100%; }
