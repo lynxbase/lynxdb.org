@@ -132,7 +132,7 @@ function init(cx) {
 
   /* ------------------------------------------------------------ the histogram */
   function drawChart(grow) {
-    const NS = 'http://www.w3.org/2000/svg', W = 1000, H = 88, { n, bins } = S.span;
+    const NS = 'http://www.w3.org/2000/svg', W = 1000, H = 64, { n, bins } = S.span;
     const gap = n > 40 ? 3 : 4, bw = (W - gap * (n - 1)) / n, max = Math.max(1, ...bins.map(b => b[0] + b[1]));
     const rect = (x, y, w, h, cls) => {
       const r = document.createElementNS(NS, 'rect');
